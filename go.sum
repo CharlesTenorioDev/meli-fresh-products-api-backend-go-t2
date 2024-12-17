@@ -1,3 +1,5 @@
+github.com/bootcamp-go/web v1.0.0 h1:uXcEWwfI0YYq9PldzJvPIf4RSXtwt6gLnQ7Vtxb4gSo=
+github.com/bootcamp-go/web v1.0.0/go.mod h1:NswrU/78aW7T+bQlrvgmu6eM9p4TxltZfZ5VKgTIW9s=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-chi/chi/v5 v5.2.0 h1:Aj1EtB0qR2Rdo2dG4O94RIU35w2lvQSj6BRA4+qwFL0=
