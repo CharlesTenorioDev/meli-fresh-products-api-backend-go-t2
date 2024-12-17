@@ -32,6 +32,10 @@ func (r MemorySectionRepository) GetAll() ([]pkg.Section, error) {
 	return sections, nil
 }
 
+func (r *MemorySectionRepository) GetById(id int) (pkg.Section, error) {
+	return r.db[id], nil
+}
+
 func (r *MemorySectionRepository) GetBySectionNumber(sectionNumber int) (pkg.Section, error) {
 	for _, section := range r.db {
 		if section.SectionNumber == sectionNumber {

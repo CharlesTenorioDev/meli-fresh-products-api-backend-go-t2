@@ -17,6 +17,18 @@ func (r BasicSectionService) GetAll() ([]pkg.Section, error) {
 	return r.repo.GetAll()
 }
 
+func (r BasicSectionService) GetById(id int) (pkg.Section, error) {
+	possibleSection, err := r.repo.GetById(id)
+	if err != nil {
+		return pkg.Section{}, err
+	}
+
+	// If does not exists, 404 error
+	if possibleSection == (pkg.Section{}) {
+		return pkg.Section{}, utils.ErrNotFound
+	}
+	return possibleSection, nil
+}
 func (r BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) {
 	// Zero value validation
 	if newSection.WarehouseID == 0 {

@@ -10,6 +10,7 @@ func RegisterSectionRoutes(mux *chi.Mux, service pkg.SectionService) error {
 	handler := handler.NewSectionHandler(service)
 	mux.Route("/sections", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
+		router.Get("/{id}", handler.GetById())
 		router.Post("/", handler.Post())
 	})
 	return nil

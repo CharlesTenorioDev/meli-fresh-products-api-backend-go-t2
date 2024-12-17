@@ -3,11 +3,25 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
+
+type reqPostSection struct {
+	SectionNumber      int     `json:"section_number"`
+	CurrentCapacity    int     `json:"current_capacity"`
+	MaximumCapacity    int     `json:"maximum_capacity"`
+	MinimumCapacity    int     `json:"minimum_capacity"`
+	CurrentTemperature float64 `json:"current_temperature"`
+	MinimumTemperature float64 `json:"minimum_temperature"`
+	ProductTypeID      int     `json:"warehouse_id"`
+	WarehouseID        int     `json:"product_type_id"`
+}
 
 type SectionHandler struct {
 	service pkg.SectionService
@@ -28,15 +42,24 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-type reqPostSection struct {
-	SectionNumber      int     `json:"section_number"`
-	CurrentCapacity    int     `json:"current_capacity"`
-	MaximumCapacity    int     `json:"maximum_capacity"`
-	MinimumCapacity    int     `json:"minimum_capacity"`
-	CurrentTemperature float64 `json:"current_temperature"`
-	MinimumTemperature float64 `json:"minimum_temperature"`
-	ProductTypeID      int     `json:"warehouse_id"`
-	WarehouseID        int     `json:"product_type_id"`
+func (h *SectionHandler) GetById() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		section, err := h.service.GetById(id)
+		if err != nil {
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section with id %d", id))
+				return
+			}
+			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+			return
+		}
+		utils.JSON(w, http.StatusOK, section)
+	}
 }
 
 func (h *SectionHandler) Post() http.HandlerFunc {
