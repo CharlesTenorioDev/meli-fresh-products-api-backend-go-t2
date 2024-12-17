@@ -31,3 +31,19 @@ func (r MemorySectionRepository) GetAll() ([]pkg.Section, error) {
 	})
 	return sections, nil
 }
+
+func (r *MemorySectionRepository) GetBySectionNumber(sectionNumber int) (pkg.Section, error) {
+	for _, section := range r.db {
+		if section.SectionNumber == sectionNumber {
+			return section, nil
+		}
+	}
+	return pkg.Section{}, nil
+}
+
+func (r *MemorySectionRepository) Save(newSection pkg.Section) (pkg.Section, error) {
+	newSection.ID = r.nextId
+	r.nextId++
+	r.db[newSection.ID] = newSection
+	return r.db[newSection.ID], nil
+}
