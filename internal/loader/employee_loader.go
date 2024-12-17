@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	employeesPkg "github.com/yywatanabe_meli/api-produtos-frescos/internal/pkg"
+	employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
 type EmployeeJsonFile struct {
@@ -26,7 +26,7 @@ func NewEmployeeJsonFile(path string) *EmployeeJsonFile {
 	}
 }
 
-func (l *EmployeeJsonFile) Load() (v map[int]employeesPkg.Employee, err error) {
+func (l *EmployeeJsonFile) Load() (employee map[int]employeesPkg.Employee, err error) {
 	// open file
 	file, err := os.Open(l.path)
 	if err != nil {
@@ -42,9 +42,9 @@ func (l *EmployeeJsonFile) Load() (v map[int]employeesPkg.Employee, err error) {
 	}
 
 	// serialize Employees
-	v = make(map[int]employeesPkg.Employee)
+	employee = make(map[int]employeesPkg.Employee)
 	for _, employees := range EmployeesJson {
-		v[employees.ID] = employeesPkg.Employee{
+		employee[employees.ID] = employeesPkg.Employee{
 			ID:           employees.ID,
 			CardNumberId: employees.CardNumberId,
 			FirstName:    employees.FirstName,

@@ -2,29 +2,15 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/handler"
-	employeesPkg "github.com/yywatanabe_meli/api-produtos-frescos/internal/pkg"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/repository"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
+	employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
 func RegisterEmployeesRoutes(mux *chi.Mux, service employeesPkg.EmployeeService) error {
 	handler := handler.NewEmployeeHandler(service)
-	mux.Route("/employees", func(router chi.Router) {
+	mux.Route("/api/v1/employees", func(router chi.Router) {
 		router.Get("/", handler.GetAllEmployees())
 	})
 
-	router := chi.NewRouter()
-
-	// - repository
-	rp := repository.NewEmployeeRepository(db)
-	// - service
-	sv := service.NewEmployeeDefault(rp)
-	// - handler
-	hd := handler.NewEmployeeS(sv)
-	// Create the routes and deps
-	router.Route("/api/v1", func(rt chi.Router) {
-		// Employees
-		rt.Get("/employees", hd.GetAllEmployees())
-	})
 	return nil
 }
