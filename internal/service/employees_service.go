@@ -1,8 +1,6 @@
 package service
 
-import (
-	employeesPkg "github.com/yywatanabe_meli/api-produtos-frescos/internal/pkg"
-)
+import employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 
 type EmployeeDefault struct {
 	rp employeesPkg.EmployeeRepository

@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/loader"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/repository"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/routes"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/service"
-	"github.com/yywatanabe_meli/api-produtos-frescos/internal/utils"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/loader"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		return
 	}
 
-	rp := repository.NewEmployeeRepository()
+	rp := repository.NewEmployeeRepository(db)
 	sv := service.NewEmployeeService(rp)
 	routes.RegisterEmployeesRoutes(router, sv)
 

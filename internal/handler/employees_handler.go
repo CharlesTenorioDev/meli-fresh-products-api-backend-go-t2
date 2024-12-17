@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/bootcamp-go/web/response"
-	employeesPkg "github.com/yywatanabe_meli/api-produtos-frescos/internal/pkg"
+	employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
 type EmployeeDefault struct {
