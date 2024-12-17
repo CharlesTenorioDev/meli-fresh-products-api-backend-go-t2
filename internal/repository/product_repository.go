@@ -37,13 +37,18 @@ func (p *ProductDB) GetByID(id int) (product pkg.Product, err error) {
 
 // Create a product
 func (p *ProductDB) Create(newproduct pkg.ProductAttributes) (product pkg.Product, err error) {
+	newID := utils.GetBiggestId(p.db) + 1
+	product = pkg.Product{
+		ID:                newID,
+		ProductAttributes: newproduct,
+	}
 	p.db[product.ID] = product
 	return product, nil
 }
 
 // Update a product
 func (p *ProductDB) Update(inputProduct pkg.Product) (product pkg.Product, err error) {
-	p.db[product.ID] = product
+	p.db[inputProduct.ID] = inputProduct
 	return product, nil
 }
 

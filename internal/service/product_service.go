@@ -22,6 +22,10 @@ func (s *ProductServiceDefault) GetProductByID(id int) (product pkg.Product, err
 }
 
 func (s *ProductServiceDefault) CreateProduct(newProduct pkg.ProductAttributes) (product pkg.Product, err error) {
+	err = validateEmptyFields(newProduct)
+	if err != nil {
+		return pkg.Product{}, err
+	}
 	listProducts, _ := s.repo.GetAll()
 	err = validateDuplicates(listProducts, newProduct)
 	if err != nil {
@@ -41,6 +45,43 @@ func (s *ProductServiceDefault) UpdateProduct(inputProduct pkg.Product) (product
 
 func (s *ProductServiceDefault) DeleteProduct(id int) (err error) {
 	return s.repo.Delete(id)
+}
+
+func validateEmptyFields(newProduct pkg.ProductAttributes) error {
+	if newProduct.ProductCode == "" {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.Description == "" {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.Width == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.Height == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.Length == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.NetWeight == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.ExpirationRate == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.RecommendedFreezingTemperature == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.FreezingRate == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.ProductType == "" {
+		return utils.ErrInvalidArguments
+	}
+	if newProduct.SellerID == 0 {
+		return utils.ErrInvalidArguments
+	}
+	return nil
 }
 
 func validateDuplicates(listProducts []pkg.Product, newProduct pkg.ProductAttributes) error {
@@ -99,10 +140,10 @@ func prepareProductUpdate(inputProduct, internalProduct pkg.Product) (preparedPr
 	} else {
 		preparedProduct.FreezingRate = internalProduct.FreezingRate
 	}
-	if inputProduct.ProuctType != "" {
-		preparedProduct.ProuctType = inputProduct.ProuctType
+	if inputProduct.ProductType != "" {
+		preparedProduct.ProductType = inputProduct.ProductType
 	} else {
-		preparedProduct.ProuctType = internalProduct.ProuctType
+		preparedProduct.ProductType = internalProduct.ProductType
 	}
 	if inputProduct.SellerID != 0 {
 		preparedProduct.SellerID = inputProduct.SellerID
