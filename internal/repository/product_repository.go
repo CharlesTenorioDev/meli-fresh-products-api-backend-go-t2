@@ -49,7 +49,7 @@ func (p *ProductDB) Create(newproduct pkg.ProductAttributes) (product pkg.Produc
 // Update a product
 func (p *ProductDB) Update(inputProduct pkg.Product) (product pkg.Product, err error) {
 	p.db[inputProduct.ID] = inputProduct
-	return product, nil
+	return inputProduct, nil
 }
 
 // Delete a product
