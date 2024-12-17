@@ -2,18 +2,23 @@ package pkg
 
 
 type SellerService interface {
-	GetAll() (s map[int]Seller)
+	GetAll() (map[int]Seller, error)
+	GetById(id int) (Seller, error)
+
+
 }
 
 type SellerRepository interface {
 	GetAll() (s map[int]Seller, err error)
+	GetById(id int) (Seller, error)
+
 }
 
 type Seller struct {
 	
-	Id int
-	Cid int
-	CompanyName string
-	Adress string
-	Telephone string
+	ID           int
+	Cid 		 int
+	CompanyName  string
+	Address 	 string
+	Telephone 	 string
 }
