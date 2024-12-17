@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type MemorySectionRepository struct {
@@ -50,4 +51,12 @@ func (r *MemorySectionRepository) Save(newSection pkg.Section) (pkg.Section, err
 	r.nextId++
 	r.db[newSection.ID] = newSection
 	return r.db[newSection.ID], nil
+}
+
+func (r *MemorySectionRepository) Delete(id int) error {
+	if r.db[id] == (pkg.Section{}) {
+		return utils.ErrNotFound
+	}
+	delete(r.db, id)
+	return nil
 }

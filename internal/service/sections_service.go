@@ -29,6 +29,7 @@ func (r BasicSectionService) GetById(id int) (pkg.Section, error) {
 	}
 	return possibleSection, nil
 }
+
 func (r BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) {
 	// Zero value validation
 	if newSection.WarehouseID == 0 {
@@ -50,4 +51,16 @@ func (r BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) {
 	}
 
 	return newSection, nil
+}
+
+func (r BasicSectionService) Delete(id int) error {
+	possibleSection, err := r.repo.GetById(id)
+	if err != nil {
+		return err
+	}
+	if possibleSection == (pkg.Section{}) {
+		return utils.ErrNotFound
+	}
+	r.repo.Delete(id)
+	return nil
 }

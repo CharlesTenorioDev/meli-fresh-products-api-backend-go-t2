@@ -91,3 +91,23 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 		utils.JSON(w, http.StatusCreated, newSection)
 	}
 }
+
+func (h *SectionHandler) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		err = h.service.Delete(id)
+		if err != nil {
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section with id %d", id))
+				return
+			}
+			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+			return
+		}
+		utils.JSON(w, http.StatusNoContent, nil)
+	}
+}

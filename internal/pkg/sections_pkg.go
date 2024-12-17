@@ -31,7 +31,7 @@ type (
 		// Update(Section) (Section, error)
 		GetById(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)
-		// Delete(int) error
+		Delete(int) error
 	}
 	SectionService interface {
 		GetAll() ([]Section, error)
@@ -39,6 +39,6 @@ type (
 		// Update(int, Section) (Section, error)
 		// UpdateByFields(int, SectionPointers) (Section, error)
 		GetById(int) (Section, error)
-		// Delete(int) error
+		Delete(int) error
 	}
 )
