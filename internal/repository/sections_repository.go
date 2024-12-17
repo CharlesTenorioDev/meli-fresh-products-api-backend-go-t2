@@ -53,6 +53,11 @@ func (r *MemorySectionRepository) Save(newSection pkg.Section) (pkg.Section, err
 	return r.db[newSection.ID], nil
 }
 
+func (r *MemorySectionRepository) Update(section pkg.Section) (pkg.Section, error) {
+	r.db[section.ID] = section
+	return r.db[section.ID], nil
+}
+
 func (r *MemorySectionRepository) Delete(id int) error {
 	if r.db[id] == (pkg.Section{}) {
 		return utils.ErrNotFound

@@ -13,22 +13,21 @@ type Section struct {
 }
 
 type SectionPointers struct {
-	ID                 *int
-	SectionNumber      *int
-	CurrentCapacity    *int
-	MaximumCapacity    *int
-	MinimumCapacity    *int
-	CurrentTemperature *float64
-	MinimumTemperature *float64
-	ProductTypeID      *int
-	WarehouseID        *int
+	SectionNumber      *int     `json:"section_number"`
+	CurrentCapacity    *int     `json:"current_capacity"`
+	MaximumCapacity    *int     `json:"maximum_capacity"`
+	MinimumCapacity    *int     `json:"minimum_capacity"`
+	CurrentTemperature *float64 `json:"current_temperature"`
+	MinimumTemperature *float64 `json:"minimum_temperature"`
+	ProductTypeID      *int     `json:"product_type_id"`
+	WarehouseID        *int     `json:"warehouse_id"`
 }
 
 type (
 	SectionRepository interface {
 		GetAll() ([]Section, error)
 		Save(Section) (Section, error)
-		// Update(Section) (Section, error)
+		Update(Section) (Section, error)
 		GetById(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)
 		Delete(int) error
@@ -36,8 +35,7 @@ type (
 	SectionService interface {
 		GetAll() ([]Section, error)
 		Save(Section) (Section, error)
-		// Update(int, Section) (Section, error)
-		// UpdateByFields(int, SectionPointers) (Section, error)
+		Update(int, SectionPointers) (Section, error)
 		GetById(int) (Section, error)
 		Delete(int) error
 	}

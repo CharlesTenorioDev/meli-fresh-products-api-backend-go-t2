@@ -12,6 +12,7 @@ func RegisterSectionRoutes(mux *chi.Mux, service pkg.SectionService) error {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetById())
 		router.Post("/", handler.Post())
+		router.Patch("/{id}", handler.Update())
 		router.Delete("/{id}", handler.Delete())
 	})
 	return nil

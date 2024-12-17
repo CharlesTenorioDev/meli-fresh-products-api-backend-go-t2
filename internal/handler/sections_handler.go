@@ -92,6 +92,31 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 	}
 }
 
+func (h *SectionHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		var body pkg.SectionPointers
+		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
+			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			return
+		}
+		updatedSection, err := h.service.Update(id, body)
+		if err != nil {
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			if errors.Is(err, utils.ErrInvalidArguments) {
+			}
+		}
+		utils.JSON(w, http.StatusOK, updatedSection)
+	}
+}
+
 func (h *SectionHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
