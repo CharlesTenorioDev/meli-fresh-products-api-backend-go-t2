@@ -58,6 +58,23 @@ func (s *EmployeeDefault) UpdateEmployee(inputEmployee employeesPkg.Employee) (e
 	return
 }
 
+// DeleteEmployee deletes an employee from the repository based on the provided ID
+func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
+	// find the employee to ensure it exists
+	employee, err := s.rp.FindById(id)
+	if err != nil {
+		return utils.ErrNotFound
+	}
+
+	// delete the employee by passing only the ID to the repository
+	err = s.rp.DeleteEmployee(employee.ID)
+	if err != nil {
+		return utils.ErrInvalidArguments
+	}
+
+	return nil
+}
+
 // validateDuplicates ensures that no existing employee has the same CardNumberId as the new employee
 func validateDuplicates(employees map[int]employeesPkg.Employee, newEmployee employeesPkg.EmployeeAttributes) error {
 	for _, employee := range employees {

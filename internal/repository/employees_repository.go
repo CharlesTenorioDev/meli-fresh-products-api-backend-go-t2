@@ -1,40 +1,37 @@
 package repository
 
 import (
-	"fmt"
-
 	employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-// EmployeeMap represents the repository implementation for employee data storage using a map
-type EmployeeMap struct {
+// EmployeeRepository represents the repository implementation for employee data storage using a map
+type EmployeeRepository struct {
 	// db is an in-memory map that stores employees by their ID
 	db map[int]employeesPkg.Employee
 }
 
-// NewEmployeeRepository creates a new EmployeeMap repository instance
+// NewEmployeeRepository creates a new EmployeeRepository repository instance
 // if a non-nil `db` is provided, it uses it as the initial database
 // otherwise, it initializes an empty map
-func NewEmployeeRepository(db map[int]employeesPkg.Employee) *EmployeeMap {
+func NewEmployeeRepository(db map[int]employeesPkg.Employee) *EmployeeRepository {
 	// initialize a default database map if no `db` is provided
 	defaultDb := make(map[int]employeesPkg.Employee)
 	if db != nil {
 		defaultDb = db
 	}
-	return &EmployeeMap{db: defaultDb}
+	return &EmployeeRepository{db: defaultDb}
 }
 
 // FindAll retrieves all employees from the repository
 // it copies the data from the internal map to avoid direct manipulation of the repository state
-func (r *EmployeeMap) FindAll() (employees map[int]employeesPkg.Employee, err error) {
+func (r *EmployeeRepository) FindAll() (employees map[int]employeesPkg.Employee, err error) {
 	// create a new map to hold the employees
 	employees = make(map[int]employeesPkg.Employee)
 
 	// copy each employee from the repository's internal map
 	for key, value := range r.db {
 		employees[key] = value
-		fmt.Printf("key: %v, value: %v\n", key, value)
 	}
 
 	return
@@ -42,7 +39,7 @@ func (r *EmployeeMap) FindAll() (employees map[int]employeesPkg.Employee, err er
 
 // FindById retrieves an employee by their ID
 // if the employee is not found, it returns an error
-func (r *EmployeeMap) FindById(id int) (employee employeesPkg.Employee, err error) {
+func (r *EmployeeRepository) FindById(id int) (employee employeesPkg.Employee, err error) {
 	// check if the employee exists in the internal map
 	employee, exists := r.db[id]
 	if !exists {
@@ -56,9 +53,9 @@ func (r *EmployeeMap) FindById(id int) (employee employeesPkg.Employee, err erro
 
 // CreateEmployee adds a new employee to the repository
 // it generates a new unique ID for the employee and adds them to the map
-func (r *EmployeeMap) CreateEmployee(newEmployee employeesPkg.EmployeeAttributes) (employee employeesPkg.Employee, err error) {
+func (r *EmployeeRepository) CreateEmployee(newEmployee employeesPkg.EmployeeAttributes) (employee employeesPkg.Employee, err error) {
 	// generate a new ID for the employee by finding the largest existing ID and adding 1
-	newID := utils.GetBiggestId(map[int]employeesPkg.Employee(r.db)) + 1
+	newID := utils.GetBiggestId(r.db) + 1
 
 	// create the new employee struct with the provided attributes and the new ID
 	employee = employeesPkg.Employee{
@@ -77,7 +74,7 @@ func (r *EmployeeMap) CreateEmployee(newEmployee employeesPkg.EmployeeAttributes
 }
 
 // UpdateEmployee updates an employee's data in the repository
-func (r *EmployeeMap) UpdateEmployee(inputEmployee employeesPkg.Employee) (employee employeesPkg.Employee, err error) {
+func (r *EmployeeRepository) UpdateEmployee(inputEmployee employeesPkg.Employee) (employee employeesPkg.Employee, err error) {
 	// check if the employee exists in the internal map
 	existingEmployee, exists := r.db[inputEmployee.ID]
 	if !exists {
@@ -102,4 +99,16 @@ func (r *EmployeeMap) UpdateEmployee(inputEmployee employeesPkg.Employee) (emplo
 	r.db[inputEmployee.ID] = existingEmployee
 
 	return existingEmployee, nil
+}
+
+// DeleteEmployee removes an employee from the in-memory repository
+func (r *EmployeeRepository) DeleteEmployee(id int) error {
+	// check if the employee exists
+	if _, exists := r.db[id]; !exists {
+		return utils.ErrNotFound
+	}
+
+	// delete the employee from the map using the ID
+	delete(r.db, id)
+	return nil
 }

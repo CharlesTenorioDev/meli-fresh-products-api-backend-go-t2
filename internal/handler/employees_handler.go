@@ -155,6 +155,36 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 	}
 }
 
+// DeleteEmployees handles the DELETE /employees/{id} route
+// it deletes an existing employee based on the provided ID
+func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// extract the employee ID from the URL parameters and converts it to int
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			handleError(w, utils.ErrInvalidFormat)
+			return
+		}
+
+		// delete the employee
+		err = h.sv.DeleteEmployee(id)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				handleError(w, utils.ErrNotFound)
+			} else {
+				handleError(w, utils.ErrInvalidArguments)
+			}
+			return
+		}
+
+		// returns status 200 and a success message if all ok
+		response.JSON(w, http.StatusOK, map[string]any{
+			"message": "employee deleted successfully",
+		})
+	}
+}
+
 // handleError centralizes error handling and response formatting
 func handleError(w http.ResponseWriter, err error) {
 	var status int

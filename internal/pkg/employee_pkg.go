@@ -30,6 +30,7 @@ type EmployeeRepository interface {
 	FindById(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
+	DeleteEmployee(id int) (err error)
 }
 
 // EmployeeService defines the interface for employee-related business logic
@@ -39,4 +40,5 @@ type EmployeeService interface {
 	FindById(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
+	DeleteEmployee(id int) (err error)
 }

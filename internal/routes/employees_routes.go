@@ -17,6 +17,8 @@ func RegisterEmployeesRoutes(mux *chi.Mux, service employeesPkg.EmployeeService)
 		router.Post("/", handler.PostEmployees())
 		// Patch
 		router.Patch("/{id}", handler.PatchEmployees())
+		// Delete
+		router.Delete("/{id}", handler.DeleteEmployees())
 	})
 
 	return nil
