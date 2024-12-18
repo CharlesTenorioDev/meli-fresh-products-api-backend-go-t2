@@ -5,23 +5,23 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type ProductServiceDefault struct {
+type ProductService struct {
 	repo pkg.ProductRepository
 }
 
-func NewProductServiceDefault(repo pkg.ProductRepository) *ProductServiceDefault {
-	return &ProductServiceDefault{repo: repo}
+func NewProductService(repo pkg.ProductRepository) *ProductService {
+	return &ProductService{repo: repo}
 }
 
-func (s *ProductServiceDefault) GetProducts() (listProducts []pkg.Product, err error) {
+func (s *ProductService) GetProducts() (listProducts []pkg.Product, err error) {
 	return s.repo.GetAll()
 }
 
-func (s *ProductServiceDefault) GetProductByID(id int) (product pkg.Product, err error) {
+func (s *ProductService) GetProductByID(id int) (product pkg.Product, err error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *ProductServiceDefault) CreateProduct(newProduct pkg.ProductAttributes) (product pkg.Product, err error) {
+func (s *ProductService) CreateProduct(newProduct pkg.ProductAttributes) (product pkg.Product, err error) {
 	err = validateEmptyFields(newProduct)
 	if err != nil {
 		return pkg.Product{}, err
@@ -34,7 +34,7 @@ func (s *ProductServiceDefault) CreateProduct(newProduct pkg.ProductAttributes) 
 	return s.repo.Create(newProduct)
 }
 
-func (s *ProductServiceDefault) UpdateProduct(inputProduct pkg.Product) (product pkg.Product, err error) {
+func (s *ProductService) UpdateProduct(inputProduct pkg.Product) (product pkg.Product, err error) {
 	internalProduct, err := s.repo.GetByID(inputProduct.ID)
 	if err != nil {
 		return pkg.Product{}, utils.ErrNotFound
@@ -43,7 +43,7 @@ func (s *ProductServiceDefault) UpdateProduct(inputProduct pkg.Product) (product
 	return s.repo.Update(preparedProduct)
 }
 
-func (s *ProductServiceDefault) DeleteProduct(id int) (err error) {
+func (s *ProductService) DeleteProduct(id int) (err error) {
 	return s.repo.Delete(id)
 }
 
@@ -75,7 +75,7 @@ func validateEmptyFields(newProduct pkg.ProductAttributes) error {
 	if newProduct.FreezingRate == 0 {
 		return utils.ErrInvalidArguments
 	}
-	if newProduct.ProductType == "" {
+	if newProduct.ProductType == 0 {
 		return utils.ErrInvalidArguments
 	}
 	if newProduct.SellerID == 0 {
@@ -140,7 +140,7 @@ func prepareProductUpdate(inputProduct, internalProduct pkg.Product) (preparedPr
 	} else {
 		preparedProduct.FreezingRate = internalProduct.FreezingRate
 	}
-	if inputProduct.ProductType != "" {
+	if inputProduct.ProductType != 0 {
 		preparedProduct.ProductType = inputProduct.ProductType
 	} else {
 		preparedProduct.ProductType = internalProduct.ProductType

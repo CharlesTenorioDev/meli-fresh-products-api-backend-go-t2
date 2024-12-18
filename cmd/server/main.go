@@ -21,7 +21,7 @@ func main() {
 
 	// Create the routes and deps
 	repo := repository.NewProductDB(nil)
-	service := service.NewProductServiceDefault(repo)
+	service := service.NewProductService(repo)
 	err = routes.NewProductRoutes(router, service)
 	if err != nil {
 		panic(err)
