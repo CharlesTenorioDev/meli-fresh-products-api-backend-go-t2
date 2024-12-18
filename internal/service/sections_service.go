@@ -47,6 +47,54 @@ func (r BasicSectionService) GetById(id int) (pkg.Section, error) {
 	return possibleSection, nil
 }
 
+func (r *BasicSectionService) warehouseExistsById(id int) error {
+	possibleWarehouse, err := r.warehouseService.GetById(id)
+	// When internal server error
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+		return err
+	}
+	if possibleWarehouse == (pkg.Warehouse{}) {
+		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse_id not found for id %d", id))
+	}
+	return nil
+}
+
+func (r *BasicSectionService) productTypeExistsById(id int) error {
+	possibleProductType, err := r.productTypeService.GetProductTypeByID(id)
+	// When internal server error
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+		return err
+	}
+	if possibleProductType == (pkg.ProductType{}) {
+		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type_id not found for id %d", id))
+	}
+	return nil
+}
+
+func (r *BasicSectionService) sectionExistsBySectionNumber(sectionNumber int) error {
+	possibleSection, err := r.repo.GetBySectionNumber(sectionNumber)
+	if possibleSection != (pkg.Section{}) {
+		return utils.ErrConflict
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *BasicSectionService) validateLogicRules(section pkg.Section) error {
+	if section.MinimumCapacity > section.MaximumCapacity {
+		return errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
+	}
+	if section.MinimumTemperature < MinCelsiusTemperature {
+		return errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than 273.15 Celsius"))
+	}
+	if section.CurrentTemperature < MinCelsiusTemperature {
+		return errors.Join(utils.ErrInvalidArguments, errors.New("current_temperature cannot be less than 273.15 Celsius"))
+	}
+	return nil
+}
+
 // Save a section, check the relations, zero value when applicable, and basic logic
 func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) {
 	// Zero value validation
@@ -60,43 +108,21 @@ func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) 
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
 	}
 
-	fmt.Printf("%+v", newSection)
-	possibleWarehouse, err := r.warehouseService.GetById(newSection.WarehouseID)
-	// When internal server error
-	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+	if err := r.warehouseExistsById(newSection.WarehouseID); err != nil {
 		return pkg.Section{}, err
 	}
-	if possibleWarehouse == (pkg.Warehouse{}) {
-		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
-	}
-
-	possibleProductType, err := r.productTypeService.GetProductTypeByID(newSection.ProductTypeID)
-	// When internal server error
-	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+	if err := r.productTypeExistsById(newSection.ProductTypeID); err != nil {
 		return pkg.Section{}, err
 	}
-	if possibleProductType == (pkg.ProductType{}) {
-		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type_id not found for id %d", newSection.WarehouseID))
+	if err := r.validateLogicRules(newSection); err != nil {
+		return pkg.Section{}, err
 	}
-
-	if newSection.MinimumCapacity > newSection.MaximumCapacity {
-		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
-	}
-	if newSection.MinimumTemperature < MinCelsiusTemperature {
-		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than 273.15 Celsius"))
-	}
-
-	// Check if a section already exists for section number
-	possibleSection, err := r.repo.GetBySectionNumber(newSection.SectionNumber)
-	if possibleSection != (pkg.Section{}) {
-		return pkg.Section{}, utils.ErrConflict
-	}
-	if err != nil {
+	if err := r.sectionExistsBySectionNumber(newSection.SectionNumber); err != nil {
 		return pkg.Section{}, err
 	}
 
 	// Save if ok
-	newSection, err = r.repo.Save(newSection)
+	newSection, err := r.repo.Save(newSection)
 	if err != nil {
 		return pkg.Section{}, err
 	}
@@ -115,8 +141,15 @@ func (r *BasicSectionService) Update(id int, sectionToUpdate pkg.SectionPointers
 	}
 
 	// Check which field will be updated
-	if sectionToUpdate.SectionNumber != nil {
+	if sectionToUpdate.SectionNumber != nil && *sectionToUpdate.SectionNumber != section.SectionNumber {
 		section.SectionNumber = *sectionToUpdate.SectionNumber
+		if section.SectionNumber == 0 {
+			return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("section_number cannot be empty/null"))
+		}
+
+		if err := r.sectionExistsBySectionNumber(section.SectionNumber); err != nil {
+			return pkg.Section{}, err
+		}
 	}
 	if sectionToUpdate.CurrentCapacity != nil {
 		section.CurrentCapacity = *sectionToUpdate.CurrentCapacity
@@ -135,25 +168,30 @@ func (r *BasicSectionService) Update(id int, sectionToUpdate pkg.SectionPointers
 	}
 	if sectionToUpdate.ProductTypeID != nil {
 		section.ProductTypeID = *sectionToUpdate.ProductTypeID
+		if section.ProductTypeID == 0 {
+			return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
+		}
+		if err := r.productTypeExistsById(section.ProductTypeID); err != nil {
+			return pkg.Section{}, err
+		}
 	}
 	if sectionToUpdate.WarehouseID != nil {
 		section.WarehouseID = *sectionToUpdate.WarehouseID
+		if section.WarehouseID == 0 {
+			return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("warehouse_id cannot be empty/null"))
+		}
+		if err := r.warehouseExistsById(section.WarehouseID); err != nil {
+			return pkg.Section{}, err
+		}
 	}
-
-	if section.MinimumCapacity > section.MaximumCapacity {
-		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
+	if err := r.validateLogicRules(section); err != nil {
+		return pkg.Section{}, err
 	}
-
-	possibleSection, err := r.repo.GetBySectionNumber(section.SectionNumber)
-	if possibleSection != (pkg.Section{}) {
-		return pkg.Section{}, utils.ErrConflict
-	}
+	// Update
+	section, err = r.repo.Update(section)
 	if err != nil {
 		return pkg.Section{}, err
 	}
-
-	// Update
-	section, err = r.repo.Update(section)
 	return section, nil
 }
 
