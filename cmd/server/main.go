@@ -20,8 +20,9 @@ func main() {
 	router := chi.NewRouter()
 
 	// Create the routes and deps
-	sectionRepo := repository.NewMemorySectionRepository()
-	sectionService := service.NewBasicSectionService(sectionRepo)
+	sectionRepo := repository.NewMemorySectionRepository(nil)
+	sectionValidations := service.SectionsValidation{}
+	sectionService := service.NewBasicSectionService(sectionRepo, &sectionValidations)
 	routes.RegisterSectionRoutes(router, sectionService)
 
 	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))

@@ -1,15 +1,15 @@
 package pkg
 
 type Section struct {
-	ID                 int
-	SectionNumber      int
-	CurrentCapacity    int
-	MaximumCapacity    int
-	MinimumCapacity    int
-	CurrentTemperature float64
-	MinimumTemperature float64
-	ProductTypeID      int
-	WarehouseID        int
+	ID                 int     `json:"id"`
+	SectionNumber      int     `json:"section_number"`
+	CurrentCapacity    int     `json:"current_capacity"`
+	MaximumCapacity    int     `json:"maximum_capacity"`
+	MinimumCapacity    int     `json:"minimum_capacity"`
+	CurrentTemperature float64 `json:"current_temperature"`
+	MinimumTemperature float64 `json:"minimum_temperature"`
+	ProductTypeID      int     `json:"warehouse_id"`
+	WarehouseID        int     `json:"product_type_id"`
 }
 
 type SectionPointers struct {
@@ -38,5 +38,9 @@ type (
 		Update(int, SectionPointers) (Section, error)
 		GetById(int) (Section, error)
 		Delete(int) error
+	}
+	SectionValidations interface {
+		WarehouseExistsById(int) bool
+		ProductTypeExistsById(int) bool
 	}
 )

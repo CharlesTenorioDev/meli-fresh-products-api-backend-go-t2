@@ -12,6 +12,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
+// Simple structure to hold the data when POST request
 type reqPostSection struct {
 	SectionNumber      int     `json:"section_number"`
 	CurrentCapacity    int     `json:"current_capacity"`
@@ -27,10 +28,13 @@ type SectionHandler struct {
 	service pkg.SectionService
 }
 
+// Get a new instance of SectionHandler
 func NewSectionHandler(service pkg.SectionService) *SectionHandler {
 	return &SectionHandler{service}
 }
 
+// Get all the sections - 200
+// An error not mapped - 500
 func (h *SectionHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sections, err := h.service.GetAll()
@@ -42,6 +46,10 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 	}
 }
 
+// Get the section by Id - 200
+// If the id is in the wrong format - 400
+// If the section doesn't exist - 404
+// An error not mapped - 500
 func (h *SectionHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -52,7 +60,7 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 		section, err := h.service.GetById(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section with id %d", id))
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
@@ -62,6 +70,11 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 	}
 }
 
+// Save the section - 201
+// If payload is in the wrong format - 400
+// If a section already exists for section_number - 409
+// If the payload contains invalid or empty fields for mandatory data - 422
+// An error not mapped - 500
 func (h *SectionHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostSection
@@ -86,12 +99,21 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 				return
 			}
 			if errors.Is(err, utils.ErrInvalidArguments) {
+				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+				return
 			}
+			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+			return
 		}
 		utils.JSON(w, http.StatusCreated, newSection)
 	}
 }
 
+// Update the section - 200
+// If payload or Id is in a incorrect format - 400
+// If a section already exists for section_number - 409
+// If the payload contains invalid or empty fields for mandatory data - 422
+// An error not mapped - 500
 func (h *SectionHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -111,12 +133,20 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 				return
 			}
 			if errors.Is(err, utils.ErrInvalidArguments) {
+				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+				return
 			}
+			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+			return
 		}
 		utils.JSON(w, http.StatusOK, updatedSection)
 	}
 }
 
+// Delete a section by id - 204
+// If the id is in the wrong format - 400
+// If the section doesn't exist - 404
+// An error not mapped - 500
 func (h *SectionHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -127,7 +157,7 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 		err = h.service.Delete(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section with id %d", id))
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
