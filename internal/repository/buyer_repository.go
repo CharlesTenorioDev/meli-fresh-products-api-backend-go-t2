@@ -7,9 +7,22 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
+type BuyerDb struct {
+	buyerTable map[int]pkg.Buyer
+}
+
+func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerDb {
+
+	buyerDb := make(map[int]pkg.Buyer)
+	if buyerTab != nil {
+		buyerDb = buyerTab
+	}
+	return &BuyerDb{buyerTable: buyerDb}
+}
+
 var buyersFile = "buyers.json"
 
-func LoadBuyers() (map[int]pkg.Buyer, error) {
+func (repo *BuyerDb) LoadBuyers() (map[int]pkg.Buyer, error) {
 	file, err := os.ReadFile(buyersFile)
 	if err != nil {
 		return nil, err
@@ -24,8 +37,8 @@ func LoadBuyers() (map[int]pkg.Buyer, error) {
 	return buyers, nil
 }
 
-func GetAllBuyers() ([]pkg.Buyer, error) {
-	buyersMap, err := LoadBuyers()
+func (repo *BuyerDb) GetAll() ([]pkg.Buyer, error) {
+	buyersMap, err := repo.LoadBuyers()
 	if err != nil {
 		return nil, err
 	}

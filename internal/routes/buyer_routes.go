@@ -1,13 +1,21 @@
 package routes
 
 import (
+	"errors"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
-func BuyerRoutes(r *chi.Mux) {
-	r.Route("/api/v1/buyer", func(r chi.Router) {
-		r.Get("/", handler.GetBuyersHandler)
-	})
+func BuyerRoutes(mux *chi.Mux, service pkg.BuyerService) error {
+	if mux == nil {
+		return errors.New("mux router is nil")
+	}
 
+	handler := handler.NewBuyerHandler(service)
+	mux.Route("/api/v1/buyer", func(router chi.Router) {
+		router.Get("/", handler.GetAll())
+	})
+	return nil
 }

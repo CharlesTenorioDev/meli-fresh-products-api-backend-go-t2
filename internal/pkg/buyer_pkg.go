@@ -8,9 +8,10 @@ type Buyer struct {
 }
 
 type BuyerService interface {
-	GetAllBuyers() ([]Buyer, error)
+	GetAll() ([]Buyer, error)
 }
 
 type BuyerRepository interface {
-	GetAllBuyers() ([]Buyer, error)
+	LoadBuyers() (map[int]Buyer, error)
+	GetAll() ([]Buyer, error)
 }

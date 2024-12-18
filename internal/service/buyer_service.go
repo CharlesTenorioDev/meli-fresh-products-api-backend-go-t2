@@ -2,9 +2,17 @@ package service
 
 import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 )
 
-func GetAllBuyers() ([]pkg.Buyer, error) {
-	return repository.GetAllBuyers()
+type BuyerService struct {
+	repo pkg.BuyerRepository
+}
+
+func NewBuyer(repo pkg.BuyerRepository) *BuyerService {
+	return &BuyerService{repo: repo}
+}
+
+func (service *BuyerService) GetAll() (buyer []pkg.Buyer, err error) {
+	buyer, err = service.repo.GetAll()
+	return buyer, err
 }
