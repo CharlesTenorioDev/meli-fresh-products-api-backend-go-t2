@@ -10,8 +10,10 @@ import (
 func RegisterEmployeesRoutes(mux *chi.Mux, service employeesPkg.EmployeeService) error {
 	handler := handler.NewEmployeeHandler(service)
 	mux.Route("/api/v1/employees", func(router chi.Router) {
+		// Get
 		router.Get("/", handler.GetAllEmployees())
 		router.Get("/{id}", handler.GetEmployeesById())
+		// Post
 		router.Post("/", handler.PostEmployees())
 	})
 
