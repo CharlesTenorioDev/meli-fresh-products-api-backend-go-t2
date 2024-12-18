@@ -39,8 +39,7 @@ type (
 		GetById(int) (Section, error)
 		Delete(int) error
 	}
-	SectionValidations interface {
-		WarehouseExistsById(int) bool
-		ProductTypeExistsById(int) bool
+	SectionWarehouseValidation interface {
+		GetById(int) (Warehouse, error)
 	}
 )

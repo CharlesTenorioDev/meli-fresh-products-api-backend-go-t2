@@ -8,24 +8,29 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
+const (
+	MinCelsiusTemperature = -273.15
+)
+
 type BasicSectionService struct {
-	repo        pkg.SectionRepository
-	validations pkg.SectionValidations
+	repo             pkg.SectionRepository
+	warehouseService pkg.SectionWarehouseValidation
 }
 
-func NewBasicSectionService(repo pkg.SectionRepository, validations pkg.SectionValidations) pkg.SectionService {
+func NewBasicSectionService(repo pkg.SectionRepository, warehouseService pkg.SectionWarehouseValidation) pkg.SectionService {
 	return &BasicSectionService{
-		repo:        repo,
-		validations: validations,
+		repo:             repo,
+		warehouseService: warehouseService,
 	}
 }
 
 // Returns all the sections
-func (r *BasicSectionService) GetAll() ([]pkg.Section, error) {
+func (r BasicSectionService) GetAll() ([]pkg.Section, error) {
 	return r.repo.GetAll()
 }
 
-func (r *BasicSectionService) GetById(id int) (pkg.Section, error) {
+// Get the section by id, if sections does not exist, utils.ErrNotFound is returned
+func (r BasicSectionService) GetById(id int) (pkg.Section, error) {
 	// Check if section exists
 	possibleSection, err := r.repo.GetById(id)
 	if err != nil {
@@ -40,6 +45,7 @@ func (r *BasicSectionService) GetById(id int) (pkg.Section, error) {
 	return possibleSection, nil
 }
 
+// Save a section, check the relations, zero value when applicable, and basic logic
 func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) {
 	// Zero value validation
 	if newSection.SectionNumber == 0 {
@@ -52,16 +58,26 @@ func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) 
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
 	}
 
-	// ToDo: Implement the warehouse_id validation and product_type_id validation
-	if !r.validations.WarehouseExistsById(newSection.WarehouseID) {
-		return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
+	possibleWarehouse, err := r.warehouseService.GetById(newSection.WarehouseID)
+	// When internal server error
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+		return pkg.Section{}, err
 	}
-	if !r.validations.ProductTypeExistsById(newSection.ProductTypeID) {
-		return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("product_type_id not found for id %d", newSection.ProductTypeID))
+	if possibleWarehouse == (pkg.Warehouse{}) {
+		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
 	}
+	//if !r.validations.WarehouseExistsById(newSection.WarehouseID) {
+	//	return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
+	//}
+	//	if !r.validations.ProductTypeExistsById(newSection.ProductTypeID) {
+	//		return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("product_type_id not found for id %d", newSection.ProductTypeID))
+	//	}
 
 	if newSection.MinimumCapacity > newSection.MaximumCapacity {
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
+	}
+	if newSection.MinimumTemperature < MinCelsiusTemperature {
+		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than 273.15 Celsius"))
 	}
 
 	// Check if a section already exists for section number
@@ -116,6 +132,18 @@ func (r *BasicSectionService) Update(id int, sectionToUpdate pkg.SectionPointers
 	}
 	if sectionToUpdate.WarehouseID != nil {
 		section.WarehouseID = *sectionToUpdate.WarehouseID
+	}
+
+	if section.MinimumCapacity > section.MaximumCapacity {
+		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
+	}
+
+	possibleSection, err := r.repo.GetBySectionNumber(section.SectionNumber)
+	if possibleSection != (pkg.Section{}) {
+		return pkg.Section{}, utils.ErrConflict
+	}
+	if err != nil {
+		return pkg.Section{}, err
 	}
 
 	// Update

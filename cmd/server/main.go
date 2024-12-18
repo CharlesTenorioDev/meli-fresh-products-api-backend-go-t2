@@ -29,8 +29,7 @@ func main() {
 	}
 	// Section
 	sectionRepo := repository.NewMemorySectionRepository(nil)
-	sectionValidations := service.SectionsValidation{}
-	sectionService := service.NewBasicSectionService(sectionRepo, &sectionValidations)
+	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService)
 	routes.RegisterSectionRoutes(router, sectionService)
 
 	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))
