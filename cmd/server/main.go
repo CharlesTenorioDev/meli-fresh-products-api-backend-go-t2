@@ -20,6 +20,15 @@ func main() {
 	router := chi.NewRouter()
 
 	// Create the routes and deps
+
+	// ProductType
+	repotypes := repository.NewProductTypeDB(nil)
+	serviceType := service.NewProductTypeService(repotypes)
+	if err := routes.NewProductTypeRoutes(router, serviceType); err != nil {
+		panic(err)
+	}
+
+	// Product
 	repo := repository.NewProductDB(nil)
 	service := service.NewProductService(repo)
 	err = routes.NewProductRoutes(router, service)
