@@ -20,6 +20,14 @@ func main() {
 	router := chi.NewRouter()
 
 	// Create the routes and deps
+	// Warehouses
+	warehouseRepo := repository.NewWarehouseDB(nil)
+	warehouseService := service.NewWarehouseService(warehouseRepo)
+	err = routes.NewWarehouseRoutes(router, warehouseService)
+	if err != nil {
+		panic(err)
+	}
+	// Section
 	sectionRepo := repository.NewMemorySectionRepository(nil)
 	sectionValidations := service.SectionsValidation{}
 	sectionService := service.NewBasicSectionService(sectionRepo, &sectionValidations)
