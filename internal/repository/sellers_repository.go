@@ -1,6 +1,9 @@
 package repository
 
-import "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+import (
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+)
 
 
 func NewSellerDbRepository(db map[int]pkg.Seller) *SellerDbRepository {
@@ -35,7 +38,17 @@ func (r *SellerDbRepository) GetByCid(cid int) (pkg.Seller, error) {
 	return r.db[cid], nil
 }
 
-func (r *SellerDbRepository) Create(seller pkg.Seller) (pkg.Seller, error) {
-	
+func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) {
+	newSellerId := utils.GetBiggestId(r.db) + 1
+	createdSeller := pkg.Seller {
+		ID: newSellerId,
+		Cid: newSeller.Cid,
+		CompanyName: newSeller.CompanyName,
+		Address: newSeller.Address,
+		Telephone: newSeller.Telephone,
+	}
+
+	r.db[newSellerId] = createdSeller
+	return createdSeller, nil
 
 }

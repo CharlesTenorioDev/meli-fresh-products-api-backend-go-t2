@@ -12,13 +12,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type SellerRequest struct {
-	Cid           int     `json:"cid"`
-	CompanyName   string  `json:"company_name"`
-	Address       string  `json:"adress"`
-	Telephone     string  `json:"telephone"`
-}
-
 
 func NewSellerHandler(service pkg.SellerService) *SellerHandler {
 	return &SellerHandler{service}
@@ -66,21 +59,27 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 
 func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqBody pkg.Seller
+		var reqBody pkg.SellerRequest
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
 		}
 
 		seller, err := h.service.Create(reqBody)
 		if err != nil {
-			utils.JSON(w, http.StatusInternalServerError, "internal error")
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			if errors.Is(err, utils.ErrInvalidArguments) {
+				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+				return
+			}
+
+			utils.Error(w, http.StatusInternalServerError, "Internal error")
 			return
+
 		}
-
-		utils.JSON(w, http.StatusCreated, seller)
-
-
-	}
-
+	utils.JSON(w, http.StatusCreated, seller)
 	
+	}
 }

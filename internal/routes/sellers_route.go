@@ -11,6 +11,8 @@ func RegisterSellerRoutes(mux *chi.Mux, service pkg.SellerService) error {
 	mux.Route("/api/v1/sellers", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetById())
+		router.Post("/", handler.Create())
+
 	})
 	return nil
 }

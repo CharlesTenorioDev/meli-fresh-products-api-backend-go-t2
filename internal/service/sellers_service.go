@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -32,29 +31,12 @@ func (s *SellerService) GetById(id int) (pkg.Seller, error) {
 	return seller, nil
 }
 
-func (s *SellerService) Create(newSeller pkg.Seller) (pkg.Seller, error) {
+func (s *SellerService) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) {
 	sellerValidation := s.verify(newSeller)
 
 	if sellerValidation != nil {
 		return pkg.Seller{}, sellerValidation
 	}
-
-	existintgSeller, err := s.rp.GetById(newSeller.ID)
-	if err != nil {
-		return pkg.Seller{}, err
-	}
-	if existintgSeller.ID != 0 {
-		return pkg.Seller{}, utils.ErrConflict
-	}
-
-	existintgCid, err := s.rp.GetByCid(newSeller.Cid)
-	if err != nil {
-		return pkg.Seller{}, err
-	}
-	if existintgCid.Cid != 0 {
-		return pkg.Seller{}, errors.New("cid already used by another seller")
-	}
-
 
 	createdSeller, err := s.rp.Create(newSeller)
 	if err != nil {
@@ -65,21 +47,40 @@ func (s *SellerService) Create(newSeller pkg.Seller) (pkg.Seller, error) {
 
 }
 
-func (s *SellerService) verify(newSeller pkg.Seller) (error) {
+func (s *SellerService) verify(newSeller pkg.SellerRequest) (error) {
 
 	if newSeller.Cid <= 0 {
-		return errors.New("invalid cid")
+		return utils.ErrInvalidArguments
 	}
+
+	existintgCid, err := s.rp.GetByCid(newSeller.Cid)
+	if err != nil {
+		return err
+	}
+	if existintgCid.Cid != 0 {
+		return utils.ErrConflict
+	}
+
 	if len(newSeller.CompanyName) == 0 {
-		return errors.New("company Name can`t be empty")
+		return utils.ErrInvalidArguments
 	}
 	if len(newSeller.Telephone) == 0 {
-		return errors.New("telephone can`t be empty")
+		return utils.ErrInvalidArguments
 	}
 	if len(newSeller.Address) == 0 {
-		return errors.New("adress can`t be empty")
+		return utils.ErrInvalidArguments
 	}
 
 	return nil
 
 }
+
+	// existintgSeller, err := s.rp.GetById(newSeller.ID)
+	// if err != nil {
+	// 	return pkg.Seller{}, err
+	// }
+	// if existintgSeller.ID != 0 {
+	// 	return pkg.Seller{}, utils.ErrConflict
+	// }
+
+
