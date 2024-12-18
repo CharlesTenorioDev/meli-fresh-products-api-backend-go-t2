@@ -30,7 +30,7 @@ func main() {
 
 	// Product
 	repo := repository.NewProductDB(nil)
-	service := service.NewProductService(repo)
+	service := service.NewProductService(repo, serviceType)
 	err = routes.NewProductRoutes(router, service)
 	if err != nil {
 		panic(err)

@@ -6,11 +6,16 @@ import (
 )
 
 type ProductService struct {
-	repo pkg.ProductRepository
+	repo                  pkg.ProductRepository
+	validationProductType pkg.ProductValidation
+	validationSellerID    pkg.SellerValidation
 }
 
-func NewProductService(repo pkg.ProductRepository) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(repo pkg.ProductRepository, validationProductType pkg.ProductValidation) *ProductService {
+	return &ProductService{
+		repo:                  repo,
+		validationProductType: validationProductType,
+	}
 }
 
 func (s *ProductService) GetProducts() (listProducts []pkg.Product, err error) {
@@ -22,7 +27,7 @@ func (s *ProductService) GetProductByID(id int) (product pkg.Product, err error)
 }
 
 func (s *ProductService) CreateProduct(newProduct pkg.ProductAttributes) (product pkg.Product, err error) {
-	err = validateEmptyFields(newProduct)
+	err = s.validateEmptyFields(newProduct)
 	if err != nil {
 		return pkg.Product{}, err
 	}
@@ -47,7 +52,7 @@ func (s *ProductService) DeleteProduct(id int) (err error) {
 	return s.repo.Delete(id)
 }
 
-func validateEmptyFields(newProduct pkg.ProductAttributes) error {
+func (s *ProductService) validateEmptyFields(newProduct pkg.ProductAttributes) error {
 	if newProduct.ProductCode == "" {
 		return utils.ErrInvalidArguments
 	}
@@ -75,12 +80,14 @@ func validateEmptyFields(newProduct pkg.ProductAttributes) error {
 	if newProduct.FreezingRate == 0 {
 		return utils.ErrInvalidArguments
 	}
-	if newProduct.ProductType == 0 {
+
+	// TODO: validate product type and seller id
+	if _, err := s.validationProductType.GetProductTypeByID(newProduct.ProductType); err != nil {
 		return utils.ErrInvalidArguments
-	}
-	if newProduct.SellerID == 0 {
-		return utils.ErrInvalidArguments
-	}
+	} /*
+		if _, err := s.validationSellerID.GetSellerByID(newProduct.SellerID); err != nil {
+			return utils.ErrInvalidArguments
+		}*/
 	return nil
 }
 

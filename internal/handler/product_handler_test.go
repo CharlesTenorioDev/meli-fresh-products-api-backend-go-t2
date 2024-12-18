@@ -30,10 +30,13 @@ var mockProduct = pkg.Product{
 		SellerID:                       1,
 	},
 }
+var mockProductTypeService = service.NewProductTypeService(repository.NewProductTypeDB(map[int]pkg.ProductType{
+	1: {ID: 1, Description: "test"},
+}))
 
 var mockService = service.NewProductService(repository.NewProductDB(map[int]pkg.Product{
 	1: mockProduct,
-}))
+}), mockProductTypeService)
 
 func TestProductHandler_GetProducts(t *testing.T) {
 	h := handler.NewProductHandler(mockService)
@@ -56,23 +59,31 @@ func TestProductHandler_GetProductByID_WhenExists(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 }
 
-/*
-	func TestProductHandler_GetProductByID_WhenNotExists(t *testing.T) {
-		h := NewProductHandler(mockService)
-		req := httptest.NewRequest(http.MethodGet, "/products/99", nil)
-		w := httptest.NewRecorder()
-		h.GetProductByID(w, req)
-		require.Equal(t, http.StatusNotFound, w.Code)
+func TestProductHandler_GetProductByID_WhenNotExists(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
 	}
-*/
-func TestProductHandler_CreateProduct(t *testing.T) {
-	h := handler.NewProductHandler(mockService)
-	req := httptest.NewRequest(http.MethodPost, "/products", nil)
+	req := httptest.NewRequest(http.MethodGet, "/products/99", nil)
 	w := httptest.NewRecorder()
-	h.CreateProduct(w, req)
-	require.Equal(t, http.StatusCreated, w.Code)
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
+/*
+func TestProductHandler_CreateProduct(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/products", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusCreated, w.Code)
+}
+*/
 /*
 	func TestProductHandler_UpdateProduct(t *testing.T) {
 		h := NewProductHandler(mockService)

@@ -34,3 +34,18 @@ type ProductRepository interface {
 	Update(inputProduct Product) (product Product, err error)
 	Delete(id int) (err error)
 }
+
+type ProductValidation interface {
+	GetProductTypeByID(id int) (productType ProductType, err error)
+}
+type SellerValidation interface {
+	GetSellerByID(id int) (seller Seller, err error)
+}
+
+// TODO: implement this
+type Seller struct {
+}
+
+func (s *Seller) GetSellerByID(id int) (seller Seller, err error) {
+	return Seller{}, nil
+}
