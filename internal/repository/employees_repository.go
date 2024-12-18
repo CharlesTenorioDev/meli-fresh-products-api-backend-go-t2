@@ -42,21 +42,16 @@ func (r *EmployeeMap) FindAll() (employees map[int]employeesPkg.Employee, err er
 
 // FindById retrieves an employee by their ID
 // if the employee is not found, it returns an error
-func (r *EmployeeMap) FindById(id int) (employees map[int]employeesPkg.Employee, err error) {
-	// create a map to hold the result
-	employees = make(map[int]employeesPkg.Employee)
-
+func (r *EmployeeMap) FindById(id int) (employee employeesPkg.Employee, err error) {
 	// check if the employee exists in the internal map
-	e, exists := r.db[id]
+	employee, exists := r.db[id]
 	if !exists {
 		// return an error if the employee is not found
 		err = utils.ErrNotFound
 		return
 	}
 
-	// add the employee to the result map
-	employees[id] = e
-	return
+	return employee, nil
 }
 
 // CreateEmployee adds a new employee to the repository
@@ -79,4 +74,32 @@ func (r *EmployeeMap) CreateEmployee(newEmployee employeesPkg.EmployeeAttributes
 	// add the new employee to the repository's internal map
 	r.db[employee.ID] = employee
 	return
+}
+
+// UpdateEmployee updates an employee's data in the repository
+func (r *EmployeeMap) UpdateEmployee(inputEmployee employeesPkg.Employee) (employee employeesPkg.Employee, err error) {
+	// check if the employee exists in the internal map
+	existingEmployee, exists := r.db[inputEmployee.ID]
+	if !exists {
+		return employeesPkg.Employee{}, utils.ErrNotFound
+	}
+
+	// merge fields from the inputEmployee
+	if inputEmployee.Attributes.CardNumberId != 0 {
+		existingEmployee.Attributes.CardNumberId = inputEmployee.Attributes.CardNumberId
+	}
+	if inputEmployee.Attributes.FirstName != "" {
+		existingEmployee.Attributes.FirstName = inputEmployee.Attributes.FirstName
+	}
+	if inputEmployee.Attributes.LastName != "" {
+		existingEmployee.Attributes.LastName = inputEmployee.Attributes.LastName
+	}
+	if inputEmployee.Attributes.WarehouseId != 0 {
+		existingEmployee.Attributes.WarehouseId = inputEmployee.Attributes.WarehouseId
+	}
+
+	// update the map with the modified employee
+	r.db[inputEmployee.ID] = existingEmployee
+
+	return existingEmployee, nil
 }

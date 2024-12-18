@@ -27,14 +27,16 @@ type EmployeeJson struct {
 // it specifies methods for fetching and creating employee data
 type EmployeeRepository interface {
 	FindAll() (employees map[int]Employee, err error)
-	FindById(id int) (employees map[int]Employee, err error)
+	FindById(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
+	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
 }
 
 // EmployeeService defines the interface for employee-related business logic
 // it includes methods for fetching and creating employees
 type EmployeeService interface {
 	FindAll() (employees map[int]Employee, err error)
-	FindById(id int) (employees map[int]Employee, err error)
+	FindById(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
+	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
 }
