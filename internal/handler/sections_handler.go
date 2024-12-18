@@ -20,8 +20,8 @@ type reqPostSection struct {
 	MinimumCapacity    int     `json:"minimum_capacity"`
 	CurrentTemperature float64 `json:"current_temperature"`
 	MinimumTemperature float64 `json:"minimum_temperature"`
-	ProductTypeID      int     `json:"warehouse_id"`
-	WarehouseID        int     `json:"product_type_id"`
+	ProductTypeID      int     `json:"product_type_id"`
+	WarehouseID        int     `json:"warehouse_id"`
 }
 
 type SectionHandler struct {

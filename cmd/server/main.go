@@ -20,6 +20,21 @@ func main() {
 	router := chi.NewRouter()
 
 	// Create the routes and deps
+	// ProductType
+	productTypeRepo := repository.NewProductTypeDB(nil)
+	productTypeService := service.NewProductTypeService(productTypeRepo)
+	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
+		panic(err)
+	}
+
+	// Product
+	productRepo := repository.NewProductDB(nil)
+	productService := service.NewProductService(productRepo)
+	err = routes.NewProductRoutes(router, productService)
+	if err != nil {
+		panic(err)
+	}
+
 	// Warehouses
 	warehouseRepo := repository.NewWarehouseDB(nil)
 	warehouseService := service.NewWarehouseService(warehouseRepo)
@@ -27,22 +42,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	// Section
 	sectionRepo := repository.NewMemorySectionRepository(nil)
-	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService)
-	routes.RegisterSectionRoutes(router, sectionService)
-
-	// ProductType
-	repotypes := repository.NewProductTypeDB(nil)
-	serviceType := service.NewProductTypeService(repotypes)
-	if err := routes.NewProductTypeRoutes(router, serviceType); err != nil {
-		panic(err)
-	}
-
-	// Product
-	repo := repository.NewProductDB(nil)
-	service := service.NewProductService(repo)
-	err = routes.NewProductRoutes(router, service)
+	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
+	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
 		panic(err)
 	}

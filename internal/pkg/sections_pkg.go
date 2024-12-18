@@ -42,4 +42,7 @@ type (
 	SectionWarehouseValidation interface {
 		GetById(int) (Warehouse, error)
 	}
+	SectionProductTypeValidation interface {
+		GetProductTypeByID(int) (ProductType, error)
+	}
 )

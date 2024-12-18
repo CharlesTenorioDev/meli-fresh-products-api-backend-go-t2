@@ -13,14 +13,16 @@ const (
 )
 
 type BasicSectionService struct {
-	repo             pkg.SectionRepository
-	warehouseService pkg.SectionWarehouseValidation
+	repo               pkg.SectionRepository
+	warehouseService   pkg.SectionWarehouseValidation
+	productTypeService pkg.SectionProductTypeValidation
 }
 
-func NewBasicSectionService(repo pkg.SectionRepository, warehouseService pkg.SectionWarehouseValidation) pkg.SectionService {
+func NewBasicSectionService(repo pkg.SectionRepository, warehouseService pkg.SectionWarehouseValidation, productTypeService pkg.SectionProductTypeValidation) pkg.SectionService {
 	return &BasicSectionService{
-		repo:             repo,
-		warehouseService: warehouseService,
+		repo:               repo,
+		warehouseService:   warehouseService,
+		productTypeService: productTypeService,
 	}
 }
 
@@ -58,6 +60,7 @@ func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) 
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
 	}
 
+	fmt.Printf("%+v", newSection)
 	possibleWarehouse, err := r.warehouseService.GetById(newSection.WarehouseID)
 	// When internal server error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
@@ -66,12 +69,15 @@ func (r *BasicSectionService) Save(newSection pkg.Section) (pkg.Section, error) 
 	if possibleWarehouse == (pkg.Warehouse{}) {
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
 	}
-	//if !r.validations.WarehouseExistsById(newSection.WarehouseID) {
-	//	return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("warehouse_id not found for id %d", newSection.WarehouseID))
-	//}
-	//	if !r.validations.ProductTypeExistsById(newSection.ProductTypeID) {
-	//		return pkg.Section{}, errors.Join(utils.ErrNotFound, fmt.Errorf("product_type_id not found for id %d", newSection.ProductTypeID))
-	//	}
+
+	possibleProductType, err := r.productTypeService.GetProductTypeByID(newSection.ProductTypeID)
+	// When internal server error
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
+		return pkg.Section{}, err
+	}
+	if possibleProductType == (pkg.ProductType{}) {
+		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type_id not found for id %d", newSection.WarehouseID))
+	}
 
 	if newSection.MinimumCapacity > newSection.MaximumCapacity {
 		return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
