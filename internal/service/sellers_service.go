@@ -28,6 +28,9 @@ func (s *SellerService) GetById(id int) (pkg.Seller, error) {
 	if err != nil {
 		return pkg.Seller{}, err
 	}
+	if seller == (pkg.Seller{}) {
+		return pkg.Seller{}, utils.ErrNotFound
+	}
 	return seller, nil
 }
 
