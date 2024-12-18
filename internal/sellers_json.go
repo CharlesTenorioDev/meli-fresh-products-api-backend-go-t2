@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"os"
-
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 

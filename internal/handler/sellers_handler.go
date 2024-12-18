@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -59,19 +60,27 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 		utils.JSON(w, http.StatusOK, seller)
 
 		}
-		
-		
-
 }
 
 
 
-// func (h *SellerHandler) Create() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		var reqBody SellerRequest
-// 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != {
-// 			utils.JSON(w, http.StatusInternalServerError, ErrInvalidFormat)
-// 		}
+func (h *SellerHandler) Create() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var reqBody pkg.Seller
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+		}
 
-// 	}
-// }
+		seller, err := h.service.Create(reqBody)
+		if err != nil {
+			utils.JSON(w, http.StatusInternalServerError, "internal error")
+			return
+		}
+
+		utils.JSON(w, http.StatusCreated, seller)
+
+
+	}
+
+	
+}
