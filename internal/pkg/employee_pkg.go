@@ -1,15 +1,10 @@
 package employeesPkg
 
 type Employee struct {
-	ID           int
-	CardNumberId int
-	FirstName    string
-	LastName     string
-	WarehouseId  int
+	ID         int                `json:"id"`
+	Attributes EmployeeAttributes `json:"attributes"`
 }
-
-type EmployeeJson struct {
-	ID           int    `json:"id"`
+type EmployeeAttributes struct {
 	CardNumberId int    `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
@@ -18,8 +13,12 @@ type EmployeeJson struct {
 
 type EmployeeRepository interface {
 	FindAll() (employees map[int]Employee, err error)
+	FindById(id int) (employees map[int]Employee, err error)
+	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 }
 
 type EmployeeService interface {
 	FindAll() (employees map[int]Employee, err error)
+	FindById(id int) (employees map[int]Employee, err error)
+	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 }

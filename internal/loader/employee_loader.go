@@ -45,11 +45,13 @@ func (l *EmployeeJsonFile) Load() (employee map[int]employeesPkg.Employee, err e
 	employee = make(map[int]employeesPkg.Employee)
 	for _, employees := range EmployeesJson {
 		employee[employees.ID] = employeesPkg.Employee{
-			ID:           employees.ID,
-			CardNumberId: employees.CardNumberId,
-			FirstName:    employees.FirstName,
-			LastName:     employees.LastName,
-			WarehouseId:  employees.WarehouseId,
+			ID: employees.ID,
+			Attributes: employeesPkg.EmployeeAttributes{
+				CardNumberId: employees.CardNumberId,
+				FirstName:    employees.FirstName,
+				LastName:     employees.LastName,
+				WarehouseId:  employees.WarehouseId,
+			},
 		}
 	}
 

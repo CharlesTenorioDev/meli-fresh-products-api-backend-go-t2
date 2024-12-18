@@ -1,6 +1,6 @@
 package utils
 
-func GetBiggestId(db map[int]any) int {
+func GetBiggestId[T any](db map[int]T) int {
 	if len(db) == 0 {
 		return 1
 	}

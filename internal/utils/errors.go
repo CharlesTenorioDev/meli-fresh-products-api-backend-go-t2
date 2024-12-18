@@ -10,5 +10,5 @@ var (
 	ErrConflict          = errors.New("entity already exists") // 409
 	ErrNotFound          = errors.New("entity not found")      // 404
 	ErrInvalidProperties = errors.New("invalid properties format")
-	ErrEmptyArguments    = errors.New("arguments must not be empty")
+	ErrEmptyArguments    = errors.New("arguments must not be empty") // 400
 )
