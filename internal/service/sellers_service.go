@@ -59,11 +59,11 @@ func (s *SellerService) Update(id int, newSeller pkg.SellerRequestPointer) (pkg.
 	if existingSeller == (pkg.Seller{}) {
 		return pkg.Seller{}, utils.ErrNotFound
 	}
-	existintgCid, err := s.rp.GetByCid(*newSeller.Cid)
+	existingCid, err := s.rp.GetByCid(*newSeller.Cid)
 	if err != nil {
 		return pkg.Seller{}, err
 	}
-	if existintgCid.Cid != 0 && existingSeller.ID != id{
+	if existingCid.Cid != 0 && existingCid.ID != id{
 		return pkg.Seller{}, utils.ErrConflict
 	}
 	if *newSeller.Cid != 0 {
@@ -112,11 +112,11 @@ func (s *SellerService) verify(newSeller pkg.SellerRequest) (error) {
 		return utils.ErrInvalidArguments
 	}
 
-	existintgCid, err := s.rp.GetByCid(newSeller.Cid)
+	existingCid, err := s.rp.GetByCid(newSeller.Cid)
 	if err != nil {
 		return err
 	}
-	if existintgCid.Cid != 0 {
+	if existingCid.Cid != 0 {
 		return utils.ErrConflict
 	}
 
