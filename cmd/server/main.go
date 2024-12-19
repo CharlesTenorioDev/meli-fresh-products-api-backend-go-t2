@@ -22,7 +22,6 @@ func main() {
 	}
 
 	router := chi.NewRouter()
-	// Create the routes and deps
 
 	// Requisito 1 - Seller
 	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
@@ -77,6 +76,14 @@ func main() {
 	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
 	routes.RegisterEmployeesRoutes(router, employeesService)
 
+	// Requisito 6 - Buyers
+	buyersRepo := repository.NewBuyerDb(nil)
+	buyersService := service.NewBuyer(buyersRepo)
+	// Create the routes and deps
+	err = routes.BuyerRoutes(router, buyersService)
+	if err != nil {
+		panic(err)
+	}
 	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))
 	if err := http.ListenAndServe(os.Getenv("SERVER.PORT"), router); err != nil {
 		panic(err)
