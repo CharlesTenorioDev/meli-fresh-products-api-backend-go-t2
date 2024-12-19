@@ -54,7 +54,7 @@ func (r *BasicSectionService) warehouseExistsById(id int) error {
 		return err
 	}
 	if possibleWarehouse == (pkg.Warehouse{}) {
-		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse_id not found for id %d", id))
+		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse not found for id %d", id))
 	}
 	return nil
 }
@@ -66,7 +66,7 @@ func (r *BasicSectionService) productTypeExistsById(id int) error {
 		return err
 	}
 	if possibleProductType == (pkg.ProductType{}) {
-		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type_id not found for id %d", id))
+		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type not found for id %d", id))
 	}
 	return nil
 }
@@ -87,10 +87,10 @@ func (r *BasicSectionService) validateLogicRules(section pkg.Section) error {
 		return errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
 	}
 	if section.MinimumTemperature < MinCelsiusTemperature {
-		return errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than 273.15 Celsius"))
+		return errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than -273.15 Celsius"))
 	}
 	if section.CurrentTemperature < MinCelsiusTemperature {
-		return errors.Join(utils.ErrInvalidArguments, errors.New("current_temperature cannot be less than 273.15 Celsius"))
+		return errors.Join(utils.ErrInvalidArguments, errors.New("current_temperature cannot be less than -273.15 Celsius"))
 	}
 	return nil
 }
