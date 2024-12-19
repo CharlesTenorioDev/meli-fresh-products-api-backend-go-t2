@@ -42,3 +42,7 @@ type EmployeeService interface {
 	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
 	DeleteEmployee(id int) (err error)
 }
+
+type EmployeesWarehouseValidation interface {
+	GetById(int) (Warehouse, error)
+}

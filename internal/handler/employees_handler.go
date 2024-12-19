@@ -7,18 +7,18 @@ import (
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
-	employeesPkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 // EmployeeDefault is the http handler for employee-related endpoints
 // it communicates with the service layer to process requests
 type EmployeeDefault struct {
-	sv employeesPkg.EmployeeService
+	sv pkg.EmployeeService
 }
 
 // NewEmployeeHandler creates a new instance of EmployeeDefault
-func NewEmployeeHandler(sv employeesPkg.EmployeeService) *EmployeeDefault {
+func NewEmployeeHandler(sv pkg.EmployeeService) *EmployeeDefault {
 	return &EmployeeDefault{sv: sv}
 }
 
@@ -31,11 +31,11 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 			return
 		}
 
-		data := make(map[int]employeesPkg.Employee)
+		data := make(map[int]pkg.Employee)
 		for key, value := range employees {
-			data[key] = employeesPkg.Employee{
+			data[key] = pkg.Employee{
 				ID: value.ID,
-				Attributes: employeesPkg.EmployeeAttributes{
+				Attributes: pkg.EmployeeAttributes{
 					CardNumberId: value.Attributes.CardNumberId,
 					FirstName:    value.Attributes.FirstName,
 					LastName:     value.Attributes.LastName,
@@ -68,9 +68,9 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 			return
 		}
 
-		data := employeesPkg.Employee{
+		data := pkg.Employee{
 			ID: employee.ID,
-			Attributes: employeesPkg.EmployeeAttributes{
+			Attributes: pkg.EmployeeAttributes{
 				CardNumberId: employee.Attributes.CardNumberId,
 				FirstName:    employee.Attributes.FirstName,
 				LastName:     employee.Attributes.LastName,
@@ -89,7 +89,7 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 // PostEmployees handles the POST /employees route
 func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var newEmployee employeesPkg.EmployeeAttributes
+		var newEmployee pkg.EmployeeAttributes
 
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newEmployee)
@@ -129,7 +129,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 			return
 		}
 
-		var inputEmployee employeesPkg.Employee
+		var inputEmployee pkg.Employee
 		// decode the json request body into Employee struct
 		err = json.NewDecoder(r.Body).Decode(&inputEmployee)
 		if err != nil {
@@ -144,7 +144,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 			if err == utils.ErrNotFound {
 				handleError(w, utils.ErrNotFound)
 			} else {
-				handleError(w, utils.ErrInvalidArguments)
+				handleError(w, utils.ErrWarehouseDoesNotExists)
 			}
 			return
 		}
@@ -196,6 +196,9 @@ func handleError(w http.ResponseWriter, err error) {
 	case utils.ErrInvalidFormat:
 		status = http.StatusBadRequest
 		message = utils.ErrInvalidFormat.Error()
+	case utils.ErrWarehouseDoesNotExists:
+		status = http.StatusUnprocessableEntity
+		message = utils.ErrWarehouseDoesNotExists.Error()
 	case utils.ErrInvalidArguments:
 		status = http.StatusUnprocessableEntity
 		message = utils.ErrInvalidArguments.Error()

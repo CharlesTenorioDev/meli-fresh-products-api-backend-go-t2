@@ -31,10 +31,6 @@ func main() {
 		return
 	}
 
-	rp := repository.NewEmployeeRepository(db)
-	sv := service.NewEmployeeService(rp)
-	routes.RegisterEmployeesRoutes(router, sv)
-
 	// Create the routes and deps
 	repo := repository.NewWarehouseDB(nil)
 	warehouseService := service.NewWarehouseService(repo)
@@ -42,6 +38,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	rp := repository.NewEmployeeRepository(db)
+	sv := service.NewEmployeeService(rp, warehouseService)
+	routes.RegisterEmployeesRoutes(router, sv)
 
 	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))
 	if err := http.ListenAndServe(os.Getenv("SERVER.PORT"), router); err != nil {
