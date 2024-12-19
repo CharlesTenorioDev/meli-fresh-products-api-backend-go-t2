@@ -14,20 +14,20 @@ import (
 )
 
 func main() {
-	err := utils.LoadProperties("/Users/dfcarvalho/Documents/aulas-go-meli/meli-fresh-products-api-backend-go-t2/.env")
+	err := utils.LoadProperties("./.env")
 	if err != nil {
 		panic(err)
 	}
 
 	router := chi.NewRouter()
 
-	ld := internal.NewSellerJSONFile("/Users/dfcarvalho/Documents/aulas-go-meli/meli-fresh-products-api-backend-go-t2/internal/sellers.json")
-	db, err := ld.Load()
+	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
+	dbSellers, err := ldSellers.Load()
 	if err != nil {
 		return
 	}
 
-	rp := repository.NewSellerDbRepository(db)
+	rp := repository.NewSellerDbRepository(dbSellers)
 	sv := service.NewSellerService(rp)
 	routes.RegisterSellerRoutes(router, sv)
 
