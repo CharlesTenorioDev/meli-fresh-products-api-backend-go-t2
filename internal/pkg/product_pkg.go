@@ -41,11 +41,3 @@ type ProductValidation interface {
 type SellerValidation interface {
 	GetSellerByID(id int) (seller Seller, err error)
 }
-
-// TODO: implement this
-type Seller struct {
-}
-
-func (s *Seller) GetSellerByID(id int) (seller Seller, err error) {
-	return Seller{}, nil
-}

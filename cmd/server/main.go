@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/loader"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
@@ -15,13 +16,23 @@ import (
 )
 
 func main() {
-	err := utils.LoadProperties(".env")
+	err := utils.LoadProperties("./.env")
 	if err != nil {
 		panic(err)
 	}
 
 	router := chi.NewRouter()
 	// Create the routes and deps
+
+	// Requisito 1 - Seller
+	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
+	dbSellers, err := ldSellers.Load()
+	if err != nil {
+		return
+	}
+	sellerRepo := repository.NewSellerDbRepository(dbSellers)
+	sellerService := service.NewSellerService(sellerRepo)
+	routes.RegisterSellerRoutes(router, sellerService)
 
 	// Requisito 4 - ProductType
 	productTypeRepo := repository.NewProductTypeDB(nil)
