@@ -32,7 +32,7 @@ func (s *ProductService) CreateProduct(newProduct pkg.ProductAttributes) (produc
 		return pkg.Product{}, err
 	}
 	listProducts, _ := s.repo.GetAll()
-	err = validateDuplicates(listProducts, newProduct)
+	err = s.validateDuplicates(listProducts, newProduct)
 	if err != nil {
 		return pkg.Product{}, err
 	}
@@ -90,7 +90,7 @@ func (s *ProductService) validateEmptyFields(newProduct pkg.ProductAttributes) e
 	return nil
 }
 
-func validateDuplicates(listProducts []pkg.Product, newProduct pkg.ProductAttributes) error {
+func (s *ProductService) validateDuplicates(listProducts []pkg.Product, newProduct pkg.ProductAttributes) error {
 	for _, product := range listProducts {
 		if product.ProductCode == newProduct.ProductCode {
 			return utils.ErrConflict
