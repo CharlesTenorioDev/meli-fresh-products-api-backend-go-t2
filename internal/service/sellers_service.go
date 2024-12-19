@@ -50,6 +50,62 @@ func (s *SellerService) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) 
 
 }
 
+func (s *SellerService) Update(id int, newSeller pkg.SellerRequestPointer) (pkg.Seller, error) {
+	
+	existingSeller, err := s.rp.GetById(id)
+	if err != nil {
+		return pkg.Seller{}, err
+	}
+	if existingSeller == (pkg.Seller{}) {
+		return pkg.Seller{}, utils.ErrNotFound
+	}
+	existintgCid, err := s.rp.GetByCid(*newSeller.Cid)
+	if err != nil {
+		return pkg.Seller{}, err
+	}
+	if existintgCid.Cid != 0 && existingSeller.ID != id{
+		return pkg.Seller{}, utils.ErrConflict
+	}
+	if *newSeller.Cid != 0 {
+		existingSeller.Cid = *newSeller.Cid
+	}
+
+	if newSeller.CompanyName != nil {
+		existingSeller.CompanyName = *newSeller.CompanyName
+	}
+	if newSeller.Address != nil {
+		existingSeller.Address = *newSeller.Address
+	}
+	if newSeller.Telephone != nil {
+		existingSeller.Telephone = *newSeller.Telephone
+	}
+
+	updatedSeller, err := s.rp.Update(existingSeller)
+	if err != nil {
+		return pkg.Seller{}, err
+	}
+
+	return updatedSeller, nil
+
+}
+
+func (s *SellerService) Delete(id int) (bool, error) {
+
+	existingSeller, err := s.rp.GetById(id)
+	if err != nil {
+		return false, err
+	}
+	if existingSeller == (pkg.Seller{}) {
+		return false, utils.ErrNotFound
+	}
+	result, err := s.rp.Delete(id) 
+		if err != nil {
+			return false, err
+		}
+	return result, nil
+}
+
+
 func (s *SellerService) verify(newSeller pkg.SellerRequest) (error) {
 
 	if newSeller.Cid <= 0 {
@@ -78,12 +134,5 @@ func (s *SellerService) verify(newSeller pkg.SellerRequest) (error) {
 
 }
 
-	// existintgSeller, err := s.rp.GetById(newSeller.ID)
-	// if err != nil {
-	// 	return pkg.Seller{}, err
-	// }
-	// if existintgSeller.ID != 0 {
-	// 	return pkg.Seller{}, utils.ErrConflict
-	// }
 
 

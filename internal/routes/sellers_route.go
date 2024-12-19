@@ -12,7 +12,10 @@ func RegisterSellerRoutes(mux *chi.Mux, service pkg.SellerService) error {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetById())
 		router.Post("/", handler.Create())
+		router.Patch("/{id}", handler.Update())
+		router.Delete("/{id}", handler.Delete())
 
 	})
 	return nil
 }
+

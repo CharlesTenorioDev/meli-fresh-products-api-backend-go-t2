@@ -83,3 +83,61 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 	
 	}
 }
+
+
+func (h *SellerHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+
+		var reqBody pkg.SellerRequestPointer
+
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+		}
+
+		seller, err := h.service.Update(id, reqBody)
+		if err != nil {
+
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, err.Error())
+				return
+			}
+
+			utils.Error(w, http.StatusInternalServerError, "Internal error")
+			return
+
+		}
+		utils.JSON(w, http.StatusOK, seller)
+	
+	}
+}
+
+func (h *SellerHandler) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		
+		isDeleted, err := h.service.Delete(id)
+		if err != nil {
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, err.Error())
+				return
+			}
+			utils.Error(w, http.StatusInternalServerError, "Internal error")
+			return
+		}
+		utils.JSON(w, http.StatusNoContent, isDeleted)
+	}
+}
+

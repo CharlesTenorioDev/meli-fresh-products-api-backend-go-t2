@@ -52,3 +52,14 @@ func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, er
 	return createdSeller, nil
 
 }
+
+func (r *SellerDbRepository) Update(seller pkg.Seller) (pkg.Seller, error) {
+	r.db[seller.ID] = seller
+
+	return r.db[seller.ID], nil
+}
+
+func (r *SellerDbRepository) Delete(id int) (bool, error) {
+	delete(r.db, id)
+	return true, nil
+}
