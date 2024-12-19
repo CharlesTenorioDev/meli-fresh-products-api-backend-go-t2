@@ -82,3 +82,23 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 		utils.JSON(w, http.StatusCreated, buyer)
 	}
 }
+
+func (handler *BuyerHandler) DeleteBuyer() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			log.Println("Error in parse param to int")
+			utils.Error(w, http.StatusBadRequest, err.Error())
+		}
+
+		err = handler.service.DeleteBuyer(id)
+
+		if err != nil {
+			log.Println("Error to  an user - ", err)
+			utils.Error(w, http.StatusInternalServerError, err.Error())
+		}
+
+		utils.JSON(w, http.StatusNoContent, nil)
+	}
+
+}

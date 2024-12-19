@@ -65,6 +65,24 @@ func (service *BuyerService) CreateBuyer(buyer pkg.BuyerAttributes) (*pkg.Buyer,
 	return &newBuyer, nil
 }
 
+func (service *BuyerService) DeleteBuyer(id int) error {
+	buyers, err := service.GetAll()
+
+	if err != nil {
+		log.Println("Error in GetAll - ", err)
+		return err
+	}
+
+	for _, buyer := range buyers {
+		if int(buyer.ID) == id {
+			service.repo.DeleteBuyer(id)
+			return nil
+		}
+	}
+
+	return err
+}
+
 func (service *BuyerService) validation(newBuyer pkg.Buyer) error {
 	buyers, err := service.repo.GetAll()
 	if err != nil {

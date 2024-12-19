@@ -105,3 +105,42 @@ func (repo *BuyerRepo) CreateBuyer(newBuyer pkg.Buyer) (*pkg.Buyer, error) {
 
 	return &newBuyer, nil
 }
+
+func (repo *BuyerRepo) DeleteBuyer(id int) error {
+	buyers, err := repo.GetAll()
+	if err != nil {
+		log.Println("Erro ao carregar os compradores:", err)
+		return err
+	}
+
+	indexToDelete := -1
+	for i, buyer := range buyers {
+		if int(buyer.ID) == id {
+			indexToDelete = i
+			break
+		}
+	}
+
+	if indexToDelete == -1 {
+		log.Println("Comprador com o ID fornecido não encontrado")
+		return utils.ErrInvalidArguments
+	}
+
+	buyers = append(buyers[:indexToDelete], buyers[indexToDelete+1:]...)
+
+	file, err := os.Create(buyersFile)
+	if err != nil {
+		log.Println("Erro ao abrir o arquivo para escrita:", err)
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(buyers); err != nil {
+		log.Println("Erro ao codificar JSON:", err)
+		return err
+	}
+
+	log.Println("Comprador excluído com sucesso!")
+	return nil
+}
