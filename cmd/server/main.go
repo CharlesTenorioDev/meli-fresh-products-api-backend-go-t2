@@ -22,7 +22,7 @@ func main() {
 
 	router := chi.NewRouter()
 
-	// - loader
+	// Requisito 5 - Employees
 	filePath := "docs/db/employees.json"
 	ld := loader.NewEmployeeJsonFile(filePath)
 	db, err := ld.Load()
@@ -34,6 +34,14 @@ func main() {
 	rp := repository.NewEmployeeRepository(db)
 	sv := service.NewEmployeeService(rp)
 	routes.RegisterEmployeesRoutes(router, sv)
+
+	// Create the routes and deps
+	repo := repository.NewWarehouseDB(nil)
+	warehouseService := service.NewWarehouseService(repo)
+	err = routes.NewWarehouseRoutes(router, warehouseService)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))
 	if err := http.ListenAndServe(os.Getenv("SERVER.PORT"), router); err != nil {
