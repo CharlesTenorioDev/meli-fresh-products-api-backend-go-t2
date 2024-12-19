@@ -22,7 +22,7 @@ func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerRepo {
 	return &BuyerRepo{buyerTable: BuyerDb}
 }
 
-var buyersFile = "/Users/peddpereira/Desktop/Project/meli-fresh-products-api-backend-go-t2/buyers.json"
+var buyersFile = "./docs/db/buyers.json"
 
 func (repo *BuyerRepo) LoadBuyers() (map[int]pkg.Buyer, error) {
 	file, err := os.ReadFile(buyersFile)
