@@ -8,22 +8,22 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
-type BuyerDb struct {
+type BuyerRepo struct {
 	buyerTable map[int]pkg.Buyer
 }
 
-func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerDb {
+func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerRepo {
 
-	buyerDb := make(map[int]pkg.Buyer)
+	BuyerDb := make(map[int]pkg.Buyer)
 	if buyerTab != nil {
-		buyerDb = buyerTab
+		BuyerDb = buyerTab
 	}
-	return &BuyerDb{buyerTable: buyerDb}
+	return &BuyerRepo{buyerTable: BuyerDb}
 }
 
 var buyersFile = "/Users/peddpereira/Desktop/Project/meli-fresh-products-api-backend-go-t2/buyers.json"
 
-func (repo *BuyerDb) LoadBuyers() (map[int]pkg.Buyer, error) {
+func (repo *BuyerRepo) LoadBuyers() (map[int]pkg.Buyer, error) {
 	file, err := os.ReadFile(buyersFile)
 	if err != nil {
 		log.Println("Error to read file", err)
@@ -45,7 +45,7 @@ func (repo *BuyerDb) LoadBuyers() (map[int]pkg.Buyer, error) {
 	return repo.buyerTable, nil
 }
 
-func (repo *BuyerDb) GetAll() ([]pkg.Buyer, error) {
+func (repo *BuyerRepo) GetAll() ([]pkg.Buyer, error) {
 	buyersMap, err := repo.LoadBuyers()
 	if err != nil {
 		return nil, err
