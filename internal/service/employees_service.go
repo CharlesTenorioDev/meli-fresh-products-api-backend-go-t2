@@ -83,7 +83,7 @@ func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 
 // validateFields checks if the required fields of a new employee are not empty
 func validateFields(newEmployee employeesPkg.EmployeeAttributes) (err error) {
-	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == 0 || newEmployee.WarehouseId == 0 {
+	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == 0 {
 		return utils.ErrEmptyArguments
 	}
 	return
