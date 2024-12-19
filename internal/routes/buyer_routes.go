@@ -17,6 +17,7 @@ func BuyerRoutes(mux *chi.Mux, service pkg.BuyerService) error {
 	mux.Route("/api/v1/buyers", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetOne())
+		router.Post("/", handler.CreateBuyer())
 	})
 	return nil
 }

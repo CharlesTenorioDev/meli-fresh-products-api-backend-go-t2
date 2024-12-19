@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type BuyerRepo struct {
@@ -70,4 +71,37 @@ func (repo *BuyerRepo) GetOne(id int) (*pkg.Buyer, error) {
 		return &buyer, err
 	}
 	return nil, err
+}
+
+func (repo *BuyerRepo) CreateBuyer(newBuyer pkg.Buyer) (*pkg.Buyer, error) {
+	buyers, err := repo.GetAll()
+
+	if err != nil {
+		log.Println("Error to load - ", err)
+		return nil, err
+	}
+
+	for _, buyer := range buyers {
+		if buyer.ID == newBuyer.ID {
+			log.Println("There is an user with this ID", err)
+			return nil, utils.ErrConflict
+		}
+	}
+	buyers = append(buyers, newBuyer)
+
+	file, err := os.Create(buyersFile)
+	if err != nil {
+		log.Println("Erro ao reabrir o arquivo:", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(buyers); err != nil {
+		log.Println("Erro ao codificar JSON:", err)
+		return nil, err
+	}
+	log.Println("Comprador salvo!")
+
+	return &newBuyer, nil
 }

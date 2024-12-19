@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -55,4 +56,29 @@ func (handler *BuyerHandler) GetOne() http.HandlerFunc {
 		utils.JSON(w, http.StatusOK, buyer)
 	}
 
+}
+
+func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var newBuyer pkg.BuyerAttributes
+		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
+			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+		}
+
+		buyer, err := handler.service.CreateBuyer(newBuyer)
+		if err != nil {
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			utils.Error(w, http.StatusInternalServerError, "500")
+			return
+		}
+
+		utils.JSON(w, http.StatusCreated, buyer)
+	}
 }
