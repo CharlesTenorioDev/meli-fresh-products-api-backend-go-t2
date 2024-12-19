@@ -180,8 +180,8 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 			return
 		}
 
-		// returns status 200 and a success message if all ok
-		response.JSON(w, http.StatusOK, map[string]any{
+		// returns status 204 and a success message if all ok
+		response.JSON(w, http.StatusNoContent, map[string]any{
 			"message": "employee deleted successfully",
 		})
 	}
