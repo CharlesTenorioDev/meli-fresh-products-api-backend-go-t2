@@ -17,7 +17,7 @@ With air installed, just run `air`
 - `internal/service`: Keeps the business rules and validations
 - `internal/repository`: Persistence layer abstractions
 - `internal/utils`: All-purpose functions and variables
-- `inernal/pkg`: Domain structures and contracts(interfaces)
+- `internal/pkg`: Domain structures and contracts(interfaces)
 
 
 # Code standards
