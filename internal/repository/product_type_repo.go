@@ -30,7 +30,7 @@ func (p *ProductTypeDB) GetAll() (listProductTypes []pkg.ProductType, err error)
 func (p *ProductTypeDB) GetByID(id int) (productType pkg.ProductType, err error) {
 	productType, ok := p.db[id]
 	if !ok {
-		return pkg.ProductType{}, nil
+		return pkg.ProductType{}, utils.ErrNotFound
 	}
 	return productType, nil
 }

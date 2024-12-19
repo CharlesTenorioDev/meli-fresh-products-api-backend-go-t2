@@ -136,7 +136,7 @@ func TestProductHandler_CreateProduct_WhenEmptyFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := httptest.NewRequest(http.MethodPost, "/products", nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/products/", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	require.Equal(t, http.StatusBadRequest, w.Code)
