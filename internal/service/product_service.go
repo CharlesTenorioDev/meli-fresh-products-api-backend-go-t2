@@ -81,13 +81,12 @@ func (s *ProductService) validateEmptyFields(newProduct pkg.ProductAttributes) e
 		return utils.ErrInvalidArguments
 	}
 
-	// TODO: validate product type and seller id
 	if _, err := s.validationProductType.GetProductTypeByID(newProduct.ProductType); err != nil {
 		return utils.ErrInvalidArguments
-	} /*
-		if _, err := s.validationSellerID.GetSellerByID(newProduct.SellerID); err != nil {
-			return utils.ErrInvalidArguments
-		}*/
+	}
+	if newProduct.SellerID == 0 {
+		return utils.ErrInvalidArguments
+	}
 	return nil
 }
 

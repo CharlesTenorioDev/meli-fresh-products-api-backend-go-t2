@@ -1,6 +1,8 @@
 package handler_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -71,8 +73,64 @@ func TestProductHandler_GetProductByID_WhenNotExists(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
-/*
 func TestProductHandler_CreateProduct(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mockProduct.ProductCode = "1234"
+	body, err := json.Marshal(mockProduct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/products/", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusCreated, w.Code)
+}
+
+func TestProductHandler_UpdateProduct(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := json.Marshal(mockProduct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/products/1", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestProductHandler_DeleteProduct(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/products/1", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func TestProductHandler_DeleteProduct_WhenNotExists(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodDelete, "/products/99", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestProductHandler_CreateProduct_WhenEmptyFields(t *testing.T) {
 	router := chi.NewRouter()
 	err := routes.NewProductRoutes(router, mockService)
 	if err != nil {
@@ -81,51 +139,24 @@ func TestProductHandler_CreateProduct(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/products", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	require.Equal(t, http.StatusCreated, w.Code)
-}
-*/
-/*
-	func TestProductHandler_UpdateProduct(t *testing.T) {
-		h := NewProductHandler(mockService)
-		req := httptest.NewRequest(http.MethodPut, "/products/1", nil)
-		w := httptest.NewRecorder()
-		h.UpdateProduct(w, req)
-		require.Equal(t, http.StatusOK, w.Code)
-	}
-
-	func TestProductHandler_DeleteProduct(t *testing.T) {
-		h := NewProductHandler(mockService)
-		req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
-		w := httptest.NewRecorder()
-		h.DeleteProduct(w, req)
-		require.Equal(t, http.StatusOK, w.Code)
-	}
-
-	func TestProductHandler_DeleteProduct_WhenNotExists(t *testing.T) {
-		h := NewProductHandler(mockService)
-		req := httptest.NewRequest(http.MethodDelete, "/products/99", nil)
-		w := httptest.NewRecorder()
-		h.DeleteProduct(w, req)
-		require.Equal(t, http.StatusNotFound, w.Code)
-	}
-*/
-func TestProductHandler_CreateProduct_WhenEmptyFields(t *testing.T) {
-	h := handler.NewProductHandler(mockService)
-	req := httptest.NewRequest(http.MethodPost, "/products", nil)
-	w := httptest.NewRecorder()
-	h.CreateProduct(w, req)
 	require.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-/*
-	func TestProductHandler_CreateProduct_WhenDuplicated(t *testing.T) {
-		h := NewProductHandler(mockService)
-		req := httptest.NewRequest(http.MethodPost, "/products", nil)
-		w := httptest.NewRecorder()
-		h.CreateProduct(w, req)
-		require.Equal(t, http.StatusConflict, w.Code)
+func TestProductHandler_CreateProduct_WhenDuplicated(t *testing.T) {
+	router := chi.NewRouter()
+	err := routes.NewProductRoutes(router, mockService)
+	if err != nil {
+		t.Fatal(err)
 	}
-*/
+	body, err := json.Marshal(mockProduct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/products/", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusConflict, w.Code)
+}
 func TestProductHandler_CreateProduct_WhenEmptyFieldsAndDuplicated(t *testing.T) {
 	h := handler.NewProductHandler(mockService)
 	req := httptest.NewRequest(http.MethodPost, "/products", nil)
