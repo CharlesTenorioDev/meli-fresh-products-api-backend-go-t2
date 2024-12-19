@@ -103,6 +103,8 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 		if err != nil {
 			if err == utils.ErrConflict {
 				handleError(w, utils.ErrConflict)
+			} else if err == utils.ErrEmptyArguments {
+				handleError(w, utils.ErrEmptyArguments)
 			} else {
 				handleError(w, utils.ErrInvalidArguments)
 			}
@@ -197,6 +199,9 @@ func handleError(w http.ResponseWriter, err error) {
 	case utils.ErrInvalidArguments:
 		status = http.StatusUnprocessableEntity
 		message = utils.ErrInvalidArguments.Error()
+	case utils.ErrEmptyArguments:
+		status = http.StatusUnprocessableEntity
+		message = utils.ErrEmptyArguments.Error()
 	case utils.ErrConflict:
 		status = http.StatusConflict
 		message = utils.ErrConflict.Error()

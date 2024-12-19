@@ -31,6 +31,12 @@ func (s *EmployeeDefault) FindById(id int) (employee employeesPkg.Employee, err 
 
 // CreateEmployee adds a new employee to the repository
 func (s *EmployeeDefault) CreateEmployee(newEmployee employeesPkg.EmployeeAttributes) (employee employeesPkg.Employee, err error) {
+	// validate required fields
+	err = validateFields(newEmployee)
+	if err != nil {
+		return
+	}
+
 	// check for duplicates
 	employees, _ := s.rp.FindAll()
 	err = validateDuplicates(employees, newEmployee)
@@ -73,6 +79,14 @@ func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 	}
 
 	return nil
+}
+
+// validateFields checks if the required fields of a new employee are not empty
+func validateFields(newEmployee employeesPkg.EmployeeAttributes) (err error) {
+	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == 0 || newEmployee.WarehouseId == 0 {
+		return utils.ErrEmptyArguments
+	}
+	return
 }
 
 // validateDuplicates ensures that no existing employee has the same CardNumberId as the new employee
