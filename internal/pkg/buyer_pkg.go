@@ -9,10 +9,11 @@ type Buyer struct {
 
 type BuyerService interface {
 	GetAll() ([]Buyer, error)
+	GetOne(id int) (*Buyer, error)
 }
 
 type BuyerRepository interface {
 	LoadBuyers() (map[int]Buyer, error)
 	GetAll() ([]Buyer, error)
-	// GetOne() (Buyer, error)
+	GetOne(id int) (*Buyer, error)
 }

@@ -2,9 +2,13 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type BuyerHandler struct {
@@ -31,4 +35,24 @@ func (handler *BuyerHandler) GetAll() http.HandlerFunc {
 		}
 
 	}
+}
+
+func (handler *BuyerHandler) GetOne() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			log.Println("Error in parse param to int")
+			utils.Error(w, http.StatusBadRequest, err.Error())
+		}
+
+		buyer, err := handler.service.GetOne(id)
+
+		if err != nil {
+			log.Println("Error to get an user - ", err)
+			utils.Error(w, http.StatusInternalServerError, err.Error())
+		}
+
+		utils.JSON(w, http.StatusOK, buyer)
+	}
+
 }

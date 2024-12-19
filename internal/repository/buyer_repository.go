@@ -58,3 +58,16 @@ func (repo *BuyerRepo) GetAll() ([]pkg.Buyer, error) {
 
 	return buyers, nil
 }
+
+func (repo *BuyerRepo) GetOne(id int) (*pkg.Buyer, error) {
+	buyersMap, err := repo.LoadBuyers()
+	if err != nil {
+		log.Println("Error to Load Buyers - ", err)
+		return nil, err
+	}
+
+	if buyer, exists := buyersMap[id]; exists {
+		return &buyer, err
+	}
+	return nil, err
+}
