@@ -1,9 +1,6 @@
 package service
 
 import (
-	"errors"
-	"fmt"
-
 	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -41,15 +38,15 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee pkg.EmployeeAttributes) (em
 		return
 	}
 
-	// verify if warehouse_id exists
-	err = s.warehouseExistsById(newEmployee.WarehouseId)
+	// check for duplicates
+	employees, _ := s.rp.FindAll()
+	err = validateDuplicates(employees, newEmployee)
 	if err != nil {
 		return
 	}
 
-	// check for duplicates
-	employees, _ := s.rp.FindAll()
-	err = validateDuplicates(employees, newEmployee)
+	// verify if warehouse_id exists
+	err = s.warehouseExistsById(newEmployee.WarehouseId)
 	if err != nil {
 		return
 	}
@@ -154,7 +151,7 @@ func (s *EmployeeDefault) warehouseExistsById(id int) error {
 		return err
 	}
 	if possibleWarehouse == (pkg.Warehouse{}) {
-		return errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse not found for id %d", id))
+		return utils.ErrWarehouseDoesNotExists
 	}
 	return nil
 }

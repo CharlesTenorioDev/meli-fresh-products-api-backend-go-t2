@@ -105,6 +105,8 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 				handleError(w, utils.ErrConflict)
 			} else if err == utils.ErrEmptyArguments {
 				handleError(w, utils.ErrEmptyArguments)
+			} else if err == utils.ErrWarehouseDoesNotExists {
+				handleError(w, utils.ErrWarehouseDoesNotExists)
 			} else {
 				handleError(w, utils.ErrInvalidArguments)
 			}
