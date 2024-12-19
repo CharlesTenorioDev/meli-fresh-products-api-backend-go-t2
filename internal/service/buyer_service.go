@@ -65,6 +65,36 @@ func (service *BuyerService) CreateBuyer(buyer pkg.BuyerAttributes) (*pkg.Buyer,
 	return &newBuyer, nil
 }
 
+func (service *BuyerService) UpdateBuyer(updatedBuyer *pkg.Buyer) (*pkg.Buyer, error) {
+	buyers, err := service.GetAll()
+
+	if err != nil {
+		log.Println("Error internal - ", err)
+	}
+
+	var buyerFound pkg.Buyer
+	for _, buyer := range buyers {
+		if buyer.ID == updatedBuyer.ID {
+			buyerFound = buyer
+		}
+	}
+
+	if buyerFound == (pkg.Buyer{}) {
+		return nil, utils.ErrNotFound
+	}
+
+	for _, buyer := range buyers {
+		if buyer.CardNumberID == updatedBuyer.CardNumberID {
+			log.Println("Error Card number already exist in our system")
+			return nil, utils.ErrConflict
+		}
+	}
+
+	service.repo.UpdateBuyer(updatedBuyer)
+
+	return updatedBuyer, nil
+}
+
 func (service *BuyerService) DeleteBuyer(id int) error {
 	buyers, err := service.GetAll()
 
@@ -102,7 +132,7 @@ func (service *BuyerService) validation(newBuyer pkg.Buyer) error {
 		}
 	}
 
-	return nil // Retorno após verificar todos os compradores
+	return nil
 }
 
 func getNextID(buyers []pkg.Buyer) int {

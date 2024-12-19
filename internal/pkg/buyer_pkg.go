@@ -15,6 +15,7 @@ type BuyerService interface {
 	GetAll() ([]Buyer, error)
 	GetOne(id int) (*Buyer, error)
 	CreateBuyer(BuyerAttributes) (*Buyer, error)
+	UpdateBuyer(*Buyer) (*Buyer, error)
 	DeleteBuyer(id int) error
 }
 
@@ -23,5 +24,6 @@ type BuyerRepository interface {
 	GetAll() ([]Buyer, error)
 	GetOne(id int) (*Buyer, error)
 	CreateBuyer(Buyer) (*Buyer, error)
+	UpdateBuyer(*Buyer) (*Buyer, error)
 	DeleteBuyer(id int) error
 }

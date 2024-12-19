@@ -83,6 +83,43 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 	}
 }
 
+func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var newBuyer pkg.BuyerAttributes
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+
+		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
+			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+		}
+
+		updatedBuyer := pkg.Buyer{
+			ID: int64(id),
+			BuyerAttributes: pkg.BuyerAttributes{
+				CardNumberID: newBuyer.CardNumberID,
+				FirstName:    newBuyer.FirstName,
+				LastName:     newBuyer.LastName,
+			},
+		}
+
+		buyer, err := handler.service.UpdateBuyer(&updatedBuyer)
+
+		if err != nil {
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
+			}
+			utils.Error(w, http.StatusInternalServerError, "500")
+			return
+		}
+
+		utils.JSON(w, http.StatusCreated, buyer)
+	}
+}
+
 func (handler *BuyerHandler) DeleteBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

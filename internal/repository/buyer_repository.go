@@ -106,6 +106,38 @@ func (repo *BuyerRepo) CreateBuyer(newBuyer pkg.Buyer) (*pkg.Buyer, error) {
 	return &newBuyer, nil
 }
 
+func (repo *BuyerRepo) UpdateBuyer(updatedBuyer *pkg.Buyer) (*pkg.Buyer, error) {
+	buyers, err := repo.GetAll()
+
+	if err != nil {
+		log.Println("Error to load - ", err)
+		return nil, err
+	}
+
+	for i, buyer := range buyers {
+		if buyer.ID == updatedBuyer.ID {
+			buyers[i] = *updatedBuyer
+		}
+	}
+
+	file, err := os.Create(buyersFile)
+
+	if err != nil {
+		log.Println("Error to open file:", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(buyers); err != nil {
+		log.Println("Error to encoder JSON:", err)
+		return nil, err
+	}
+	log.Println("Comprador atualizado!")
+
+	return updatedBuyer, nil
+}
+
 func (repo *BuyerRepo) DeleteBuyer(id int) error {
 	buyers, err := repo.GetAll()
 	if err != nil {
