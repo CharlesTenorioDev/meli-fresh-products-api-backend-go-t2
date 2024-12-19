@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-# meli-fresh-products-api-backend-go-t2
- API Rest usando Go lang com Go-chi
-
-=======
->>>>>>> ad7060f4e539001b181b90bfb1d0ad870c118b1f
 # Basics
 - Go will read the .env file, the property SERVER.PORT will control the server port
 
@@ -23,28 +17,16 @@ With air installed, just run `air`
 - `internal/service`: Keeps the business rules and validations
 - `internal/repository`: Persistence layer abstractions
 - `internal/utils`: All-purpose functions and variables
-<<<<<<< HEAD
 - `internal/pkg`: Domain structures and contracts(interfaces)
-=======
-- `inernal/pkg`: Domain structures and contracts(interfaces)
->>>>>>> ad7060f4e539001b181b90bfb1d0ad870c118b1f
 
 
 # Code standards
 - Every domain, when creating the necessary logic, should use its name inside their respective package, e.g: `internal/services/products.go` or `internal/respository/mysql-products.go`
 
 # Git flows & standards 
-<<<<<<< HEAD
-1. Create the branch: `git checkout -b feature-<NOME_DA_FEATURE> main`
-=======
 1. Create the branch: `git checkout -b feature/<NOME_DA_FEATURE> main`
->>>>>>> ad7060f4e539001b181b90bfb1d0ad870c118b1f
 1. Start the development: `git commit -m "feat: start <NOME_DO_REQUISITO>"`
 1. In-progress commits:`git commit -m "products POST end-point"`
 1. In-progress commits: `git commit -m "fix products save service "`
 1. In-progress commits: `git commit -m "..."`
-<<<<<<< HEAD
 1. Finish the development: `git commit -m "feat: end <NOME_DO_REQUISITO>"`
-=======
-1. Finish the development: `git commit -m "feat: end <NOME_DO_REQUISITO>"`
->>>>>>> ad7060f4e539001b181b90bfb1d0ad870c118b1f
