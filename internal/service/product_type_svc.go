@@ -23,11 +23,11 @@ func (s *ProductTypeSvc) CreateProductType(newProductType pkg.ProductType) (prod
 }
 
 func (s *ProductTypeSvc) UpdateProductType(inputProductType pkg.ProductType) (productType pkg.ProductType, err error) {
-	internalProductType, err := s.repo.GetByID(inputProductType.ID)
+	_, err = s.repo.GetByID(inputProductType.ID)
 	if err != nil {
 		return pkg.ProductType{}, err
 	}
-	return s.repo.Update(internalProductType)
+	return s.repo.Update(inputProductType)
 }
 
 func (s *ProductTypeSvc) DeleteProductType(id int) (err error) {
