@@ -35,7 +35,12 @@ func (r *SellerDbRepository) GetById(id int) (pkg.Seller, error) {
 }
 
 func (r *SellerDbRepository) GetByCid(cid int) (pkg.Seller, error) {
-	return r.db[cid], nil
+	for _, v := range r.db {
+		if v.Cid == cid {
+			return r.db[v.ID], nil
+		}
+	}
+	return pkg.Seller{}, nil
 }
 
 func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) {
