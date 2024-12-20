@@ -62,8 +62,9 @@ func (s *SellerService) Update(id int, newSeller pkg.SellerRequestPointer) (pkg.
 	existintgCid, err := s.rp.GetByCid(*newSeller.Cid)
 	if err != nil {
 		return pkg.Seller{}, err
+
 	}
-	if existintgCid.Cid != 0 && existingSeller.ID != id{
+	if existintgCid.Cid != 0 && existintgCid.ID != id{
 		return pkg.Seller{}, utils.ErrConflict
 	}
 	if *newSeller.Cid != 0 {
