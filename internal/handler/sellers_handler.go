@@ -61,7 +61,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var reqBody pkg.SellerRequest
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
 
 		seller, err := h.service.Create(reqBody)
@@ -96,7 +96,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 		var reqBody pkg.SellerRequestPointer
 
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
 
 		seller, err := h.service.Update(id, reqBody)
