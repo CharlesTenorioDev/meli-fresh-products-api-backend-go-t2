@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"io"
 	"net/http/httptest"
 	"strings"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
@@ -20,24 +20,24 @@ type MockSectionService struct {
 	mock.Mock
 }
 
-func (m *MockSectionService) GetAll() ([]pkg.Section, error) {
+func (m *MockSectionService) GetAll() ([]internal.Section, error) {
 	args := m.Called()
-	return args.Get(0).([]pkg.Section), args.Error(1)
+	return args.Get(0).([]internal.Section), args.Error(1)
 }
 
-func (m *MockSectionService) Save(section pkg.Section) (pkg.Section, error) {
+func (m *MockSectionService) Save(section internal.Section) (internal.Section, error) {
 	args := m.Called(section)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
-func (m *MockSectionService) Update(id int, toUpdate pkg.SectionPointers) (pkg.Section, error) {
+func (m *MockSectionService) Update(id int, toUpdate internal.SectionPointers) (internal.Section, error) {
 	args := m.Called(id, toUpdate)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
-func (m *MockSectionService) GetById(id int) (pkg.Section, error) {
+func (m *MockSectionService) GetById(id int) (internal.Section, error) {
 	args := m.Called(id)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
 func (m *MockSectionService) Delete(id int) error {
@@ -45,7 +45,7 @@ func (m *MockSectionService) Delete(id int) error {
 	return args.Error(0)
 }
 
-var simpleSection = pkg.Section{
+var simpleSection = internal.Section{
 	ID:                 1,
 	SectionNumber:      1,
 	CurrentTemperature: 1,
@@ -57,7 +57,7 @@ var simpleSection = pkg.Section{
 	ProductTypeID:      1,
 }
 
-var simpleSectionPointers = pkg.SectionPointers{
+var simpleSectionPointers = internal.SectionPointers{
 	SectionNumber:      &simpleSection.SectionNumber,
 	CurrentTemperature: &simpleSection.CurrentTemperature,
 	MinimumTemperature: &simpleSection.MinimumTemperature,
@@ -73,7 +73,7 @@ func Test_GetAll(t *testing.T) {
 		service := new(MockSectionService)
 		handler := handler.NewSectionHandler(service)
 
-		service.On("GetAll").Return([]pkg.Section{simpleSection}, nil)
+		service.On("GetAll").Return([]internal.Section{simpleSection}, nil)
 
 		req := httptest.NewRequest("GET", "/api/v1/sections", nil)
 		res := httptest.NewRecorder()
@@ -86,7 +86,7 @@ func Test_GetAll(t *testing.T) {
 		service := new(MockSectionService)
 		handler := handler.NewSectionHandler(service)
 
-		service.On("GetAll").Return([]pkg.Section{}, errors.New("internal error"))
+		service.On("GetAll").Return([]internal.Section{}, errors.New("internal error"))
 
 		req := httptest.NewRequest("GET", "/api/v1/sections", nil)
 		res := httptest.NewRecorder()
@@ -103,7 +103,7 @@ func Test_GetById(t *testing.T) {
 		ExpectedBody       string
 		ExpectedStatusCode int
 		MockArgs           int
-		MockReturn1        pkg.Section
+		MockReturn1        internal.Section
 		MockReturn2        error
 	}{
 		{
@@ -121,7 +121,7 @@ func Test_GetById(t *testing.T) {
 			ExpectedBody:       `{"status":"Not Found","message":"no section for id 9"}`,
 			ExpectedStatusCode: 404,
 			MockArgs:           9,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        utils.ErrNotFound,
 		},
 		{
@@ -130,7 +130,7 @@ func Test_GetById(t *testing.T) {
 			ExpectedBody:       `{"status":"Bad Request","message":"invalid id"}`,
 			ExpectedStatusCode: 400,
 			MockArgs:           0,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        nil,
 		},
 		{
@@ -139,7 +139,7 @@ func Test_GetById(t *testing.T) {
 			ExpectedBody:       `{"status":"Internal Server Error","message":"Some error occurs"}`,
 			ExpectedStatusCode: 500,
 			MockArgs:           9,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        errors.New("Internal error occurs"),
 		},
 	}
@@ -174,7 +174,7 @@ func Test_Post(t *testing.T) {
 		ExpectedBody       string
 		ExpectedStatusCode int
 		MockArgs           int
-		MockReturn1        pkg.Section
+		MockReturn1        internal.Section
 		MockReturn2        error
 	}{
 		{
@@ -192,7 +192,7 @@ func Test_Post(t *testing.T) {
 			Body:               `{section_number:1current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Bad Request","message":"invalid format"}`,
 			ExpectedStatusCode: 400,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        nil,
 		},
 		{
@@ -201,7 +201,7 @@ func Test_Post(t *testing.T) {
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Conflict","message":"entity already exists"}`,
 			ExpectedStatusCode: 409,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        utils.ErrConflict,
 		},
 		{
@@ -210,7 +210,7 @@ func Test_Post(t *testing.T) {
 			Body:               `{"section_number":0,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Unprocessable Entity","message":"invalid arguments"}`,
 			ExpectedStatusCode: 422,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        utils.ErrInvalidArguments,
 		},
 		{
@@ -219,7 +219,7 @@ func Test_Post(t *testing.T) {
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Internal Server Error","message":"Some error occurs"}`,
 			ExpectedStatusCode: 500,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        errors.New("Internal error occurs"),
 		},
 	}
@@ -255,7 +255,7 @@ func Test_Patch(t *testing.T) {
 		ExpectedBody       string
 		ExpectedStatusCode int
 		MockArgs           int
-		MockReturn1        pkg.Section
+		MockReturn1        internal.Section
 		MockReturn2        error
 	}{
 		{
@@ -273,7 +273,7 @@ func Test_Patch(t *testing.T) {
 			Body:               `{section_number:1current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Bad Request","message":"invalid format"}`,
 			ExpectedStatusCode: 400,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        nil,
 		},
 		{
@@ -282,7 +282,7 @@ func Test_Patch(t *testing.T) {
 			Body:               `{"section_number":2,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Conflict","message":"entity already exists"}`,
 			ExpectedStatusCode: 409,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        utils.ErrConflict,
 		},
 		{
@@ -291,7 +291,7 @@ func Test_Patch(t *testing.T) {
 			Body:               `{"section_number":0,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Unprocessable Entity","message":"invalid arguments"}`,
 			ExpectedStatusCode: 422,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        utils.ErrInvalidArguments,
 		},
 		{
@@ -300,7 +300,7 @@ func Test_Patch(t *testing.T) {
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
 			ExpectedBody:       `{"status":"Internal Server Error","message":"Some error occurs"}`,
 			ExpectedStatusCode: 500,
-			MockReturn1:        pkg.Section{},
+			MockReturn1:        internal.Section{},
 			MockReturn2:        errors.New("Internal error occurs"),
 		},
 	}

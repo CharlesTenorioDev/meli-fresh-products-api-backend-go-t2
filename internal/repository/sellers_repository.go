@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-func NewSellerDbRepository(db map[int]pkg.Seller) *SellerDbRepository {
-	defaultDb := make(map[int]pkg.Seller)
+func NewSellerDbRepository(db map[int]internal.Seller) *SellerDbRepository {
+	defaultDb := make(map[int]internal.Seller)
 	if db != nil {
 		defaultDb = db
 	}
@@ -15,11 +15,11 @@ func NewSellerDbRepository(db map[int]pkg.Seller) *SellerDbRepository {
 }
 
 type SellerDbRepository struct {
-	db map[int]pkg.Seller
+	db map[int]internal.Seller
 }
 
-func (r *SellerDbRepository) GetAll() (map[int]pkg.Seller, error) {
-	sellers := make(map[int]pkg.Seller)
+func (r *SellerDbRepository) GetAll() (map[int]internal.Seller, error) {
+	sellers := make(map[int]internal.Seller)
 
 	for key, value := range r.db {
 		sellers[key] = value
@@ -28,27 +28,27 @@ func (r *SellerDbRepository) GetAll() (map[int]pkg.Seller, error) {
 	return sellers, nil
 }
 
-func (r *SellerDbRepository) GetById(id int) (pkg.Seller, error) {
+func (r *SellerDbRepository) GetById(id int) (internal.Seller, error) {
 	seller, exists := r.db[id]
 	if !exists {
-		return pkg.Seller{}, utils.ErrNotFound
+		return internal.Seller{}, utils.ErrNotFound
 	}
 	return seller, nil
 }
 
-func (r *SellerDbRepository) GetByCid(cid int) (pkg.Seller, error) {
+func (r *SellerDbRepository) GetByCid(cid int) (internal.Seller, error) {
 	for _, v := range r.db {
 		if v.Cid == cid {
 			return r.db[v.ID], nil
 		}
 	}
-	return pkg.Seller{}, nil
+	return internal.Seller{}, nil
 }
 
-func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) {
+func (r *SellerDbRepository) Create(newSeller internal.SellerRequest) (internal.Seller, error) {
 	newSellerId := utils.GetBiggestId(r.db) + 1
 
-	createdSeller := pkg.Seller{
+	createdSeller := internal.Seller{
 		ID:          newSellerId,
 		Cid:         newSeller.Cid,
 		CompanyName: newSeller.CompanyName,
@@ -61,7 +61,7 @@ func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, er
 
 }
 
-func (r *SellerDbRepository) Update(seller pkg.Seller) (pkg.Seller, error) {
+func (r *SellerDbRepository) Update(seller internal.Seller) (internal.Seller, error) {
 	r.db[seller.ID] = seller
 
 	return r.db[seller.ID], nil

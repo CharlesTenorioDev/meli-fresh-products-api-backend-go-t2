@@ -1,14 +1,14 @@
 package repository
 
 import (
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
-var simpleSection = pkg.Section{
+var simpleSection = internal.Section{
 	ID:                 1,
 	SectionNumber:      1,
 	CurrentTemperature: 1,
@@ -21,7 +21,7 @@ var simpleSection = pkg.Section{
 }
 
 func Test_GetAll(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
 	sections, _ := repo.GetAll()
@@ -30,7 +30,7 @@ func Test_GetAll(t *testing.T) {
 }
 
 func Test_GetById_WhenExists(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
 	section, _ := repo.GetById(1)
@@ -44,7 +44,7 @@ func Test_GetById_WhenNotExists(t *testing.T) {
 }
 
 func Test_GetBySectionNumber_WhenExists(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
 	section, _ := repo.GetBySectionNumber(1)
@@ -58,7 +58,7 @@ func Test_GetBySectionNumber_WhenNotExists(t *testing.T) {
 }
 
 func Test_Delete_WhenExist(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
 	err := repo.Delete(1)
@@ -72,10 +72,10 @@ func Test_Delete_WhenNotExist(t *testing.T) {
 }
 
 func Test_Save_WhenLoadedDb(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
-	newSection, _ := repo.Save(pkg.Section{
+	newSection, _ := repo.Save(internal.Section{
 		SectionNumber:      2,
 		CurrentTemperature: 2,
 		MinimumTemperature: 2,
@@ -90,7 +90,7 @@ func Test_Save_WhenLoadedDb(t *testing.T) {
 
 func Test_Save_WhenEmptyDb(t *testing.T) {
 	repo := NewMemorySectionRepository(nil)
-	newSection, _ := repo.Save(pkg.Section{
+	newSection, _ := repo.Save(internal.Section{
 		SectionNumber:      2,
 		CurrentTemperature: 2,
 		MinimumTemperature: 2,
@@ -104,7 +104,7 @@ func Test_Save_WhenEmptyDb(t *testing.T) {
 }
 
 func Test_Update_WhenExists(t *testing.T) {
-	repo := NewMemorySectionRepository(map[int]pkg.Section{
+	repo := NewMemorySectionRepository(map[int]internal.Section{
 		1: simpleSection,
 	})
 	sectionToUpdate := simpleSection

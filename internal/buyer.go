@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 type BuyerAttributes struct {
 	CardNumberID string `json:"card_number_id"`

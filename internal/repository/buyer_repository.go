@@ -2,20 +2,20 @@ package repository
 
 import (
 	"encoding/json"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"log"
 	"os"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type BuyerRepo struct {
-	buyerTable map[int]pkg.Buyer
+	buyerTable map[int]internal.Buyer
 }
 
-func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerRepo {
+func NewBuyerDb(buyerTab map[int]internal.Buyer) *BuyerRepo {
 
-	BuyerDb := make(map[int]pkg.Buyer)
+	BuyerDb := make(map[int]internal.Buyer)
 	if buyerTab != nil {
 		BuyerDb = buyerTab
 	}
@@ -24,21 +24,21 @@ func NewBuyerDb(buyerTab map[int]pkg.Buyer) *BuyerRepo {
 
 var buyersFile = "./docs/db/buyers.json"
 
-func (repo *BuyerRepo) LoadBuyers() (map[int]pkg.Buyer, error) {
+func (repo *BuyerRepo) LoadBuyers() (map[int]internal.Buyer, error) {
 	file, err := os.ReadFile(buyersFile)
 	if err != nil {
 		log.Println("Error to read file", err)
 		return nil, err
 	}
 
-	var buyers []pkg.Buyer
+	var buyers []internal.Buyer
 
 	if err := json.Unmarshal(file, &buyers); err != nil {
 		log.Println("Error to unmarshal - ")
 		return nil, err
 	}
 
-	repo.buyerTable = make(map[int]pkg.Buyer)
+	repo.buyerTable = make(map[int]internal.Buyer)
 	for _, buyer := range buyers {
 		repo.buyerTable[int(buyer.ID)] = buyer
 	}
@@ -46,13 +46,13 @@ func (repo *BuyerRepo) LoadBuyers() (map[int]pkg.Buyer, error) {
 	return repo.buyerTable, nil
 }
 
-func (repo *BuyerRepo) GetAll() ([]pkg.Buyer, error) {
+func (repo *BuyerRepo) GetAll() ([]internal.Buyer, error) {
 	buyersMap, err := repo.LoadBuyers()
 	if err != nil {
 		return nil, err
 	}
 
-	var buyers []pkg.Buyer
+	var buyers []internal.Buyer
 	for _, buyer := range buyersMap {
 		buyers = append(buyers, buyer)
 	}
@@ -60,7 +60,7 @@ func (repo *BuyerRepo) GetAll() ([]pkg.Buyer, error) {
 	return buyers, nil
 }
 
-func (repo *BuyerRepo) GetOne(id int) (*pkg.Buyer, error) {
+func (repo *BuyerRepo) GetOne(id int) (*internal.Buyer, error) {
 	buyersMap, err := repo.LoadBuyers()
 	if err != nil {
 		log.Println("Error to Load Buyers - ", err)
@@ -73,7 +73,7 @@ func (repo *BuyerRepo) GetOne(id int) (*pkg.Buyer, error) {
 	return nil, err
 }
 
-func (repo *BuyerRepo) CreateBuyer(newBuyer pkg.Buyer) (*pkg.Buyer, error) {
+func (repo *BuyerRepo) CreateBuyer(newBuyer internal.Buyer) (*internal.Buyer, error) {
 	buyers, err := repo.GetAll()
 
 	if err != nil {
@@ -106,7 +106,7 @@ func (repo *BuyerRepo) CreateBuyer(newBuyer pkg.Buyer) (*pkg.Buyer, error) {
 	return &newBuyer, nil
 }
 
-func (repo *BuyerRepo) UpdateBuyer(updatedBuyer *pkg.Buyer) (*pkg.Buyer, error) {
+func (repo *BuyerRepo) UpdateBuyer(updatedBuyer *internal.Buyer) (*internal.Buyer, error) {
 	buyers, err := repo.GetAll()
 
 	if err != nil {

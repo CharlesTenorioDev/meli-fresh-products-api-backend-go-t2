@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 type Warehouse struct {
 	ID                 int    `json:"id"`

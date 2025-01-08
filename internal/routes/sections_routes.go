@@ -2,13 +2,13 @@ package routes
 
 import (
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
-func RegisterSectionRoutes(mux *chi.Mux, service pkg.SectionService) error {
+func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error {
 	if mux == nil {
 		return errors.New("mux router is nil")
 	}

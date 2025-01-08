@@ -1,26 +1,26 @@
 package service
 
 import (
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"log"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type BuyerService struct {
-	repo pkg.BuyerRepository
+	repo internal.BuyerRepository
 }
 
-func NewBuyer(repo pkg.BuyerRepository) *BuyerService {
+func NewBuyer(repo internal.BuyerRepository) *BuyerService {
 	return &BuyerService{repo: repo}
 }
 
-func (service *BuyerService) GetAll() (buyer []pkg.Buyer, err error) {
+func (service *BuyerService) GetAll() (buyer []internal.Buyer, err error) {
 	buyer, err = service.repo.GetAll()
 	return buyer, err
 }
 
-func (service *BuyerService) GetOne(id int) (*pkg.Buyer, error) {
+func (service *BuyerService) GetOne(id int) (*internal.Buyer, error) {
 	buyers, err := service.GetAll()
 
 	if err != nil {
@@ -37,7 +37,7 @@ func (service *BuyerService) GetOne(id int) (*pkg.Buyer, error) {
 	return nil, err
 }
 
-func (service *BuyerService) CreateBuyer(buyer pkg.BuyerAttributes) (*pkg.Buyer, error) {
+func (service *BuyerService) CreateBuyer(buyer internal.BuyerAttributes) (*internal.Buyer, error) {
 	buyers, err := service.GetAll()
 	if err != nil {
 		log.Println("Error to load - ", err)
@@ -46,9 +46,9 @@ func (service *BuyerService) CreateBuyer(buyer pkg.BuyerAttributes) (*pkg.Buyer,
 
 	id := getNextID(buyers)
 
-	newBuyer := pkg.Buyer{
+	newBuyer := internal.Buyer{
 		ID: int64(id),
-		BuyerAttributes: pkg.BuyerAttributes{
+		BuyerAttributes: internal.BuyerAttributes{
 			CardNumberID: buyer.CardNumberID,
 			FirstName:    buyer.FirstName,
 			LastName:     buyer.LastName,
@@ -65,21 +65,21 @@ func (service *BuyerService) CreateBuyer(buyer pkg.BuyerAttributes) (*pkg.Buyer,
 	return &newBuyer, nil
 }
 
-func (service *BuyerService) UpdateBuyer(updatedBuyer *pkg.Buyer) (*pkg.Buyer, error) {
+func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*internal.Buyer, error) {
 	buyers, err := service.GetAll()
 
 	if err != nil {
 		log.Println("Error internal - ", err)
 	}
 
-	var buyerFound pkg.Buyer
+	var buyerFound internal.Buyer
 	for _, buyer := range buyers {
 		if buyer.ID == updatedBuyer.ID {
 			buyerFound = buyer
 		}
 	}
 
-	if buyerFound == (pkg.Buyer{}) {
+	if buyerFound == (internal.Buyer{}) {
 		return nil, utils.ErrNotFound
 	}
 
@@ -113,7 +113,7 @@ func (service *BuyerService) DeleteBuyer(id int) error {
 	return err
 }
 
-func (service *BuyerService) validation(newBuyer pkg.Buyer) error {
+func (service *BuyerService) validation(newBuyer internal.Buyer) error {
 	buyers, err := service.repo.GetAll()
 	if err != nil {
 		log.Println("Error in load -", err)
@@ -135,7 +135,7 @@ func (service *BuyerService) validation(newBuyer pkg.Buyer) error {
 	return nil
 }
 
-func getNextID(buyers []pkg.Buyer) int {
+func getNextID(buyers []internal.Buyer) int {
 	maxID := 0
 	for _, buyer := range buyers {
 		if int(buyer.ID) > maxID {

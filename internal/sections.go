@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 type Section struct {
 	ID                 int     `json:"id"`

@@ -1,16 +1,16 @@
 package service
 
 import (
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/stretchr/testify/require"
 )
 
-var mockProduct = pkg.Product{
+var mockProduct = internal.Product{
 	ID: 1,
-	ProductAttributes: pkg.ProductAttributes{
+	ProductAttributes: internal.ProductAttributes{
 		ProductCode:                    "123",
 		Description:                    "test",
 		Width:                          1,
@@ -25,11 +25,11 @@ var mockProduct = pkg.Product{
 	},
 }
 
-var mockRepo = repository.NewProductDB(map[int]pkg.Product{
+var mockRepo = repository.NewProductDB(map[int]internal.Product{
 	1: mockProduct,
 })
 
-var mockProductTypeService = NewProductTypeService(repository.NewProductTypeDB(map[int]pkg.ProductType{
+var mockProductTypeService = NewProductTypeService(repository.NewProductTypeDB(map[int]internal.ProductType{
 	1: {ID: 1, Description: "test"},
 }))
 
@@ -73,7 +73,7 @@ func TestProductService_DeleteProduct_WhenNotExists(t *testing.T) {
 
 func TestProductService_CreateProduct_WhenEmptyFields(t *testing.T) {
 	s := NewProductService(mockRepo, mockProductTypeService)
-	product, err := s.CreateProduct(pkg.ProductAttributes{})
+	product, err := s.CreateProduct(internal.ProductAttributes{})
 	require.Empty(t, product)
 	require.NotNil(t, err)
 }
@@ -88,14 +88,14 @@ func TestProductService_CreateProduct_WhenEmptyFields(t *testing.T) {
 */
 func TestProductService_CreateProduct_WhenEmptyFieldsAndDuplicated(t *testing.T) {
 	s := NewProductService(mockRepo, mockProductTypeService)
-	product, err := s.CreateProduct(pkg.ProductAttributes{})
+	product, err := s.CreateProduct(internal.ProductAttributes{})
 	require.Empty(t, product)
 	require.NotNil(t, err)
 }
 
 func TestProductService_UpdateProduct_WhenNotExists(t *testing.T) {
 	s := NewProductService(mockRepo, mockProductTypeService)
-	product, err := s.UpdateProduct(pkg.Product{})
+	product, err := s.UpdateProduct(internal.Product{})
 	require.Empty(t, product)
 	require.NotNil(t, err)
 }
@@ -111,35 +111,35 @@ func TestProductService_UpdateProduct_WhenNotExists(t *testing.T) {
 */
 func Test_prepareProductUpdate(t *testing.T) {
 	internalProduct, _ := mockRepo.GetByID(1)
-	preparedProduc := prepareProductUpdate(pkg.Product{ID: 1}, internalProduct)
+	preparedProduc := prepareProductUpdate(internal.Product{ID: 1}, internalProduct)
 	require.Equal(t, internalProduct, preparedProduc)
 }
 
 func Test_validateEmptyFields(t *testing.T) {
 	s := NewProductService(mockRepo, mockProductTypeService)
 
-	err := s.validateEmptyFields(pkg.ProductAttributes{})
+	err := s.validateEmptyFields(internal.ProductAttributes{})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 		Description: "test",
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 		Description: "test",
 		Width:       1,
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 		Description: "test",
 		Width:       1,
@@ -147,7 +147,7 @@ func Test_validateEmptyFields(t *testing.T) {
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 		Description: "test",
 		Width:       1,
@@ -156,7 +156,7 @@ func Test_validateEmptyFields(t *testing.T) {
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode: "123",
 		Description: "test",
 		Width:       1,
@@ -166,7 +166,7 @@ func Test_validateEmptyFields(t *testing.T) {
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode:    "123",
 		Description:    "test",
 		Width:          1,
@@ -177,7 +177,7 @@ func Test_validateEmptyFields(t *testing.T) {
 	})
 	require.NotNil(t, err)
 
-	err = s.validateEmptyFields(pkg.ProductAttributes{
+	err = s.validateEmptyFields(internal.ProductAttributes{
 		ProductCode:                    "123",
 		Description:                    "test",
 		Width:                          1,

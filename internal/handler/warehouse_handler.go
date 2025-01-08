@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -21,10 +21,10 @@ type reqPostWarehouse struct {
 }
 
 type WarehouseHandler struct {
-	service pkg.WarehouseService
+	service internal.WarehouseService
 }
 
-func NewWarehouseHandler(service pkg.WarehouseService) *WarehouseHandler {
+func NewWarehouseHandler(service internal.WarehouseService) *WarehouseHandler {
 	return &WarehouseHandler{service}
 }
 
@@ -70,7 +70,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
-		newWarehouse := pkg.Warehouse{
+		newWarehouse := internal.Warehouse{
 			WarehouseCode:      body.Code,
 			Address:            body.Address,
 			Telephone:          body.Telephone,
@@ -102,7 +102,7 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
-		var body pkg.WarehousePointers
+		var body internal.WarehousePointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return

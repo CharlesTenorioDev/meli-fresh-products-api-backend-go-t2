@@ -3,20 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type ProductHandler struct {
-	service pkg.ProductService
+	service internal.ProductService
 }
 
-func NewProductHandler(service pkg.ProductService) *ProductHandler {
+func NewProductHandler(service internal.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
@@ -49,7 +49,7 @@ func (p *ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 }
 
 func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var newProduct pkg.ProductAttributes
+	var newProduct internal.ProductAttributes
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
@@ -77,7 +77,7 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
-	var inputProduct pkg.Product
+	var inputProduct internal.Product
 	err = json.NewDecoder(r.Body).Decode(&inputProduct)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid request body")

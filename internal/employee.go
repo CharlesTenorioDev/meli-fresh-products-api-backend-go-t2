@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 // Employee represents an employee entity with its unique ID and attributes
 type Employee struct {

@@ -1,17 +1,17 @@
 package repository
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type ProductDB struct {
-	db map[int]pkg.Product
+	db map[int]internal.Product
 }
 
-func NewProductDB(db map[int]pkg.Product) *ProductDB {
+func NewProductDB(db map[int]internal.Product) *ProductDB {
 	// default db
-	defaultDb := make(map[int]pkg.Product)
+	defaultDb := make(map[int]internal.Product)
 	if db != nil {
 		defaultDb = db
 	}
@@ -19,7 +19,7 @@ func NewProductDB(db map[int]pkg.Product) *ProductDB {
 }
 
 // GetAll returns all products
-func (p *ProductDB) GetAll() (listProducts []pkg.Product, err error) {
+func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 	for _, product := range p.db {
 		listProducts = append(listProducts, product)
 	}
@@ -27,18 +27,18 @@ func (p *ProductDB) GetAll() (listProducts []pkg.Product, err error) {
 }
 
 // GetByID returns a product by id
-func (p *ProductDB) GetByID(id int) (product pkg.Product, err error) {
+func (p *ProductDB) GetByID(id int) (product internal.Product, err error) {
 	product, ok := p.db[id]
 	if !ok {
-		return pkg.Product{}, utils.ErrNotFound
+		return internal.Product{}, utils.ErrNotFound
 	}
 	return product, nil
 }
 
 // Create a product
-func (p *ProductDB) Create(newproduct pkg.ProductAttributes) (product pkg.Product, err error) {
+func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product internal.Product, err error) {
 	newID := utils.GetBiggestId(p.db) + 1
-	product = pkg.Product{
+	product = internal.Product{
 		ID:                newID,
 		ProductAttributes: newproduct,
 	}
@@ -47,7 +47,7 @@ func (p *ProductDB) Create(newproduct pkg.ProductAttributes) (product pkg.Produc
 }
 
 // Update a product
-func (p *ProductDB) Update(inputProduct pkg.Product) (product pkg.Product, err error) {
+func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Product, err error) {
 	p.db[inputProduct.ID] = inputProduct
 	return inputProduct, nil
 }

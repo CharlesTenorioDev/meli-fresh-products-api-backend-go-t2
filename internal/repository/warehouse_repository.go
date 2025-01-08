@@ -1,17 +1,17 @@
 package repository
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type WarehouseDB struct {
-	data   map[int]pkg.Warehouse
+	data   map[int]internal.Warehouse
 	nextID int
 }
 
-func NewWarehouseDB(load map[int]pkg.Warehouse) *WarehouseDB {
-	db := make(map[int]pkg.Warehouse)
+func NewWarehouseDB(load map[int]internal.Warehouse) *WarehouseDB {
+	db := make(map[int]internal.Warehouse)
 	nextID := 1
 
 	if len(load) > 0 {
@@ -25,12 +25,12 @@ func NewWarehouseDB(load map[int]pkg.Warehouse) *WarehouseDB {
 	}
 }
 
-func (r *WarehouseDB) GetAll() ([]pkg.Warehouse, error) {
+func (r *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	if len(r.data) == 0 {
 		return nil, nil
 	}
 
-	warehouses := make([]pkg.Warehouse, 0, len(r.data))
+	warehouses := make([]internal.Warehouse, 0, len(r.data))
 	for _, warehouse := range r.data {
 		warehouses = append(warehouses, warehouse)
 	}
@@ -38,15 +38,15 @@ func (r *WarehouseDB) GetAll() ([]pkg.Warehouse, error) {
 	return warehouses, nil
 }
 
-func (r *WarehouseDB) GetById(id int) (pkg.Warehouse, error) {
+func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
 	warehouse, exists := r.data[id]
 	if !exists {
-		return pkg.Warehouse{}, utils.ErrNotFound
+		return internal.Warehouse{}, utils.ErrNotFound
 	}
 	return warehouse, nil
 }
 
-func (r *WarehouseDB) Save(newWarehouse pkg.Warehouse) (pkg.Warehouse, error) {
+func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	newWarehouse.ID = r.nextID
 	r.nextID++
 
@@ -54,9 +54,9 @@ func (r *WarehouseDB) Save(newWarehouse pkg.Warehouse) (pkg.Warehouse, error) {
 	return newWarehouse, nil
 }
 
-func (r *WarehouseDB) Update(updatedWarehouse pkg.Warehouse) (pkg.Warehouse, error) {
+func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	if _, exists := r.data[updatedWarehouse.ID]; !exists {
-		return pkg.Warehouse{}, utils.ErrNotFound
+		return internal.Warehouse{}, utils.ErrNotFound
 	}
 
 	r.data[updatedWarehouse.ID] = updatedWarehouse

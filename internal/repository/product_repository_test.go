@@ -1,16 +1,16 @@
 package repository
 
 import (
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
-var mockProduct = pkg.Product{
+var mockProduct = internal.Product{
 	ID: 1,
-	ProductAttributes: pkg.ProductAttributes{
+	ProductAttributes: internal.ProductAttributes{
 		ProductCode:                    "123",
 		Description:                    "test",
 		Width:                          1,
@@ -26,7 +26,7 @@ var mockProduct = pkg.Product{
 }
 
 func TestProductDB_GetAll(t *testing.T) {
-	repo := NewProductDB(map[int]pkg.Product{
+	repo := NewProductDB(map[int]internal.Product{
 		1: mockProduct,
 	})
 	products, _ := repo.GetAll()
@@ -35,7 +35,7 @@ func TestProductDB_GetAll(t *testing.T) {
 }
 
 func TestProductDB_GetByID_WhenExists(t *testing.T) {
-	repo := NewProductDB(map[int]pkg.Product{
+	repo := NewProductDB(map[int]internal.Product{
 		1: mockProduct,
 	})
 	product, _ := repo.GetByID(1)
@@ -55,7 +55,7 @@ func TestProductDB_Create(t *testing.T) {
 }
 
 func TestProductDB_Update(t *testing.T) {
-	repo := NewProductDB(map[int]pkg.Product{
+	repo := NewProductDB(map[int]internal.Product{
 		1: mockProduct,
 	})
 	mockProduct.ProductAttributes.Description = "updated"
@@ -64,7 +64,7 @@ func TestProductDB_Update(t *testing.T) {
 }
 
 func TestProductDB_Delete_WhenExist(t *testing.T) {
-	repo := NewProductDB(map[int]pkg.Product{
+	repo := NewProductDB(map[int]internal.Product{
 		1: mockProduct,
 	})
 	err := repo.Delete(1)

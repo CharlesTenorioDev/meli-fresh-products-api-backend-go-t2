@@ -4,21 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-
-func NewSellerHandler(service pkg.SellerService) *SellerHandler {
+func NewSellerHandler(service internal.SellerService) *SellerHandler {
 	return &SellerHandler{service}
 }
 
 type SellerHandler struct {
-	service pkg.SellerService
+	service internal.SellerService
 }
 
 func (h *SellerHandler) GetAll() http.HandlerFunc {
@@ -26,7 +25,7 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 		sellers, err := h.service.GetAll()
 		if err != nil {
 			utils.JSON(w, http.StatusInternalServerError, nil)
-			return 
+			return
 		}
 
 		utils.JSON(w, http.StatusOK, sellers)
@@ -52,14 +51,12 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 		}
 		utils.JSON(w, http.StatusOK, seller)
 
-		}
+	}
 }
-
-
 
 func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqBody pkg.SellerRequest
+		var reqBody internal.SellerRequest
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
@@ -79,11 +76,10 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			return
 
 		}
-	utils.JSON(w, http.StatusCreated, seller)
-	
+		utils.JSON(w, http.StatusCreated, seller)
+
 	}
 }
-
 
 func (h *SellerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +89,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		var reqBody pkg.SellerRequestPointer
+		var reqBody internal.SellerRequestPointer
 
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
@@ -116,7 +112,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 
 		}
 		utils.JSON(w, http.StatusOK, seller)
-	
+
 	}
 }
 
@@ -127,7 +123,7 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
-		
+
 		isDeleted, err := h.service.Delete(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
@@ -140,4 +136,3 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 		utils.JSON(w, http.StatusNoContent, isDeleted)
 	}
 }
-

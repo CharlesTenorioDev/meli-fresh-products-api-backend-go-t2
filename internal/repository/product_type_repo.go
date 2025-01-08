@@ -1,17 +1,17 @@
 package repository
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type ProductTypeDB struct {
-	db map[int]pkg.ProductType
+	db map[int]internal.ProductType
 }
 
-func NewProductTypeDB(db map[int]pkg.ProductType) *ProductTypeDB {
+func NewProductTypeDB(db map[int]internal.ProductType) *ProductTypeDB {
 	// default db
-	defaultDb := make(map[int]pkg.ProductType)
+	defaultDb := make(map[int]internal.ProductType)
 	if db != nil {
 		defaultDb = db
 	}
@@ -19,7 +19,7 @@ func NewProductTypeDB(db map[int]pkg.ProductType) *ProductTypeDB {
 }
 
 // GetAll returns all product types
-func (p *ProductTypeDB) GetAll() (listProductTypes []pkg.ProductType, err error) {
+func (p *ProductTypeDB) GetAll() (listProductTypes []internal.ProductType, err error) {
 	for _, productType := range p.db {
 		listProductTypes = append(listProductTypes, productType)
 	}
@@ -27,18 +27,18 @@ func (p *ProductTypeDB) GetAll() (listProductTypes []pkg.ProductType, err error)
 }
 
 // GetByID returns a product type by id
-func (p *ProductTypeDB) GetByID(id int) (productType pkg.ProductType, err error) {
+func (p *ProductTypeDB) GetByID(id int) (productType internal.ProductType, err error) {
 	productType, ok := p.db[id]
 	if !ok {
-		return pkg.ProductType{}, utils.ErrNotFound
+		return internal.ProductType{}, utils.ErrNotFound
 	}
 	return productType, nil
 }
 
 // Create a product type
-func (p *ProductTypeDB) Create(newProductType pkg.ProductType) (productType pkg.ProductType, err error) {
+func (p *ProductTypeDB) Create(newProductType internal.ProductType) (productType internal.ProductType, err error) {
 	newID := utils.GetBiggestId(p.db) + 1
-	productType = pkg.ProductType{
+	productType = internal.ProductType{
 		ID:          newID,
 		Description: newProductType.Description,
 	}
@@ -47,7 +47,7 @@ func (p *ProductTypeDB) Create(newProductType pkg.ProductType) (productType pkg.
 }
 
 // Update a product type
-func (p *ProductTypeDB) Update(inputProductType pkg.ProductType) (productType pkg.ProductType, err error) {
+func (p *ProductTypeDB) Update(inputProductType internal.ProductType) (productType internal.ProductType, err error) {
 	p.db[inputProductType.ID] = inputProductType
 	return inputProductType, nil
 }

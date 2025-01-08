@@ -3,22 +3,22 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
-var mockProduct = pkg.Product{
+var mockProduct = internal.Product{
 	ID: 1,
-	ProductAttributes: pkg.ProductAttributes{
+	ProductAttributes: internal.ProductAttributes{
 		ProductCode:                    "123",
 		Description:                    "test",
 		Width:                          1,
@@ -32,11 +32,11 @@ var mockProduct = pkg.Product{
 		SellerID:                       1,
 	},
 }
-var mockProductTypeService = service.NewProductTypeService(repository.NewProductTypeDB(map[int]pkg.ProductType{
+var mockProductTypeService = service.NewProductTypeService(repository.NewProductTypeDB(map[int]internal.ProductType{
 	1: {ID: 1, Description: "test"},
 }))
 
-var mockService = service.NewProductService(repository.NewProductDB(map[int]pkg.Product{
+var mockService = service.NewProductService(repository.NewProductDB(map[int]internal.Product{
 	1: mockProduct,
 }), mockProductTypeService)
 

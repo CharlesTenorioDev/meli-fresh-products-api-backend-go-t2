@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -25,11 +25,11 @@ type reqPostSection struct {
 }
 
 type SectionHandler struct {
-	service pkg.SectionService
+	service internal.SectionService
 }
 
 // Get a new instance of SectionHandler
-func NewSectionHandler(service pkg.SectionService) *SectionHandler {
+func NewSectionHandler(service internal.SectionService) *SectionHandler {
 	return &SectionHandler{service}
 }
 
@@ -82,7 +82,7 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
-		newSection := pkg.Section{
+		newSection := internal.Section{
 			SectionNumber:      body.SectionNumber,
 			CurrentCapacity:    body.CurrentCapacity,
 			MaximumCapacity:    body.MaximumCapacity,
@@ -121,7 +121,7 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
-		var body pkg.SectionPointers
+		var body internal.SectionPointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return

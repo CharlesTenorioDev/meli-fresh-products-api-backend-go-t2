@@ -3,9 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -15,29 +15,29 @@ type MockSectionRepository struct {
 	mock.Mock
 }
 
-func (m *MockSectionRepository) GetAll() ([]pkg.Section, error) {
+func (m *MockSectionRepository) GetAll() ([]internal.Section, error) {
 	args := m.Called()
-	return args.Get(0).([]pkg.Section), args.Error(1)
+	return args.Get(0).([]internal.Section), args.Error(1)
 }
 
-func (m *MockSectionRepository) Save(section pkg.Section) (pkg.Section, error) {
+func (m *MockSectionRepository) Save(section internal.Section) (internal.Section, error) {
 	args := m.Called(section)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
-func (m *MockSectionRepository) Update(section pkg.Section) (pkg.Section, error) {
+func (m *MockSectionRepository) Update(section internal.Section) (internal.Section, error) {
 	args := m.Called(section)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
-func (m *MockSectionRepository) GetById(id int) (pkg.Section, error) {
+func (m *MockSectionRepository) GetById(id int) (internal.Section, error) {
 	args := m.Called(id)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
-func (m *MockSectionRepository) GetBySectionNumber(sectionNumber int) (pkg.Section, error) {
+func (m *MockSectionRepository) GetBySectionNumber(sectionNumber int) (internal.Section, error) {
 	args := m.Called(sectionNumber)
-	return args.Get(0).(pkg.Section), args.Error(1)
+	return args.Get(0).(internal.Section), args.Error(1)
 }
 
 func (m *MockSectionRepository) Delete(id int) error {
@@ -49,22 +49,22 @@ type MockSectionWarehouseService struct {
 	mock.Mock
 }
 
-func (m *MockSectionWarehouseService) GetById(id int) (pkg.Warehouse, error) {
+func (m *MockSectionWarehouseService) GetById(id int) (internal.Warehouse, error) {
 	args := m.Called(id)
-	return args.Get(0).(pkg.Warehouse), args.Error(1)
+	return args.Get(0).(internal.Warehouse), args.Error(1)
 }
 
 type MockSectionProductTypeService struct {
 	mock.Mock
 }
 
-func (m *MockSectionProductTypeService) GetProductTypeByID(id int) (pkg.ProductType, error) {
+func (m *MockSectionProductTypeService) GetProductTypeByID(id int) (internal.ProductType, error) {
 	args := m.Called(id)
-	return args.Get(0).(pkg.ProductType), args.Error(1)
+	return args.Get(0).(internal.ProductType), args.Error(1)
 }
 
 var (
-	simpleSection = pkg.Section{
+	simpleSection = internal.Section{
 		ID:                 1,
 		SectionNumber:      1,
 		CurrentTemperature: 1,
@@ -75,7 +75,7 @@ var (
 		WarehouseID:        1,
 		ProductTypeID:      1,
 	}
-	simpleSectionPointers = pkg.SectionPointers{
+	simpleSectionPointers = internal.SectionPointers{
 		SectionNumber:      &simpleSection.SectionNumber,
 		CurrentTemperature: &simpleSection.CurrentTemperature,
 		MinimumTemperature: &simpleSection.MinimumTemperature,
@@ -85,7 +85,7 @@ var (
 		WarehouseID:        &simpleSection.WarehouseID,
 		ProductTypeID:      &simpleSection.ProductTypeID,
 	}
-	simpleWarehouse = pkg.Warehouse{
+	simpleWarehouse = internal.Warehouse{
 		ID:                 1,
 		Address:            "Monroe 860",
 		Telephone:          "00900009999",
@@ -93,7 +93,7 @@ var (
 		MinimumCapacity:    10,
 		MinimumTemperature: 10,
 	}
-	simpleProductType = pkg.ProductType{
+	simpleProductType = internal.ProductType{
 		ID:          1,
 		Description: "Foo Bar",
 	}
@@ -101,7 +101,7 @@ var (
 
 func Test_GetAll(t *testing.T) {
 	repo := new(MockSectionRepository)
-	repo.On("GetAll").Return([]pkg.Section{simpleSection}, nil)
+	repo.On("GetAll").Return([]internal.Section{simpleSection}, nil)
 	service := NewBasicSectionService(repo, nil, nil)
 	sections, _ := service.GetAll()
 	require.Equal(t, 1, len(sections))
@@ -118,7 +118,7 @@ func Test_GetById(t *testing.T) {
 	})
 	t.Run("when does not exist", func(s *testing.T) {
 		repo := new(MockSectionRepository)
-		repo.On("GetById", 1).Return(pkg.Section{}, nil)
+		repo.On("GetById", 1).Return(internal.Section{}, nil)
 		service := NewBasicSectionService(repo, nil, nil)
 		section, err := service.GetById(1)
 		require.Empty(t, section)
@@ -126,7 +126,7 @@ func Test_GetById(t *testing.T) {
 	})
 	t.Run("when internal error occurs", func(s *testing.T) {
 		repo := new(MockSectionRepository)
-		repo.On("GetById", 1).Return(pkg.Section{}, errors.New("internal error"))
+		repo.On("GetById", 1).Return(internal.Section{}, errors.New("internal error"))
 		service := NewBasicSectionService(repo, nil, nil)
 		section, err := service.GetById(1)
 		require.Empty(t, section)
@@ -145,14 +145,14 @@ func Test_Delete(t *testing.T) {
 	})
 	t.Run("when does not exist", func(s *testing.T) {
 		repo := new(MockSectionRepository)
-		repo.On("GetById", 1).Return(pkg.Section{}, nil)
+		repo.On("GetById", 1).Return(internal.Section{}, nil)
 		service := NewBasicSectionService(repo, nil, nil)
 		err := service.Delete(1)
 		require.ErrorIs(t, err, utils.ErrNotFound)
 	})
 	t.Run("when internal error occurs at getById", func(s *testing.T) {
 		repo := new(MockSectionRepository)
-		repo.On("GetById", 1).Return(pkg.Section{}, errors.New("internal error"))
+		repo.On("GetById", 1).Return(internal.Section{}, errors.New("internal error"))
 		service := NewBasicSectionService(repo, nil, nil)
 		err := service.Delete(1)
 		require.Equal(t, err.Error(), "internal error")
@@ -170,15 +170,15 @@ func Test_Delete(t *testing.T) {
 func Test_Save(t *testing.T) {
 	scenarios := []struct {
 		Name string
-		Data pkg.Section
-		Mock func(*MockSectionRepository, *MockSectionWarehouseService, *MockSectionProductTypeService) (pkg.Section, error)
+		Data internal.Section
+		Mock func(*MockSectionRepository, *MockSectionWarehouseService, *MockSectionProductTypeService) (internal.Section, error)
 	}{
 		{
 			Name: "when ok",
 			Data: simpleSection,
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				repo.On("Save", mock.Anything).Return(simpleSection, nil)
-				repo.On("GetBySectionNumber", mock.Anything).Return(pkg.Section{}, nil)
+				repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, nil)
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
 				return simpleSection, nil
@@ -186,81 +186,81 @@ func Test_Save(t *testing.T) {
 		},
 		{
 			Name: "when zero value section_number",
-			Data: pkg.Section{},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Data: internal.Section{},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				repo.On("Save", mock.Anything).Return(simpleSection, nil)
-				repo.On("GetBySectionNumber", mock.Anything).Return(pkg.Section{}, nil)
+				repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, nil)
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("section_number cannot be empty/null"))
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("section_number cannot be empty/null"))
 			},
 		},
 		{
 			Name: "when zero value warehouse_id",
-			Data: pkg.Section{SectionNumber: 1},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("warehouse_id cannot be empty/null"))
+			Data: internal.Section{SectionNumber: 1},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("warehouse_id cannot be empty/null"))
 			},
 		},
 		{
 			Name: "when zero value product_type_id",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
 			},
 		},
 		{
 			Name: "when warehouse does not exist",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
-				warehouseService.On("GetById", mock.Anything).Return(pkg.Warehouse{}, utils.ErrNotFound)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse not found for id %d", 1))
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				warehouseService.On("GetById", mock.Anything).Return(internal.Warehouse{}, utils.ErrNotFound)
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("warehouse not found for id %d", 1))
 			},
 		},
 		{
 			Name: "when product_type does not exist",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
-				productTypeService.On("GetProductTypeByID", mock.Anything).Return(pkg.ProductType{}, utils.ErrNotFound)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type not found for id %d", 1))
+				productTypeService.On("GetProductTypeByID", mock.Anything).Return(internal.ProductType{}, utils.ErrNotFound)
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, fmt.Errorf("product_type not found for id %d", 1))
 			},
 		},
 		{
 			Name: "when minimum_capacity is greater than maximum_capacity",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 5, MaximumCapacity: 4},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 5, MaximumCapacity: 4},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_capacity cannot be greater than maximum_capacity"))
 			},
 		},
 		{
 			Name: "when minimum_temperature is less than -273.15 Celsius",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: -300},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: -300},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than -273.15 Celsius"))
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("minimum_temperature cannot be less than -273.15 Celsius"))
 			},
 		},
 		{
 			Name: "when current_temperature is less than -273.15 Celsius",
-			Data: pkg.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: 0, CurrentTemperature: -300},
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: 0, CurrentTemperature: -300},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
-				return pkg.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("current_temperature cannot be less than -273.15 Celsius"))
+				return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("current_temperature cannot be less than -273.15 Celsius"))
 			},
 		},
 		{
 			Name: "when section_number already exists",
 			Data: simpleSection,
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
-				repo.On("GetBySectionNumber", mock.Anything).Return(pkg.Section{ID: 2}, nil)
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{ID: 2}, nil)
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
-				return pkg.Section{}, utils.ErrConflict
+				return internal.Section{}, utils.ErrConflict
 			},
 		},
 	}
@@ -289,18 +289,18 @@ func Test_Save(t *testing.T) {
 func Test_Update(t *testing.T) {
 	scenarios := []struct {
 		Name   string
-		Data   pkg.SectionPointers
+		Data   internal.SectionPointers
 		DataId int
-		Mock   func(*MockSectionRepository, *MockSectionWarehouseService, *MockSectionProductTypeService) (pkg.Section, error)
+		Mock   func(*MockSectionRepository, *MockSectionWarehouseService, *MockSectionProductTypeService) (internal.Section, error)
 	}{
 		{
 			Name:   "when ok",
 			Data:   simpleSectionPointers,
 			DataId: 1,
-			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (pkg.Section, error) {
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				repo.On("Update", mock.Anything, mock.Anything).Return(simpleSection, nil)
 				repo.On("GetById", mock.Anything).Return(simpleSection, nil)
-				repo.On("GetBySectionNumber", mock.Anything).Return(pkg.Section{}, nil)
+				repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, nil)
 				warehouseService.On("GetById", mock.Anything).Return(simpleWarehouse, nil)
 				productTypeService.On("GetProductTypeByID", mock.Anything).Return(simpleProductType, nil)
 				return simpleSection, nil

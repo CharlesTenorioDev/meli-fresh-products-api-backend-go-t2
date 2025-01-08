@@ -1,37 +1,37 @@
 package service
 
 import (
-	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 // EmployeeDefault is the default implementation of the employee service
 // it handles business logic and delegates data operations to the repository
 type EmployeeDefault struct {
-	rp               pkg.EmployeeRepository
-	warehouseService pkg.EmployeesWarehouseValidation
+	rp               internal.EmployeeRepository
+	warehouseService internal.EmployeesWarehouseValidation
 }
 
 // NewEmployeeService creates a new instance of EmployeeDefault
 // takes an EmployeeRepository as a parameter to handle data operations
-func NewEmployeeService(rp pkg.EmployeeRepository, warehouseService pkg.EmployeesWarehouseValidation) *EmployeeDefault {
+func NewEmployeeService(rp internal.EmployeeRepository, warehouseService internal.EmployeesWarehouseValidation) *EmployeeDefault {
 	return &EmployeeDefault{rp: rp, warehouseService: warehouseService}
 }
 
 // FindAll retrieves all employees from the repository
-func (s *EmployeeDefault) FindAll() (employees map[int]pkg.Employee, err error) {
+func (s *EmployeeDefault) FindAll() (employees map[int]internal.Employee, err error) {
 	employees, err = s.rp.FindAll()
 	return
 }
 
 // FindById retrieves an employee by ID from the repository
-func (s *EmployeeDefault) FindById(id int) (employee pkg.Employee, err error) {
+func (s *EmployeeDefault) FindById(id int) (employee internal.Employee, err error) {
 	employee, err = s.rp.FindById(id)
 	return
 }
 
 // CreateEmployee adds a new employee to the repository
-func (s *EmployeeDefault) CreateEmployee(newEmployee pkg.EmployeeAttributes) (employee pkg.Employee, err error) {
+func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes) (employee internal.Employee, err error) {
 	// validate required fields
 	err = s.validateFields(newEmployee)
 	if err != nil {
@@ -56,7 +56,7 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee pkg.EmployeeAttributes) (em
 }
 
 // UpdateEmployee updates an employee in the repository
-func (s *EmployeeDefault) UpdateEmployee(inputEmployee pkg.Employee) (employee pkg.Employee, err error) {
+func (s *EmployeeDefault) UpdateEmployee(inputEmployee internal.Employee) (employee internal.Employee, err error) {
 	// find the existing employee
 	internalEmployee, err := s.rp.FindById(inputEmployee.ID)
 	if err != nil {
@@ -96,7 +96,7 @@ func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 }
 
 // validateFields checks if the required fields of a new employee are not empty
-func (s *EmployeeDefault) validateFields(newEmployee pkg.EmployeeAttributes) (err error) {
+func (s *EmployeeDefault) validateFields(newEmployee internal.EmployeeAttributes) (err error) {
 	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == 0 {
 		return utils.ErrEmptyArguments
 	}
@@ -104,7 +104,7 @@ func (s *EmployeeDefault) validateFields(newEmployee pkg.EmployeeAttributes) (er
 }
 
 // validateDuplicates ensures that no existing employee has the same CardNumberId as the new employee
-func (s *EmployeeDefault) validateDuplicates(employees map[int]pkg.Employee, newEmployee pkg.EmployeeAttributes) error {
+func (s *EmployeeDefault) validateDuplicates(employees map[int]internal.Employee, newEmployee internal.EmployeeAttributes) error {
 	for _, employee := range employees {
 		if employee.Attributes.CardNumberId == newEmployee.CardNumberId {
 			return utils.ErrConflict
@@ -114,7 +114,7 @@ func (s *EmployeeDefault) validateDuplicates(employees map[int]pkg.Employee, new
 }
 
 // mergeEmployeeFields merges the fields of the input employee with the internal employee
-func mergeEmployeeFields(inputEmployee, internalEmployee pkg.Employee) (updatedEmployee pkg.Employee) {
+func mergeEmployeeFields(inputEmployee, internalEmployee internal.Employee) (updatedEmployee internal.Employee) {
 	updatedEmployee.ID = internalEmployee.ID
 
 	if inputEmployee.Attributes.FirstName != "" {
@@ -150,7 +150,7 @@ func (s *EmployeeDefault) warehouseExistsById(id int) error {
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if possibleWarehouse == (pkg.Warehouse{}) {
+	if possibleWarehouse == (internal.Warehouse{}) {
 		return utils.ErrWarehouseDoesNotExists
 	}
 	return nil

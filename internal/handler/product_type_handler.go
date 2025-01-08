@@ -3,20 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type ProductTypeHandler struct {
-	service pkg.ProductTypeService
+	service internal.ProductTypeService
 }
 
-func NewProductTypeHandler(service pkg.ProductTypeService) *ProductTypeHandler {
+func NewProductTypeHandler(service internal.ProductTypeService) *ProductTypeHandler {
 	return &ProductTypeHandler{service: service}
 }
 
@@ -50,7 +50,7 @@ func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.R
 }
 
 func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Request) {
-	var newProductType pkg.ProductType
+	var newProductType internal.ProductType
 	err := json.NewDecoder(r.Body).Decode(&newProductType)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
@@ -78,7 +78,7 @@ func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Re
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
-	var inputProductType pkg.ProductType
+	var inputProductType internal.ProductType
 	err = json.NewDecoder(r.Body).Decode(&inputProductType)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())

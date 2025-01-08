@@ -1,48 +1,48 @@
 package service
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type ProductService struct {
-	repo                  pkg.ProductRepository
-	validationProductType pkg.ProductValidation
-	validationSellerID    pkg.SellerValidation
+	repo                  internal.ProductRepository
+	validationProductType internal.ProductValidation
+	validationSellerID    internal.SellerValidation
 }
 
-func NewProductService(repo pkg.ProductRepository, validationProductType pkg.ProductValidation) *ProductService {
+func NewProductService(repo internal.ProductRepository, validationProductType internal.ProductValidation) *ProductService {
 	return &ProductService{
 		repo:                  repo,
 		validationProductType: validationProductType,
 	}
 }
 
-func (s *ProductService) GetProducts() (listProducts []pkg.Product, err error) {
+func (s *ProductService) GetProducts() (listProducts []internal.Product, err error) {
 	return s.repo.GetAll()
 }
 
-func (s *ProductService) GetProductByID(id int) (product pkg.Product, err error) {
+func (s *ProductService) GetProductByID(id int) (product internal.Product, err error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *ProductService) CreateProduct(newProduct pkg.ProductAttributes) (product pkg.Product, err error) {
+func (s *ProductService) CreateProduct(newProduct internal.ProductAttributes) (product internal.Product, err error) {
 	err = s.validateEmptyFields(newProduct)
 	if err != nil {
-		return pkg.Product{}, err
+		return internal.Product{}, err
 	}
 	listProducts, _ := s.repo.GetAll()
 	err = s.validateDuplicates(listProducts, newProduct)
 	if err != nil {
-		return pkg.Product{}, err
+		return internal.Product{}, err
 	}
 	return s.repo.Create(newProduct)
 }
 
-func (s *ProductService) UpdateProduct(inputProduct pkg.Product) (product pkg.Product, err error) {
+func (s *ProductService) UpdateProduct(inputProduct internal.Product) (product internal.Product, err error) {
 	internalProduct, err := s.repo.GetByID(inputProduct.ID)
 	if err != nil {
-		return pkg.Product{}, utils.ErrNotFound
+		return internal.Product{}, utils.ErrNotFound
 	}
 	preparedProduct := prepareProductUpdate(inputProduct, internalProduct)
 	return s.repo.Update(preparedProduct)
@@ -52,7 +52,7 @@ func (s *ProductService) DeleteProduct(id int) (err error) {
 	return s.repo.Delete(id)
 }
 
-func (s *ProductService) validateEmptyFields(newProduct pkg.ProductAttributes) error {
+func (s *ProductService) validateEmptyFields(newProduct internal.ProductAttributes) error {
 	if newProduct.ProductCode == "" {
 		return utils.ErrInvalidArguments
 	}
@@ -90,7 +90,7 @@ func (s *ProductService) validateEmptyFields(newProduct pkg.ProductAttributes) e
 	return nil
 }
 
-func (s *ProductService) validateDuplicates(listProducts []pkg.Product, newProduct pkg.ProductAttributes) error {
+func (s *ProductService) validateDuplicates(listProducts []internal.Product, newProduct internal.ProductAttributes) error {
 	for _, product := range listProducts {
 		if product.ProductCode == newProduct.ProductCode {
 			return utils.ErrConflict
@@ -99,7 +99,7 @@ func (s *ProductService) validateDuplicates(listProducts []pkg.Product, newProdu
 	return nil
 }
 
-func prepareProductUpdate(inputProduct, internalProduct pkg.Product) (preparedProduct pkg.Product) {
+func prepareProductUpdate(inputProduct, internalProduct internal.Product) (preparedProduct internal.Product) {
 	preparedProduct.ID = internalProduct.ID
 	if inputProduct.ProductCode != "" {
 		preparedProduct.ProductCode = inputProduct.ProductCode

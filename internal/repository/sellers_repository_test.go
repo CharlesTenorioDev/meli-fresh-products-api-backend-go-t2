@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-var mockSellerDb = pkg.Seller{
+var mockSellerDb = internal.Seller{
 	ID:          1,
 	Cid:         100,
 	CompanyName: "company",
@@ -14,14 +14,14 @@ var mockSellerDb = pkg.Seller{
 	Telephone:   "11900000000",
 }
 
-var mockNewSeller = pkg.SellerRequest{
+var mockNewSeller = internal.SellerRequest{
 	Cid:         200,
 	CompanyName: "company2",
 	Address:     "address2",
 	Telephone:   "11922222222",
 }
 
-var mockCreatedSeller = pkg.Seller{
+var mockCreatedSeller = internal.Seller{
 	ID:          2,
 	Cid:         200,
 	CompanyName: "company2",
@@ -29,7 +29,7 @@ var mockCreatedSeller = pkg.Seller{
 	Telephone:   "11922222222",
 }
 
-var mockUpdatedSeller = pkg.Seller{
+var mockUpdatedSeller = internal.Seller{
 	ID:          1,
 	Cid:         888,
 	CompanyName: "change company",
@@ -38,7 +38,7 @@ var mockUpdatedSeller = pkg.Seller{
 }
 
 func Test_GetAll_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -48,14 +48,14 @@ func Test_GetAll_Sellers_Success(t *testing.T) {
 }
 
 func Test_GetAll_Sellers_Not_Found(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{})
+	repo := NewSellerDbRepository(map[int]internal.Seller{})
 
 	sellers, _ := repo.GetAll()
 	require.Equal(t, 0, len(sellers))
 }
 
 func Test_GetById_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -71,7 +71,7 @@ func Test_GetById_Sellers_Not_Found(t *testing.T) {
 }
 
 func Test_GetByCid_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -80,14 +80,14 @@ func Test_GetByCid_Sellers_Success(t *testing.T) {
 }
 
 func Test_GetByCid_Sellers_Not_Found(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{})
+	repo := NewSellerDbRepository(map[int]internal.Seller{})
 
 	sellers, _ := repo.GetByCid(100)
 	require.Empty(t, sellers)
 }
 
 func Test_Create_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -95,7 +95,7 @@ func Test_Create_Sellers_Success(t *testing.T) {
 	require.Equal(t, mockCreatedSeller, createdSeller)
 }
 func Test_Update_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -104,7 +104,7 @@ func Test_Update_Sellers_Success(t *testing.T) {
 }
 
 func Test_Delete_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]pkg.Seller{
+	repo := NewSellerDbRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 

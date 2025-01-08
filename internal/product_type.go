@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 // ProductType represents a product type
 type ProductType struct {

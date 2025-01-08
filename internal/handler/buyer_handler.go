@@ -3,20 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type BuyerHandler struct {
-	service pkg.BuyerService
+	service internal.BuyerService
 }
 
-func NewBuyerHandler(service pkg.BuyerService) *BuyerHandler {
+func NewBuyerHandler(service internal.BuyerService) *BuyerHandler {
 	return &BuyerHandler{service: service}
 }
 
@@ -60,7 +60,7 @@ func (handler *BuyerHandler) GetOne() http.HandlerFunc {
 
 func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var newBuyer pkg.BuyerAttributes
+		var newBuyer internal.BuyerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
 			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
 		}
@@ -85,16 +85,16 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 
 func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var newBuyer pkg.BuyerAttributes
+		var newBuyer internal.BuyerAttributes
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 
 		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
 			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
 		}
 
-		updatedBuyer := pkg.Buyer{
+		updatedBuyer := internal.Buyer{
 			ID: int64(id),
-			BuyerAttributes: pkg.BuyerAttributes{
+			BuyerAttributes: internal.BuyerAttributes{
 				CardNumberID: newBuyer.CardNumberID,
 				FirstName:    newBuyer.FirstName,
 				LastName:     newBuyer.LastName,
