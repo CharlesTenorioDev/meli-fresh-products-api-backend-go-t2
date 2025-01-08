@@ -2,12 +2,12 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
-	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
 // RegisterEmployeesRoutes is used to record the routes associated to the employee entity
-func RegisterEmployeesRoutes(mux *chi.Mux, service pkg.EmployeeService) error {
+func RegisterEmployeesRoutes(mux *chi.Mux, service internal.EmployeeService) error {
 	handler := handler.NewEmployeeHandler(service)
 	mux.Route("/api/v1/employees", func(router chi.Router) {
 		// Get

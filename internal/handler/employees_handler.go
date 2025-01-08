@@ -2,23 +2,23 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
-	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 // EmployeeDefault is the http handler for employee-related endpoints
 // it communicates with the service layer to process requests
 type EmployeeDefault struct {
-	sv pkg.EmployeeService
+	sv internal.EmployeeService
 }
 
 // NewEmployeeHandler creates a new instance of EmployeeDefault
-func NewEmployeeHandler(sv pkg.EmployeeService) *EmployeeDefault {
+func NewEmployeeHandler(sv internal.EmployeeService) *EmployeeDefault {
 	return &EmployeeDefault{sv: sv}
 }
 
@@ -31,11 +31,11 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 			return
 		}
 
-		data := make(map[int]pkg.Employee)
+		data := make(map[int]internal.Employee)
 		for key, value := range employees {
-			data[key] = pkg.Employee{
+			data[key] = internal.Employee{
 				ID: value.ID,
-				Attributes: pkg.EmployeeAttributes{
+				Attributes: internal.EmployeeAttributes{
 					CardNumberId: value.Attributes.CardNumberId,
 					FirstName:    value.Attributes.FirstName,
 					LastName:     value.Attributes.LastName,
@@ -68,9 +68,9 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 			return
 		}
 
-		data := pkg.Employee{
+		data := internal.Employee{
 			ID: employee.ID,
-			Attributes: pkg.EmployeeAttributes{
+			Attributes: internal.EmployeeAttributes{
 				CardNumberId: employee.Attributes.CardNumberId,
 				FirstName:    employee.Attributes.FirstName,
 				LastName:     employee.Attributes.LastName,
@@ -89,7 +89,7 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 // PostEmployees handles the POST /employees route
 func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var newEmployee pkg.EmployeeAttributes
+		var newEmployee internal.EmployeeAttributes
 
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newEmployee)
@@ -131,7 +131,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 			return
 		}
 
-		var inputEmployee pkg.Employee
+		var inputEmployee internal.Employee
 		// decode the json request body into Employee struct
 		err = json.NewDecoder(r.Body).Decode(&inputEmployee)
 		if err != nil {

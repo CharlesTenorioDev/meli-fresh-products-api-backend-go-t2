@@ -2,9 +2,8 @@ package loader
 
 import (
 	"encoding/json"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"os"
-
-	pkg "github.com/meli-fresh-products-api-backend-go-t2/internal/pkg"
 )
 
 // EmployeeJsonFile represents a loader for JSON files containing employee data
@@ -23,7 +22,7 @@ func NewEmployeeJsonFile(path string) *EmployeeJsonFile {
 
 // Load reads and loads employees data from the json file
 // and returns a map with employee IDs as keys and an error in case of failure
-func (l *EmployeeJsonFile) Load() (employee map[int]pkg.Employee, err error) {
+func (l *EmployeeJsonFile) Load() (employee map[int]internal.Employee, err error) {
 	// open file
 	file, err := os.Open(l.path)
 	if err != nil {
@@ -32,18 +31,18 @@ func (l *EmployeeJsonFile) Load() (employee map[int]pkg.Employee, err error) {
 	defer file.Close()
 
 	// decode file
-	var EmployeesJson []pkg.EmployeeJson
+	var EmployeesJson []internal.EmployeeJson
 	err = json.NewDecoder(file).Decode(&EmployeesJson)
 	if err != nil {
 		return
 	}
 
 	// convert the decoded data to the internal Employee format
-	employee = make(map[int]pkg.Employee)
+	employee = make(map[int]internal.Employee)
 	for _, employees := range EmployeesJson {
-		employee[employees.ID] = pkg.Employee{
+		employee[employees.ID] = internal.Employee{
 			ID: employees.ID,
-			Attributes: pkg.EmployeeAttributes{
+			Attributes: internal.EmployeeAttributes{
 				CardNumberId: employees.CardNumberId,
 				FirstName:    employees.FirstName,
 				LastName:     employees.LastName,
