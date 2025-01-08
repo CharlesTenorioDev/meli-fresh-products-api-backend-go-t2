@@ -143,6 +143,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	a.router = router
+
 	return nil
 }
 
