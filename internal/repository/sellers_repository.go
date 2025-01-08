@@ -5,7 +5,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-
 func NewSellerDbRepository(db map[int]pkg.Seller) *SellerDbRepository {
 	defaultDb := make(map[int]pkg.Seller)
 	if db != nil {
@@ -30,8 +29,11 @@ func (r *SellerDbRepository) GetAll() (map[int]pkg.Seller, error) {
 }
 
 func (r *SellerDbRepository) GetById(id int) (pkg.Seller, error) {
-	return r.db[id], nil
-
+	seller, exists := r.db[id]
+	if !exists {
+		return pkg.Seller{}, utils.ErrNotFound
+	}
+	return seller, nil
 }
 
 func (r *SellerDbRepository) GetByCid(cid int) (pkg.Seller, error) {
@@ -45,12 +47,13 @@ func (r *SellerDbRepository) GetByCid(cid int) (pkg.Seller, error) {
 
 func (r *SellerDbRepository) Create(newSeller pkg.SellerRequest) (pkg.Seller, error) {
 	newSellerId := utils.GetBiggestId(r.db) + 1
-	createdSeller := pkg.Seller {
-		ID: newSellerId,
-		Cid: newSeller.Cid,
+
+	createdSeller := pkg.Seller{
+		ID:          newSellerId,
+		Cid:         newSeller.Cid,
 		CompanyName: newSeller.CompanyName,
-		Address: newSeller.Address,
-		Telephone: newSeller.Telephone,
+		Address:     newSeller.Address,
+		Telephone:   newSeller.Telephone,
 	}
 
 	r.db[newSellerId] = createdSeller
