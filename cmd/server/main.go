@@ -2,16 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/loader"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
+	"github.com/go-sql-driver/mysql"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/application"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -21,71 +15,29 @@ func main() {
 		panic(err)
 	}
 
-	router := chi.NewRouter()
-
-	// Requisito 1 - Seller
-	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
-	dbSellers, err := ldSellers.Load()
-	if err != nil {
-		return
+	// - config
+	cfg := &application.ConfigApplicationDefault{
+		Db: &mysql.Config{
+			User:   os.Getenv("DB.USERNAME"),
+			Passwd: os.Getenv("DB.PASSWORD"),
+			Net:    "tcp",
+			Addr:   "localhost" + os.Getenv("DB.ADDRESS"),
+			DBName: os.Getenv("DB.NAME"),
+		},
+		Addr: "127.0.0.1" + os.Getenv("SERVER.PORT"),
 	}
-	sellerRepo := repository.NewSellerDbRepository(dbSellers)
-	sellerService := service.NewSellerService(sellerRepo)
-	routes.RegisterSellerRoutes(router, sellerService)
-
-	// Requisito 4 - ProductType
-	productTypeRepo := repository.NewProductTypeDB(nil)
-	productTypeService := service.NewProductTypeService(productTypeRepo)
-	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
-		panic(err)
-	}
-
-	// Requisito 4 - Product
-	productRepo := repository.NewProductDB(nil)
-	productService := service.NewProductService(productRepo, productTypeService)
-	err = routes.NewProductRoutes(router, productService)
-	if err != nil {
-		panic(err)
-	}
-
-	// Requisito 2 - Warehouses
-	warehouseRepo := repository.NewWarehouseDB(nil)
-	warehouseService := service.NewWarehouseService(warehouseRepo)
-	err = routes.NewWarehouseRoutes(router, warehouseService)
-	if err != nil {
-		panic(err)
-	}
-
-	// Requisito 3 - Section
-	sectionRepo := repository.NewMemorySectionRepository(nil)
-	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
-	err = routes.RegisterSectionRoutes(router, sectionService)
-	if err != nil {
-		panic(err)
-	}
-
-	// Requisito 5 - Employees
-	filePath := "docs/db/employees.json"
-	ld := loader.NewEmployeeJsonFile(filePath)
-	db, err := ld.Load()
+	app := application.NewApplicationDefault(cfg)
+	// - set up
+	err = app.SetUp()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	employeesRepo := repository.NewEmployeeRepository(db)
-	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
-	routes.RegisterEmployeesRoutes(router, employeesService)
-
-	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDb(nil)
-	buyersService := service.NewBuyer(buyersRepo)
-	// Create the routes and deps
-	err = routes.BuyerRoutes(router, buyersService)
+	// - run
+	err = app.Run()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
-	log.Printf("starting server at %s\n", os.Getenv("SERVER.PORT"))
-	if err := http.ListenAndServe(os.Getenv("SERVER.PORT"), router); err != nil {
-		panic(err)
-	}
+
 }
