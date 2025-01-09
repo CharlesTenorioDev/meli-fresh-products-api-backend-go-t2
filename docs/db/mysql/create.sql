@@ -81,12 +81,12 @@ CREATE TABLE localities(
 );
 
 CREATE TABLE provinces(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     province_name VARCHAR(255),
-    id_country_fk INT
+    country_id INT
 );
 CREATE TABLE countries(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     country_name VARCHAR(255)
 );
 
@@ -192,14 +192,14 @@ ALTER TABLE purchase_orders ADD FOREIGN KEY (order_status_id) REFERENCES order_s
 
 
 -- Insert sample countries
-INSERT INTO countries (id, country_name) VALUES
-(1, 'USA'),
-(2, 'Canada');
+INSERT INTO countries (country_name) VALUES
+('USA'),
+('Canada');
 
 -- Insert sample provinces
-INSERT INTO provinces (id, province_name, id_country_fk) VALUES
-(1, 'California', 1),
-(2, 'Ontario', 2);
+INSERT INTO provinces (province_name, country_id) VALUES
+('California', 1),
+('Ontario', 2);
 
 -- Insert sample localities
 INSERT INTO localities (id, locality_name, province_id) VALUES

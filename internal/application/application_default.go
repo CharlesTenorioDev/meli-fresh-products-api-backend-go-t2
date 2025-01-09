@@ -143,6 +143,14 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	localityRepo := repository.NewMysqlLocalityRepository(a.db)
+	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
+	countryRepo := repository.NewMysqlCountryRepository(a.db)
+	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	err = routes.NewLocalityRoutes(router, localityService)
+	if err != nil {
+		panic(err)
+	}
 	a.router = router
 
 	return nil
