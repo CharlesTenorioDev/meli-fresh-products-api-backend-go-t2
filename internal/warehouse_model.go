@@ -5,6 +5,7 @@ type Warehouse struct {
 	Address            string `json:"address"`
 	Telephone          string `json:"telephone"`
 	WarehouseCode      string `json:"warehouse_code"`
+	LocalityID         int    `json:"locality_id"`
 	MinimumCapacity    int    `json:"minimum_capacity"`
 	MinimumTemperature int    `json:"minimum_temperature"`
 }
@@ -13,6 +14,7 @@ type WarehousePointers struct {
 	Address            *string `json:"address"`
 	Telephone          *string `json:"telephone"`
 	WarehouseCode      *string `json:"warehouse_code"`
+	LocalityID         *int    `json:"locality_id"`
 	MinimumCapacity    *int    `json:"minimum_capacity"`
 	MinimumTemperature *int    `json:"minimum_temperature"`
 }
@@ -27,8 +29,8 @@ type WarehouseService interface {
 
 type WarehouseRepository interface {
 	GetAll() ([]Warehouse, error)
-	Save(Warehouse) (Warehouse, error)
-	Update(Warehouse) (Warehouse, error)
-	GetById(int) (Warehouse, error)
-	Delete(int) error
+	Save(newWarehouse Warehouse) (Warehouse, error)
+	Update(updatedWarehouse Warehouse) (Warehouse, error)
+	GetById(id int) (Warehouse, error)
+	Delete(id int) error
 }

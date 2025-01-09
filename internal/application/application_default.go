@@ -76,6 +76,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	router := chi.NewRouter()
+	a.router = router
 
 	// Requisito 1 - Seller
 	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
@@ -105,7 +106,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 2 - Warehouses
-	warehouseRepo := repository.NewWarehouseDB(nil)
+	warehouseRepo := repository.NewWarehouseDB(a.db)
 	warehouseService := service.NewWarehouseService(warehouseRepo)
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
@@ -142,8 +143,6 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	if err != nil {
 		panic(err)
 	}
-
-	a.router = router
 
 	return nil
 }

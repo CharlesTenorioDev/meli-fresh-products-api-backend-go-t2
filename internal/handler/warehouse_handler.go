@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -16,6 +17,7 @@ type reqPostWarehouse struct {
 	Code               string `json:"warehouse_code"`
 	Address            string `json:"address"`
 	Telephone          string `json:"telephone"`
+	LocalityID         int    `json:"locality_id"`
 	MinimumCapacity    int    `json:"minimum_capacity"`
 	MinimumTemperature int    `json:"minimum_temperature"`
 }
@@ -74,6 +76,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 			WarehouseCode:      body.Code,
 			Address:            body.Address,
 			Telephone:          body.Telephone,
+			LocalityID:         body.LocalityID,
 			MinimumCapacity:    body.MinimumCapacity,
 			MinimumTemperature: body.MinimumTemperature,
 		}

@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"log"
 	"strings"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -79,6 +81,7 @@ func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse
 func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePointers) (internal.Warehouse, error) {
 	warehouse, err := s.repo.GetById(id)
 	if err != nil {
+		log.Println("error here")
 		return internal.Warehouse{}, err
 	}
 	if warehouse == (internal.Warehouse{}) {
@@ -92,6 +95,9 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 	}
 	if updatedWarehouse.WarehouseCode != nil {
 		warehouse.WarehouseCode = *updatedWarehouse.WarehouseCode
+	}
+	if updatedWarehouse.LocalityID != nil {
+		warehouse.LocalityID = *updatedWarehouse.LocalityID
 	}
 	if updatedWarehouse.MinimumCapacity != nil {
 		warehouse.MinimumCapacity = *updatedWarehouse.MinimumCapacity
@@ -136,11 +142,6 @@ func (s *WarehouseService) validateWarehouse(warehouse internal.Warehouse) error
 	if warehouse.Telephone == "" {
 		return utils.ErrInvalidArguments
 	}
-	if warehouse.MinimumCapacity <= 0 {
-		return utils.ErrInvalidArguments
-	}
-	if warehouse.MinimumTemperature < -273 {
-		return utils.ErrInvalidArguments
-	}
+	// TODO: Add more validations to localities
 	return nil
 }
