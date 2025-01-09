@@ -124,7 +124,7 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while updating the warehouse")
+			utils.Error(w, http.StatusInternalServerError, "An error occurred while updating the warehouse: "+err.Error())
 			return
 		}
 		utils.JSON(w, http.StatusOK, updatedWarehouse)

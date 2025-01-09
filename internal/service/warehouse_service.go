@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -81,7 +80,6 @@ func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse
 func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePointers) (internal.Warehouse, error) {
 	warehouse, err := s.repo.GetById(id)
 	if err != nil {
-		log.Println("error here")
 		return internal.Warehouse{}, err
 	}
 	if warehouse == (internal.Warehouse{}) {
@@ -113,8 +111,10 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 	if err := s.existingWarehouseCode(warehouse, true); err != nil {
 		return internal.Warehouse{}, err
 	}
-
 	warehouse, err = s.repo.Update(warehouse)
+	if err != nil {
+		return internal.Warehouse{}, err
+	}
 	return warehouse, nil
 }
 

@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -70,7 +69,6 @@ func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
 }
 
 func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
-	log.Println(newWarehouse)
 	// prepare the query
 	statement, err := r.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES (?, ?, ?, ?)")
 	if err != nil {
@@ -81,7 +79,6 @@ func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse,
 	// execute the query
 	result, err := statement.Exec(newWarehouse.Address, newWarehouse.Telephone, newWarehouse.WarehouseCode, newWarehouse.LocalityID)
 	if err != nil {
-		log.Println("error in execution")
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
 			switch mysqlErr.Number {
@@ -114,7 +111,7 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 	}
 	// prepare the query
 	statement, err := r.db.Prepare(
-		"UPDATE `warehouses` AS `w` SET `w.address` = ?, `w.telephone` = ?, `w.warehouse_code` = ?, `w.locality_id` = ? WHERE `w.id` = ?",
+		"UPDATE `warehouses` AS `w` SET `address` = ?, `telephone` = ?, `warehouse_code` = ?, `locality_id` = ? WHERE `id` = ?",
 	)
 	if err != nil {
 		return internal.Warehouse{}, err
