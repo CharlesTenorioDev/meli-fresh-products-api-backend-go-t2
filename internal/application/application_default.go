@@ -138,7 +138,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersRepo := repository.NewBuyerDb(a.db)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
-	err = routes.BuyerRoutes(a.router, buyersService)
+	err = routes.BuyerRoutes(router, buyersService)
 	if err != nil {
 		panic(err)
 	}
