@@ -10,9 +10,7 @@ import (
 )
 
 type WarehouseDB struct {
-	db     *sql.DB
-	data   map[int]internal.Warehouse
-	nextID int
+	db *sql.DB
 }
 
 func NewWarehouseDB(db *sql.DB) *WarehouseDB {

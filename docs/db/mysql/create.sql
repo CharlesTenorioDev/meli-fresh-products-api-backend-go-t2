@@ -94,7 +94,7 @@ CREATE TABLE countries(
 -- Sprint 2, requirement 2
 CREATE TABLE carriers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid UNIQUE INT,
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -209,8 +209,8 @@ INSERT INTO localities (id, locality_name, province_id) VALUES
 
 -- Insert sample carriers
 INSERT INTO carriers (id, cid, company_name, address, telephone, locality_id) VALUES
-(1, 'CARRIER001', 'Fast Logistics', '123 Main St, LA', '555-1234', 1),
-(2, 'CARRIER002', 'Speedy Delivery', '456 Oak St, Toronto', '555-5678', 2);
+(1, 123456, 'Fast Logistics', '123 Main St, LA', '555-1234', 1),
+(2, 123457, 'Speedy Delivery', '456 Oak St, Toronto', '555-5678', 2);
 
 -- Insert sample order statuses
 INSERT INTO order_status (id, description) VALUES

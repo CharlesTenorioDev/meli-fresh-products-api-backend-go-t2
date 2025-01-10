@@ -81,3 +81,40 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 	}
 	return report, nil
 }
+
+func (r *MysqlLocalityRepository) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+	report := []internal.CarriesByLocality{}
+	var rows *sql.Rows
+	if localityId == 0 {
+		var err error
+		rows, err = r.db.Query(`SELECT l.id, l.locality_name, COUNT(c.id) AS 'carries_count' 
+			FROM localities l 
+			INNER JOIN carriers c ON c.locality_id=l.id 
+			GROUP BY l.id;`)
+		if err != nil {
+			return []internal.CarriesByLocality{}, err
+		}
+	} else {
+		stmt, err := r.db.Prepare(`SELECT l.id, l.locality_name, COUNT(c.id) AS 'carries_count' 
+			FROM localities l 
+			INNER JOIN carriers c ON c.locality_id=l.id 
+			WHERE l.id = ?
+			GROUP BY l.id;`)
+		if err != nil {
+			return []internal.CarriesByLocality{}, err
+		}
+		rows, err = stmt.Query(localityId)
+		if err != nil {
+			return []internal.CarriesByLocality{}, err
+		}
+	}
+	for rows.Next() {
+		var row internal.CarriesByLocality
+		err := rows.Scan(&row.LocalityId, &row.LocalityName, &row.CarriesCount)
+		if err != nil {
+			return []internal.CarriesByLocality{}, err
+		}
+		report = append(report, row)
+	}
+	return report, nil
+}

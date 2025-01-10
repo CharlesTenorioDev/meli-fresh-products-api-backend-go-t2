@@ -139,8 +139,21 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersRepo := repository.NewBuyerDb(nil)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
-	err = routes.BuyerRoutes(router, buyersService)
-	if err != nil {
+	if err = routes.BuyerRoutes(router, buyersService); err != nil {
+		panic(err)
+	}
+
+	// Sprint2 Requisito 2 - Locality
+	localitiesRepo := repository.NewMysqlLocalityRepository(a.db)
+	localityService := service.NewMysqlLocalityService(localitiesRepo)
+	if err = routes.LocalityRoutes(router, localityService); err != nil {
+		panic(err)
+	}
+
+	// Sprint2 Requisito 2 - Carry
+	carriesRepo := repository.NewMySQLCarryRepository(a.db)
+	carryService := service.NewMySQLCarryService(carriesRepo, localitiesRepo)
+	if err = routes.CarryRoutes(router, carryService); err != nil {
 		panic(err)
 	}
 
