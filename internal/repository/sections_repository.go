@@ -137,7 +137,7 @@ func (r *SectionMysqlRepository) Update(section internal.Section) (internal.Sect
 	//r.db[section.ID] = section
 	//return r.db[section.ID], nil
 
-	return internal.Section{}, nil
+	return section, nil
 }
 
 // Delete the section by its id
