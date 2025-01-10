@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/loader"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
@@ -77,14 +76,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	router := chi.NewRouter()
 
-	// Requisito 1 - Seller
-	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
-	dbSellers, err := ldSellers.Load()
+	localityRepo := repository.NewMysqlLocalityRepository(a.db)
+	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
+	countryRepo := repository.NewMysqlCountryRepository(a.db)
+	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	err = routes.NewLocalityRoutes(router, localityService)
 	if err != nil {
-		return
+		panic(err)
 	}
-	sellerRepo := repository.NewSellerDbRepository(dbSellers)
-	sellerService := service.NewSellerService(sellerRepo)
+
+	// Requisito 1 - Seller
+	// ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
+	// dbSellers, err := ldSellers.Load()
+	// if err != nil {
+	// return
+	// }
+	// sellerRepo := repository.NewSellerDbRepository(dbSellers)
+	sellerRepo := repository.NewSellerMysql(a.db)
+	sellerService := service.NewSellerService(sellerRepo, localityRepo)
 	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
 		panic(err)
 	}
@@ -143,14 +152,6 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
-	localityRepo := repository.NewMysqlLocalityRepository(a.db)
-	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
-	countryRepo := repository.NewMysqlCountryRepository(a.db)
-	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
-	err = routes.NewLocalityRoutes(router, localityService)
-	if err != nil {
-		panic(err)
-	}
 	a.router = router
 
 	return nil

@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -24,10 +25,10 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sellers, err := h.service.GetAll()
 		if err != nil {
+			fmt.Println(err.Error())
 			utils.JSON(w, http.StatusInternalServerError, nil)
 			return
 		}
-
 		utils.JSON(w, http.StatusOK, sellers)
 	}
 }
@@ -60,9 +61,16 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
-
-		seller, err := h.service.Create(reqBody)
+		newSeller := internal.Seller{
+			Cid:         reqBody.Cid,
+			CompanyName: reqBody.CompanyName,
+			Address:     reqBody.Address,
+			Telephone:   reqBody.Telephone,
+			LocalityId:  reqBody.LocalityId,
+		}
+		err := h.service.Create(&newSeller)
 		if err != nil {
+			fmt.Println(err.Error())
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
@@ -76,7 +84,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			return
 
 		}
-		utils.JSON(w, http.StatusCreated, seller)
+		utils.JSON(w, http.StatusCreated, newSeller)
 
 	}
 }
@@ -124,7 +132,7 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		isDeleted, err := h.service.Delete(id)
+		err = h.service.Delete(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, err.Error())
@@ -133,6 +141,6 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 			utils.Error(w, http.StatusInternalServerError, "Internal error")
 			return
 		}
-		utils.JSON(w, http.StatusNoContent, isDeleted)
+		utils.JSON(w, http.StatusNoContent, nil)
 	}
 }
