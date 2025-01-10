@@ -6,7 +6,7 @@ USE fresh_products;
 -- Sprint 1, requirement 1
 CREATE TABLE sellers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid INT,
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -25,7 +25,8 @@ CREATE TABLE warehouses(
 -- Sprint 1, requirement 3
 CREATE TABLE sections(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    section_number VARCHAR(255),
+    -- section_number é int, não varchar
+    section_number INT,
     current_capacity INT,
     maximum_capacity INT,
     minimum_capacity INT,
@@ -220,8 +221,8 @@ INSERT INTO order_status (id, description) VALUES
 
 -- Insert sample sellers
 INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
-('SELLER001', 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
-('SELLER002', 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
+(100, 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
+(200, 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
 
 -- Insert sample warehouses
 INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES
@@ -244,10 +245,10 @@ INSERT INTO products (description, expiration_rate, freezing_rate, height, lengt
 
 -- Insert sample sections
 INSERT INTO sections (section_number, current_capacity, maximum_capacity, minimum_capacity, current_temperature, minimum_temperature, product_type_id, warehouse_id) VALUES
-('S1', 50, 100, 20, 5.0, -2.0, 1, 1),
-('S2', 30, 80, 15, 4.0, -3.0, 2, 2),
-('S3', 20, 50, 10, 7.0, -5.0, 3, 1),
-('S4', 40, 100, 20, 6.0, -4.0, 4, 2);
+(1, 50, 100, 20, 5.0, -2.0, 1, 1),
+(2, 30, 80, 15, 4.0, -3.0, 2, 2),
+(3, 20, 50, 10, 7.0, -5.0, 3, 1),
+(4, 40, 100, 20, 6.0, -4.0, 4, 2);
 
 -- Insert sample employees
 INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) VALUES

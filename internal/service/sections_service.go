@@ -122,7 +122,7 @@ func (r *BasicSectionService) Save(newSection internal.Section) (internal.Sectio
 	}
 
 	// Save if ok
-	newSection, err := r.repo.Save(newSection)
+	newSection, err := r.repo.Save(&newSection)
 	if err != nil {
 		return internal.Section{}, err
 	}

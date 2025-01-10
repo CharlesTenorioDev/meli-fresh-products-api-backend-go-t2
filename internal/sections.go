@@ -26,7 +26,7 @@ type SectionPointers struct {
 type (
 	SectionRepository interface {
 		GetAll() ([]Section, error)
-		Save(Section) (Section, error)
+		Save(*Section) (Section, error)
 		Update(Section) (Section, error)
 		GetById(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)

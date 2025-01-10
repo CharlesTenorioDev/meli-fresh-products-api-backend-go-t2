@@ -78,7 +78,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	router := chi.NewRouter()
 
 	// Requisito 1 - Seller
-	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
+	ldSellers := internal.NewSellerJSONFile("/Users/dfcarvalho/Documents/aulas-go-meli/meli-fresh-products-api-backend-go-t2/internal/sellers.json")
 	dbSellers, err := ldSellers.Load()
 	if err != nil {
 		return
@@ -113,7 +113,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 3 - Section
-	sectionRepo := repository.NewMemorySectionRepository(nil)
+
+	sectionRepo := repository.NewSectionMysql(a.db)
 	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
 	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
@@ -121,7 +122,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 5 - Employees
-	filePath := "docs/db/employees.json"
+	filePath := "/Users/dfcarvalho/Documents/aulas-go-meli/meli-fresh-products-api-backend-go-t2/docs/db/employees.json"
 	ld := loader.NewEmployeeJsonFile(filePath)
 	db, err := ld.Load()
 	if err != nil {
