@@ -19,8 +19,6 @@ func NewProductDB(db *sql.DB) *ProductDB {
 
 // GetAll returns all products
 func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
-	var productList []internal.Product
-
 	rows, err := p.db.Query("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products")
 	if err != nil {
 		return nil, err
@@ -34,14 +32,14 @@ func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 			return nil, err
 		}
 
-		productList = append(productList, product)
+		listProducts = append(listProducts, product)
 	}
 	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	return productList, nil
+	return listProducts, nil
 }
 
 // GetByID returns a product by id
@@ -135,21 +133,17 @@ func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Prod
 // Delete a product
 func (p *ProductDB) Delete(id int) error {
 	_, err := p.GetByID(id)
-
 	if err != nil {
 		return err
 	}
 
 	statement, err := p.db.Prepare("DELETE FROM products WHERE id = ?")
-
 	if err != nil {
 		return err
 	}
-
 	defer statement.Close()
 
 	_, err = statement.Exec(id)
-
 	if err != nil {
 		return err
 	}

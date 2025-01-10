@@ -90,7 +90,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 4 - ProductType
-	productTypeRepo := repository.NewProductTypeDB(nil)
+	productTypeRepo := repository.NewProductTypeDB(a.db)
 	productTypeService := service.NewProductTypeService(productTypeRepo)
 	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
 		panic(err)
