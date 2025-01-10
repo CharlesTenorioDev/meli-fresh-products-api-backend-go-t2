@@ -12,4 +12,5 @@ var (
 	ErrInvalidProperties      = errors.New("invalid properties format")    // For parsing the properties, panic
 	ErrEmptyArguments         = errors.New("arguments must not be empty")  // 422
 	ErrWarehouseDoesNotExists = errors.New("warehouse's id doesn't exist") // 422
+	ErrBuyerDoesNotExists     = errors.New("buyer's id doesn't exist")     // 422
 )
