@@ -111,7 +111,7 @@ CREATE TABLE product_batches(
     due_date DATETIME(6),
     initial_quantity INT,
     manufacturing_date DATETIME(6),
-    manufacturing_hour DATETIME(6),
+    manufacturing_hour INT(2),
     minimum_temperature DECIMAL(19,2),
     product_id INT,
     section_id INT
@@ -262,8 +262,8 @@ INSERT INTO buyers (id_card_number, first_name, last_name) VALUES
 
 -- Insert sample product batches
 INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
-('BATCH001', 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', '2025-01-10 08:00:00', 3.0, 1, 1),
-('BATCH002', 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', '2025-01-12 09:00:00', 2.0, 2, 2);
+('BATCH001', 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', 8, 3.0, 1, 1),
+('BATCH002', 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', 9, 2.0, 2, 2);
 
 -- Insert sample product records
 INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES

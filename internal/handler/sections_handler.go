@@ -166,3 +166,9 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 		utils.JSON(w, http.StatusNoContent, nil)
 	}
 }
+
+//func (h *SectionHandler) CreateProductBatch() http.HandlerFunc {
+//	return func(w http.ResponseWriter, r *http.Request) {
+//
+//	}
+//}
