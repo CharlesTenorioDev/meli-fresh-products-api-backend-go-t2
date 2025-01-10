@@ -6,7 +6,7 @@ USE fresh_products;
 -- Sprint 1, requirement 1
 CREATE TABLE sellers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid INT(11),
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -220,8 +220,8 @@ INSERT INTO order_status (id, description) VALUES
 
 -- Insert sample sellers
 INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
-('SELLER001', 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
-('SELLER002', 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
+(1, 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
+(2, 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
 
 -- Insert sample warehouses
 INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES

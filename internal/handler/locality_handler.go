@@ -31,16 +31,10 @@ type reqPostLocality struct {
 	} `json:"data"`
 }
 
-// Save the locality - 201
-// If payload is in the wrong format - 400
-// If a section already exists for id - 409
-// If the payload contains invalid or empty fields for mandatory data - 422
-// An error not mapped - 500
 func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostLocality
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			fmt.Println(err.Error())
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
@@ -56,7 +50,6 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 		}
 		err := h.service.Save(&newLocality, &province, &country)
 		if err != nil {
-			fmt.Println(err.Error())
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
@@ -85,7 +78,6 @@ func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 		}
 		section, err := h.service.GetSellersByLocalityId(id)
 		if err != nil {
-			fmt.Println(err.Error())
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return

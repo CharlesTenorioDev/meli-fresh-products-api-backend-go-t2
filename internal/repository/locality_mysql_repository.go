@@ -33,6 +33,7 @@ func (r *MysqlLocalityRepository) GetById(id int) (internal.Locality, error) {
 	if err != nil {
 		return internal.Locality{}, err
 	}
+	defer stmt.Close()
 	row := stmt.QueryRow(id)
 	var locality internal.Locality
 	err = row.Scan(&locality.ID, &locality.LocalityName, &locality.ProvinceID)
@@ -57,6 +58,7 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
+		defer rows.Close()
 	} else {
 		stmt, err := r.db.Prepare(`SELECT l.id, l.locality_name, COUNT(s.id) AS 'sellers_count' 
 			FROM localities l 
@@ -66,10 +68,12 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
+		defer stmt.Close()
 		rows, err = stmt.Query(localityId)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
+		defer rows.Close()
 	}
 	for rows.Next() {
 		var row internal.SellersByLocality

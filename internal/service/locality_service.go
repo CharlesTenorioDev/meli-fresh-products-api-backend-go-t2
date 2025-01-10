@@ -24,6 +24,18 @@ func NewBasicLocalityService(
 }
 
 func (s *BasicLocalityService) Save(locality *internal.Locality, province *internal.Province, country *internal.Country) error {
+	if locality.LocalityName == "" {
+		return utils.ErrInvalidArguments
+	}
+	if locality.ID == 0 {
+		return utils.ErrInvalidArguments
+	}
+	if province.ProvinceName == "" {
+		return utils.ErrInvalidArguments
+	}
+	if country.CountryName == "" {
+		return utils.ErrInvalidArguments
+	}
 	// If locality exists by id
 	possibleLocality, err := s.localityRepo.GetById(locality.ID)
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {

@@ -8,3 +8,12 @@ services:
     volumes:
       - ./docs/db/mysql/create.sql:/docker-entrypoint-initdb.d/create.sql
       - ./mysql_data:/var/lib/mysql
+  mysql-testing:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docs/db/mysql/create.sql:/docker-entrypoint-initdb.d/create.sql
