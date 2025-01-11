@@ -104,6 +104,14 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	//Requisito 4 - Product Records
+	productRecordsRepo := repository.NewProductRecordDB(a.db)
+	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
+	err = routes.NewProductRecordsRoutes(router, productRecordsService)
+	if err != nil {
+		panic(err)
+	}
+
 	// Requisito 2 - Warehouses
 	warehouseRepo := repository.NewWarehouseDB(nil)
 	warehouseService := service.NewWarehouseService(warehouseRepo)

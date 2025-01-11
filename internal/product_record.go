@@ -1,17 +1,30 @@
 package internal
 
-// ProductRecord represents a single product record with its metadata.
-type ProductRecord struct {
-	ID          int    `json:"id"`
-	Description string `json:"description"`
+// ProductRecords represents a single product record with its metadata.
+type ProductRecords struct {
+	ID             int     `json:"id"`
+	LastUpdateDate string  `json:"last_update_date"`
+	PurchasePrice  float64 `json:"purchase_price"`
+	SalePrice      float64 `json:"sale_price"`
+	ProductId      int     `json:"product_id"`
+}
+
+type ProductReport struct {
+	ProductID    int    `json:"product_id"`
+	Description  string `json:"description"`
+	RecordsCount int    `json:"records_count"`
 }
 
 type ProductRecordsRepository interface {
-	Read(productID int) ([]ProductRecord, error)
-	Create(newProductRecord ProductRecord) (ProductRecord, error)
+	Read(productID int) ([]ProductReport, error)
+	Create(newProductRecord ProductRecords) (ProductRecords, error)
 }
 
 type ProductRecordsService interface {
-	GetProductRecords(productID int) ([]ProductRecord, error)
-	CreateProductRecord(newProductRecord ProductRecord) (ProductRecord, error)
+	GetProductRecords(productID int) ([]ProductReport, error)
+	CreateProductRecord(newProductRecord ProductRecords) (ProductRecords, error)
+}
+
+type ProductValidation interface {
+	GetProductByID(id int) (product Product, err error)
 }

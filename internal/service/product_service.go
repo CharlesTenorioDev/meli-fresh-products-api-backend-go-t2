@@ -7,11 +7,11 @@ import (
 
 type ProductService struct {
 	repo                  internal.ProductRepository
-	validationProductType internal.ProductValidation
+	validationProductType internal.ProductTypeValidation
 	validationSellerID    internal.SellerValidation
 }
 
-func NewProductService(repo internal.ProductRepository, validationProductType internal.ProductValidation) *ProductService {
+func NewProductService(repo internal.ProductRepository, validationProductType internal.ProductTypeValidation) *ProductService {
 	return &ProductService{
 		repo:                  repo,
 		validationProductType: validationProductType,

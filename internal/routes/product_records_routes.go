@@ -6,14 +6,11 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
 )
 
-func NewProductRoutes(mux *chi.Mux, service internal.ProductService) error {
-	handler := handler.NewProductHandler(service)
-	mux.Route("/api/v1/products", func(router chi.Router) {
-		router.Get("/", handler.GetProducts)
-		router.Post("/", handler.CreateProduct)
-		router.Get("/{id}", handler.GetProductByID)
-		router.Patch("/{id}", handler.UpdateProduct)
-		router.Delete("/{id}", handler.DeleteProduct)
+func NewProductRecordsRoutes(mux *chi.Mux, service internal.ProductRecordsService) error {
+	recordsHandler := handler.NewProductRecordsHandler(service)
+	mux.Route("/api/v1/productRecords", func(router chi.Router) {
+		router.Post("/", recordsHandler.CreateProductRecord)
+		router.Get("/", recordsHandler.GetProductRecords)
 	})
 	return nil
 }

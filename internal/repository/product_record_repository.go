@@ -8,32 +8,66 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type ProductDB struct {
+type ProductRecordDB struct {
 	db *sql.DB
 }
 
-func NewProductDB(db *sql.DB) *ProductDB {
+func NewProductRecordDB(db *sql.DB) *ProductRecordDB {
 
-	return &ProductDB{db: db}
+	return &ProductRecordDB{db: db}
 }
 
-// GetAll returns all products
-func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
-	rows, err := p.db.Query("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products")
+func (p *ProductRecordDB) Read(productID int) ([]internal.ProductReport, error) {
+	var rows *sql.Rows
+	var err error
+
+	if productID > 0 {
+		rows, err = p.db.Query(`
+			SELECT 
+				p.id AS product_id,
+				p.description,
+				COUNT(pr.id) AS records_count
+			FROM 
+				Products p
+			INNER JOIN 
+				Product_Records pr ON p.id = pr.product_id
+			WHERE 
+				p.id = ?
+			GROUP BY 
+				p.id, p.description
+		`, productID)
+	} else {
+		rows, err = p.db.Query(`
+			SELECT 
+				p.id AS product_id,
+				p.description,
+				COUNT(pr.id) AS records_count
+			FROM 
+				Products p
+			INNER JOIN 
+				Product_Records pr ON p.id = pr.product_id
+			GROUP BY 
+				p.id, p.description
+		`)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	for rows.Next() {
-		var product internal.Product
 
-		err := rows.Scan(&product.ID, &product.Description, &product.ExpirationRate, &product.FreezingRate, &product.Height, &product.Length, &product.NetWeight, &product.ProductCode, &product.RecommendedFreezingTemperature, &product.Width, &product.ProductType, &product.SellerID)
+	var listProducts []internal.ProductReport
+	for rows.Next() {
+		var productRecord internal.ProductReport
+
+		err := rows.Scan(&productRecord.ProductID, &productRecord.Description, &productRecord.RecordsCount)
 		if err != nil {
 			return nil, err
 		}
 
-		listProducts = append(listProducts, product)
+		listProducts = append(listProducts, productRecord)
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return nil, err
@@ -42,34 +76,14 @@ func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 	return listProducts, nil
 }
 
-// GetByID returns a product by id
-func (p *ProductDB) GetByID(id int) (product internal.Product, err error) {
-	row := p.db.QueryRow("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM products WHERE id = ?", id)
-	if err := row.Err(); err != nil {
-		return internal.Product{}, err
-	}
-
-	err = row.Scan(&product.ID, &product.Description, &product.ExpirationRate, &product.FreezingRate, &product.Height, &product.Length, &product.NetWeight, &product.ProductCode, &product.RecommendedFreezingTemperature, &product.Width, &product.ProductType, &product.SellerID)
+func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (internal.ProductRecords, error) {
+	statement, err := p.db.Prepare("INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES(?, ?, ?, ?)")
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return internal.Product{}, utils.ErrNotFound
-		}
-		return internal.Product{}, err
-	}
-
-	return product, nil
-
-}
-
-// Create a product
-func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product internal.Product, err error) {
-	statement, err := p.db.Prepare("INSERT INTO products (description, expiration_rate, freezing_rate, height, `length`, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		return internal.Product{}, err
+		return internal.ProductRecords{}, err
 	}
 	defer statement.Close()
 
-	result, err := statement.Exec(newproduct.Description, newproduct.ExpirationRate, newproduct.FreezingRate, newproduct.Height, newproduct.Length, newproduct.NetWeight, newproduct.ProductCode, newproduct.RecommendedFreezingTemperature, newproduct.Width, newproduct.ProductType, newproduct.SellerID)
+	result, err := statement.Exec(newProductRecord.LastUpdateDate, newProductRecord.PurchasePrice, newProductRecord.SalePrice, newProductRecord.ProductId)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
@@ -78,75 +92,18 @@ func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product inter
 				err = utils.ErrConflict
 				fallthrough
 			default:
-				return internal.Product{}, err
+				return internal.ProductRecords{}, err
 			}
 		}
-		return internal.Product{}, err
+		return internal.ProductRecords{}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return internal.Product{}, err
+		return internal.ProductRecords{}, err
 	}
 
-	product = internal.Product{
-		ID:                int(id),
-		ProductAttributes: newproduct,
-	}
+	newProductRecord.ID = int(id)
 
-	return product, nil
-}
-
-// Update a product
-func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Product, err error) {
-	_, err = p.GetByID(inputProduct.ID)
-	if err != nil {
-		return internal.Product{}, err
-	}
-
-	statement, err := p.db.Prepare(
-		"UPDATE products SET description=?, expiration_rate=?, freezing_rate=?, height=?, `length`=?, net_weight=?, product_code=?, recommended_freezing_temperature=?, width=?, product_type_id=?, seller_id=? WHERE id=?",
-	)
-	if err != nil {
-		return internal.Product{}, err
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(inputProduct.Description, inputProduct.ExpirationRate, inputProduct.FreezingRate, inputProduct.Height, inputProduct.Length, inputProduct.NetWeight, inputProduct.ProductCode, inputProduct.RecommendedFreezingTemperature, inputProduct.Width, inputProduct.ProductType, inputProduct.SellerID, inputProduct.ID)
-	if err != nil {
-		var mysqlErr *mysql.MySQLError
-		if errors.As(err, &mysqlErr) {
-			switch mysqlErr.Number {
-			case 1062:
-				err = utils.ErrConflict
-				fallthrough
-			default:
-				return internal.Product{}, err
-			}
-		}
-		return internal.Product{}, err
-	}
-
-	return inputProduct, nil
-}
-
-// Delete a product
-func (p *ProductDB) Delete(id int) error {
-	_, err := p.GetByID(id)
-	if err != nil {
-		return err
-	}
-
-	statement, err := p.db.Prepare("DELETE FROM products WHERE id = ?")
-	if err != nil {
-		return err
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return newProductRecord, nil
 }
