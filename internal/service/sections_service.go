@@ -209,3 +209,31 @@ func (r *BasicSectionService) Delete(id int) error {
 	}
 	return nil
 }
+
+func (r *BasicSectionService) GetSectionProductsReport(id int) ([]internal.SectionProductsReport, error) {
+	var report []internal.SectionProductsReport
+	var err error
+
+	if id == 0 {
+		report, err = r.repo.GetSectionProductsReport()
+		if err != nil {
+			return nil, err
+		}
+		return report, nil
+
+	} else {
+		sectionExists, err := r.repo.GetBySectionNumber(id)
+		if err != nil {
+			return nil, err
+		}
+		if sectionExists == (internal.Section{}) {
+			return nil, utils.ErrNotFound
+		}
+		report, err = r.repo.GetSectionProductsReportById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		return report, nil
+	}
+}

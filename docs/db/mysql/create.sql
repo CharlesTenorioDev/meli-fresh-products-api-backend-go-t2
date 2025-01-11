@@ -250,6 +250,7 @@ INSERT INTO sections (section_number, current_capacity, maximum_capacity, minimu
 (3, 20, 50, 10, 7.0, -5.0, 3, 1),
 (4, 40, 100, 20, 6.0, -4.0, 4, 2);
 
+
 -- Insert sample employees
 INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) VALUES
 ('E001', 'Alice', 'Johnson', 1),

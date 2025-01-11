@@ -16,6 +16,7 @@ func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error 
 	mux.Route("/api/v1/sections", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetById())
+		router.Get("/reportProducts", handler.GetSectionProductsReport())
 		router.Post("/", handler.Post())
 		router.Patch("/{id}", handler.Update())
 		router.Delete("/{id}", handler.Delete())

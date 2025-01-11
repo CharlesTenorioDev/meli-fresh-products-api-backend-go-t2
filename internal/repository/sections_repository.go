@@ -151,3 +151,58 @@ func (r *SectionMysqlRepository) Delete(id int) error {
 	}
 	return nil
 }
+
+func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionProductsReport, error) {
+	var reports []internal.SectionProductsReport
+
+	rows, err := r.db.Query("SELECT " +
+		"s.id, " +
+		"s.section_number, " +
+		"sum(p.current_quantity) as products_count " +
+		"FROM sections s " +
+		"left join product_batches p " +
+		"on s.id = p.section_id " +
+		"group by s.id, s.section_number")
+
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var report internal.SectionProductsReport
+		err = rows.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+		if err != nil {
+			return nil, err
+		}
+		reports = append(reports, report)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return reports, nil
+}
+func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]internal.SectionProductsReport, error) {
+	var report internal.SectionProductsReport
+	var reports []internal.SectionProductsReport
+
+	row := r.db.QueryRow("SELECT "+
+		"s.id, "+
+		"s.section_number, "+
+		"sum(p.current_quantity) as products_count "+
+		"FROM sections s "+
+		"left join product_batches p "+
+		"on s.id = p.section_id "+
+		"where id=?"+
+		"group by s.id, s.section_number", id)
+
+	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = utils.ErrNotFound
+		}
+	}
+
+	reports = append(reports, report)
+	return reports, nil
+}
