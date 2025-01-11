@@ -105,7 +105,7 @@ CREATE TABLE carriers(
 -- Sprint 2, requirement 3
 CREATE TABLE product_batches(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    batch_number VARCHAR(255),
+    batch_number INT,
     current_quantity INT,
     current_temperature DECIMAL(19,2),
     due_date DATETIME(6),
@@ -263,8 +263,8 @@ INSERT INTO buyers (id_card_number, first_name, last_name) VALUES
 
 -- Insert sample product batches
 INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
-('BATCH001', 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', 8, 3.0, 1, 1),
-('BATCH002', 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', 9, 2.0, 2, 2);
+(100, 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', 8, 3.0, 1, 1),
+(200, 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', 9, 2.0, 2, 2);
 
 -- Insert sample product records
 INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES

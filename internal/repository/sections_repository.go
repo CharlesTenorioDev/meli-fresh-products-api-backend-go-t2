@@ -103,10 +103,8 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 // All validatinos should be made on service layer
 func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Section, error) {
 
-	result, err := r.db.Exec(
-		"INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-		(*newSection).SectionNumber, (*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID,
-	)
+	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID)
 
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
@@ -131,13 +129,28 @@ func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Se
 
 }
 
-// Update the map
-// If a section does not exist for the id, a new one will be created
-func (r *SectionMysqlRepository) Update(section internal.Section) (internal.Section, error) {
-	//r.db[section.ID] = section
-	//return r.db[section.ID], nil
+func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.Section, error) {
 
-	return section, nil
+	_, err := r.db.Exec(
+		"UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, product_type_id=? WHERE id=?",
+		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature,
+		(*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID,
+		(*newSection).ProductTypeID, (*newSection).ID,
+	)
+
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) {
+			switch mysqlErr.Number {
+			case 1062:
+				err = utils.ErrConflict
+			}
+			return internal.Section{}, err
+		}
+		return internal.Section{}, err
+	}
+
+	return *newSection, nil
 }
 
 // Delete the section by its id
@@ -193,8 +206,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 		"FROM sections s "+
 		"left join product_batches p "+
 		"on s.id = p.section_id "+
-		"where id=?"+
-		"group by s.id, s.section_number", id)
+		"where id=?", id)
 
 	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
 	if err != nil {
