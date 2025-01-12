@@ -19,7 +19,7 @@ type ProductBatchRequest struct {
 }
 type (
 	ProductBatchRepository interface {
-		Save(ProductBatchRequest) (ProductBatch, error)
+		Save(*ProductBatchRequest) (ProductBatch, error)
 		GetBatchNumber(int) error
 	}
 	ProductBatchService interface {

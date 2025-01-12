@@ -27,7 +27,7 @@ func (s *ProductBatchService) Save(newBatch internal.ProductBatchRequest) (inter
 		return internal.ProductBatch{}, batchValidation
 	}
 
-	createdBatch, err := s.batchRepo.Save(newBatch)
+	createdBatch, err := s.batchRepo.Save(&newBatch)
 	if err != nil {
 		return internal.ProductBatch{}, err
 	}
@@ -67,7 +67,7 @@ func (s *ProductBatchService) verify(newBatch internal.ProductBatchRequest) erro
 		return utils.ErrInvalidArguments
 	}
 
-	batchExists := s.getBatchNumber(newBatch.BatchNumber)
+	batchExists := s.batchRepo.GetBatchNumber(newBatch.BatchNumber)
 	if batchExists != nil {
 		return batchExists
 	}
@@ -85,15 +85,6 @@ func (s *ProductBatchService) verify(newBatch internal.ProductBatchRequest) erro
 	if productExists == (internal.Product{}) {
 		return utils.ErrConflict
 	}
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *ProductBatchService) getBatchNumber(batchNumber int) error {
-	err := s.batchRepo.GetBatchNumber(batchNumber)
 	if err != nil {
 		return err
 	}
