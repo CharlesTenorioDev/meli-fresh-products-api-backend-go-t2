@@ -177,8 +177,9 @@ func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 			id, err = strconv.Atoi(idReq)
 			if err != nil {
 				utils.Error(w, http.StatusBadRequest, "invalid id")
+				return
 			}
-			return
+
 		}
 
 		sectionProductReport, err := h.service.GetSectionProductsReport(id)
