@@ -152,7 +152,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
-	// Sprint2 Requisito 2 - Locality
+	// Sprint2 Requisito 1 - Locality
 	localitiesRepo := repository.NewMysqlLocalityRepository(a.db)
 	localityService := service.NewMysqlLocalityService(localitiesRepo)
 	if err = routes.LocalityRoutes(router, localityService); err != nil {
@@ -166,6 +166,12 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	// Sprint2 Requisito 3 - Product Batch
+	productBatchRepo := repository.NewProductBatchRepository(a.db)
+	productBatchService := service.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
+		panic(err)
+	}
 	return nil
 }
 
