@@ -91,12 +91,6 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 
 	return section, nil
 
-	//for _, section := range r.db {
-	//	if section.SectionNumber == sectionNumber {
-	//		return section, nil
-	//	}
-	//}
-	//return internal.Section{}, nil
 }
 
 // Generate a new ID and save the entity
@@ -168,14 +162,7 @@ func (r *SectionMysqlRepository) Delete(id int) error {
 func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionProductsReport, error) {
 	var reports []internal.SectionProductsReport
 
-	rows, err := r.db.Query("SELECT " +
-		"s.id, " +
-		"s.section_number, " +
-		"sum(p.current_quantity) as products_count " +
-		"FROM sections s " +
-		"left join product_batches p " +
-		"on s.id = p.section_id " +
-		"group by s.id, s.section_number")
+	rows, err := r.db.Query("SELECT s.id, s.section_number, ifnull(sum(p.current_quantity), 0) as products_count FROM sections s left join product_batches p on s.id = p.section_id group by s.id, s.section_number")
 
 	if err != nil {
 		return nil, err
@@ -206,7 +193,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 		"FROM sections s "+
 		"left join product_batches p "+
 		"on s.id = p.section_id "+
-		"where id=?", id)
+		"where s.id=? group by s.id", id)
 
 	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
 	if err != nil {
