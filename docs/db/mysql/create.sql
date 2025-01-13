@@ -142,9 +142,7 @@ CREATE TABLE purchase_orders(
     order_date DATETIME(6),
     tracking_code VARCHAR(255),
     buyer_id INT,
-    carrier_id INT,
-    order_status_id INT,
-    warehouse_id INT
+    product_record_id INT
 );
 CREATE TABLE order_status(
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -182,10 +180,8 @@ ALTER TABLE inbound_orders ADD FOREIGN KEY (employee_id) REFERENCES employees(id
 ALTER TABLE inbound_orders ADD FOREIGN KEY (product_batch_id) REFERENCES product_batches(id);
 ALTER TABLE inbound_orders ADD FOREIGN KEY (warehouse_id) REFERENCES warehouses(id);
 -- R6
-ALTER TABLE purchase_orders ADD FOREIGN KEY (warehouse_id) REFERENCES warehouses(id);
 ALTER TABLE purchase_orders ADD FOREIGN KEY (buyer_id) REFERENCES buyers(id);
-ALTER TABLE purchase_orders ADD FOREIGN KEY (carrier_id) REFERENCES carriers(id);
-ALTER TABLE purchase_orders ADD FOREIGN KEY (order_status_id) REFERENCES order_status(id);
+ALTER TABLE purchase_orders ADD FOREIGN KEY (product_record_id) REFERENCES product_records(id);
 
 
 
@@ -277,9 +273,9 @@ INSERT INTO inbound_orders (order_date, order_number, employee_id, product_batch
 ('2025-01-06 12:00:00', 'IN002', 2, 2, 2);
 
 -- Insert sample purchase orders
-INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, carrier_id, order_status_id, warehouse_id) VALUES
-('PO001', '2025-01-05 12:00:00', 'TRK001', 1, 1, 1, 1),
-('PO002', '2025-01-06 12:00:00', 'TRK002', 2, 2, 2, 2);
+INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES
+('PO001', '2025-01-05 12:00:00', 'TRK001', 1, 1),
+('PO002', '2025-01-06 12:00:00', 'TRK002', 2, 2);
 
 -- Insert sample product records for tracking prices
 INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES
