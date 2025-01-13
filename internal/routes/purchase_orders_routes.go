@@ -12,13 +12,8 @@ func RegisterPurchaseOrdersRoutes(mux *chi.Mux, service internal.PurchaseOrderSe
 	mux.Route("/api/v1/PurchaseOrders", func(router chi.Router) {
 		// Get
 		router.Get("/", handler.GetAllPurchaseOrders())
-		router.Get("/{id}", handler.GetPurchaseOrdersById())
 		// Post
 		router.Post("/", handler.PostPurchaseOrders())
-		// Patch
-		router.Patch("/{id}", handler.PatchPurchaseOrders())
-		// Delete
-		router.Delete("/{id}", handler.DeletePurchaseOrders())
 	})
 
 	return nil

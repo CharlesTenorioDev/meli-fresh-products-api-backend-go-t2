@@ -19,15 +19,9 @@ func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService i
 }
 
 // FindAll retrieves all PurchaseOrders from the repository
-func (s *PurchaseOrderDefault) FindAll() (purchaseOrders map[int]internal.PurchaseOrder, err error) {
-	purchaseOrders, err = s.rp.FindAll()
-	return
-}
-
-// FindById retrieves an purchaseOrder by ID from the repository
-func (s *PurchaseOrderDefault) FindById(id int) (purchaseOrder internal.PurchaseOrder, err error) {
-	purchaseOrder, err = s.rp.FindById(id)
-	return
+func (s *PurchaseOrderDefault) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
+	purchaseOrdersSummary, err := s.rp.FindAllByBuyerId(buyerId)
+	return purchaseOrdersSummary, err
 }
 
 // CreatePurchaseOrder adds a new purchaseOrder to the repository
@@ -55,46 +49,6 @@ func (s *PurchaseOrderDefault) CreatePurchaseOrder(newPurchaseOrder internal.Pur
 	return s.rp.CreatePurchaseOrder(newPurchaseOrder)
 }
 
-// UpdatepPurchaseOrder updates an purchaseOrder in the repository
-func (s *PurchaseOrderDefault) UpdatePurchaseOrder(inputPurchaseOrder internal.PurchaseOrder) (purchaseOrder internal.PurchaseOrder, err error) {
-	// find the existing purchaseOrder
-	internalPurchaseOrder, err := s.rp.FindById(inputPurchaseOrder.ID)
-	if err != nil {
-		err = utils.ErrNotFound
-		return
-	}
-
-	// verify if buyer_id exists
-	err = s.buyerExistsById(inputPurchaseOrder.Attributes.BuyerId)
-	if err != nil {
-		return
-	}
-
-	// merge input fields with the existing purchaseOrder
-	updatedPurchaseOrder := mergePurchaseOrderFields(inputPurchaseOrder, internalPurchaseOrder)
-
-	// update the purchaseOrder in the repository
-	purchaseOrder, err = s.rp.UpdatePurchaseOrder(updatedPurchaseOrder)
-	return
-}
-
-// DeletePurchaseOrder deletes an purchaseOrder from the repository based on the provided ID
-func (s *PurchaseOrderDefault) DeletePurchaseOrder(id int) (err error) {
-	// find the purchaseOrder to ensure it exists
-	purchaseOrder, err := s.rp.FindById(id)
-	if err != nil {
-		return utils.ErrNotFound
-	}
-
-	// delete the purchaseOrder by passing only the ID to the repository
-	err = s.rp.DeletePurchaseOrder(purchaseOrder.ID)
-	if err != nil {
-		return utils.ErrInvalidArguments
-	}
-
-	return nil
-}
-
 // validateFields checks if the required fields of a new purchaseOrder are not empty
 func (s *PurchaseOrderDefault) validateFields(newPurchaseOrder internal.PurchaseOrderAttributes) (err error) {
 	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerId == 0 || newPurchaseOrder.ProductRecordId == 0 {
@@ -104,7 +58,7 @@ func (s *PurchaseOrderDefault) validateFields(newPurchaseOrder internal.Purchase
 }
 
 // validateDuplicates ensures that no existing purchaseOrder has the same CardNumberId as the new purchaseOrder
-func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders map[int]internal.PurchaseOrder, newPurchaseOrder internal.PurchaseOrderAttributes) error {
+func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders []internal.PurchaseOrder, newPurchaseOrder internal.PurchaseOrderAttributes) error {
 	for _, purchaseOrder := range purchaseOrders {
 		if purchaseOrder.Attributes.OrderNumber == newPurchaseOrder.OrderNumber {
 			return utils.ErrConflict

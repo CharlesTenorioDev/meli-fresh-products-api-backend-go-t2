@@ -10,11 +10,11 @@ type PurchaseOrder struct {
 
 // PurchaseOrderAttributes defines the details associated with an PurchaseOrder
 type PurchaseOrderAttributes struct {
-	OrderNumber     string    `json:"order_number"`
-	OrderDate       time.Time `json:"order_date"`
-	TrackingCode    string    `json:"tracking_code"`
-	BuyerId         int       `json:"buyer_id"`
-	ProductRecordId int       `json:"product_record_id"`
+	OrderNumber     string `json:"order_number"`
+	OrderDate       string `json:"order_date"`
+	TrackingCode    string `json:"tracking_code"`
+	BuyerId         int    `json:"buyer_id"`
+	ProductRecordId int    `json:"product_record_id"`
 }
 
 // PurchaseOrderJson defines the structure of the PurchaseOrder data as it appears in a json file
@@ -30,23 +30,24 @@ type PurchaseOrderJson struct {
 // PurchaseOrderRepository defines the interface for PurchaseOrder data persistence
 // it specifies methods for fetching and creating PurchaseOrder data
 type PurchaseOrderRepository interface {
-	FindAll() (PurchaseOrders map[int]PurchaseOrder, err error)
-	FindById(id int) (PurchaseOrder PurchaseOrder, err error)
+	FindAll() ([]PurchaseOrder, error)
+	FindAllByBuyerId(buyerId int) (PurchaseOrders []PurchaseOrderSummary, err error)
 	CreatePurchaseOrder(newPurchaseOrder PurchaseOrderAttributes) (PurchaseOrder PurchaseOrder, err error)
-	UpdatePurchaseOrder(inputPurchaseOrder PurchaseOrder) (PurchaseOrder PurchaseOrder, err error)
-	DeletePurchaseOrder(id int) (err error)
 }
 
 // PurchaseOrderService defines the interface for PurchaseOrder-related business logic
 // it includes methods for fetching and creating PurchaseOrders
 type PurchaseOrderService interface {
-	FindAll() (PurchaseOrders map[int]PurchaseOrder, err error)
-	FindById(id int) (PurchaseOrder PurchaseOrder, err error)
+	FindAllByBuyerId(buyerId int) (PurchaseOrders []PurchaseOrderSummary, err error)
 	CreatePurchaseOrder(newPurchaseOrder PurchaseOrderAttributes) (PurchaseOrder PurchaseOrder, err error)
-	UpdatePurchaseOrder(inputPurchaseOrder PurchaseOrder) (PurchaseOrder PurchaseOrder, err error)
-	DeletePurchaseOrder(id int) (err error)
 }
 
 type PurchaseOrdersBuyerValidation interface {
 	GetOne(int) (*Buyer, error)
+}
+
+type PurchaseOrderSummary struct {
+	BuyerId     int    `json:"buyer_id"`
+	TotalOrders int    `json:"total_orders"`
+	OrderCodes  string `json:"order_codes"`
 }

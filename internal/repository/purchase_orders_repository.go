@@ -1,191 +1,103 @@
 package repository
 
 import (
-	"encoding/json"
-	"log"
-	"os"
-	"time"
+	"database/sql"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 type PurchaseOrderRepository struct {
-	purchaseOrderTable map[int]internal.PurchaseOrder
+	db *sql.DB
 }
 
-func NewPurchaseOrderDb(orderTab map[int]internal.PurchaseOrder) *PurchaseOrderRepository {
-	orderDb := make(map[int]internal.PurchaseOrder)
-	if orderTab != nil {
-		orderDb = orderTab
-	}
-	return &PurchaseOrderRepository{purchaseOrderTable: orderDb}
-}
-
-var ordersFile = "./docs/db/purchase_orders.json"
-
-// LoadPurchaseOrders reads purchase orders from a JSON file
-func (repo *PurchaseOrderRepository) LoadPurchaseOrders() (map[int]internal.PurchaseOrder, error) {
-	file, err := os.ReadFile(ordersFile)
-	if err != nil {
-		log.Println("Error reading file:", err)
-		return nil, err
-	}
-
-	var orders []internal.PurchaseOrderJson
-	if err := json.Unmarshal(file, &orders); err != nil {
-		log.Println("Error unmarshaling JSON:", err)
-		return nil, err
-	}
-
-	repo.purchaseOrderTable = make(map[int]internal.PurchaseOrder)
-	for _, order := range orders {
-		repo.purchaseOrderTable[order.ID] = internal.PurchaseOrder{
-			ID: order.ID,
-			Attributes: internal.PurchaseOrderAttributes{
-				OrderNumber:     order.OrderNumber,
-				OrderDate:       order.OrderDate,
-				TrackingCode:    order.TrackingCode,
-				BuyerId:         order.BuyerId,
-				ProductRecordId: order.ProductRecordId,
-			},
-		}
-	}
-
-	return repo.purchaseOrderTable, nil
+func NewPurchaseOrderDb(db *sql.DB) *PurchaseOrderRepository {
+	return &PurchaseOrderRepository{db}
 }
 
 // FindAll retrieves all purchase orders
-func (repo *PurchaseOrderRepository) FindAll() (map[int]internal.PurchaseOrder, error) {
-	ordersMap, err := repo.LoadPurchaseOrders()
+func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error) {
+	query := `
+		SELECT po.id, po.order_number, po.tracking_code, po.order_date, po.buyer_id
+		FROM purchase_orders po
+		INNER JOIN buyers b ON po.buyer_id = b.id`
+
+	rows, err := repo.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	return ordersMap, nil
+	var purchaseOrders []internal.PurchaseOrder
+	for rows.Next() {
+		var po internal.PurchaseOrder
+		err := rows.Scan(&po.ID, &po.Attributes.OrderNumber, &po.Attributes.TrackingCode, &po.Attributes.OrderDate, &po.Attributes.BuyerId)
+		if err != nil {
+			return nil, err
+		}
+		purchaseOrders = append(purchaseOrders, po)
+	}
+
+	return purchaseOrders, rows.Err()
 }
 
-// FindById retrieves a specific purchase order by ID
-func (repo *PurchaseOrderRepository) FindById(id int) (internal.PurchaseOrder, error) {
-	ordersMap, err := repo.LoadPurchaseOrders()
-	if err != nil {
-		log.Println("Error loading orders:", err)
-		return internal.PurchaseOrder{}, err
+// FindAllByBuyerId retrieves all purchase orders by buyer id
+func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if buyerId != 0 {
+		query = `
+			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes
+			FROM purchase_orders po
+			INNER JOIN buyers b ON po.buyer_id = b.id
+			WHERE po.buyer_id = ?
+			GROUP BY po.buyer_id`
+		rows, err = repo.db.Query(query, buyerId)
+	} else {
+		query = `
+			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes
+			FROM purchase_orders po
+			INNER JOIN buyers b ON po.buyer_id = b.id
+			GROUP BY po.buyer_id`
+		rows, err = repo.db.Query(query)
 	}
 
-	if order, exists := ordersMap[id]; exists {
-		return order, nil
+	if err != nil {
+		return nil, err
 	}
-	return internal.PurchaseOrder{}, utils.ErrNotFound
+	defer rows.Close()
+
+	var purchaseOrders []internal.PurchaseOrderSummary
+	for rows.Next() {
+		var summary internal.PurchaseOrderSummary
+		err := rows.Scan(&summary.BuyerId, &summary.TotalOrders, &summary.OrderCodes)
+		if err != nil {
+			return nil, err
+		}
+		purchaseOrders = append(purchaseOrders, summary)
+	}
+
+	return purchaseOrders, rows.Err()
 }
 
 // CreatePurchaseOrder adds a new purchase order
 func (repo *PurchaseOrderRepository) CreatePurchaseOrder(newOrder internal.PurchaseOrderAttributes) (internal.PurchaseOrder, error) {
-	ordersMap, err := repo.FindAll()
+	query := "INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id) VALUES (?, ?, ?, ?)"
+	result, err := repo.db.Exec(query, newOrder.OrderNumber, newOrder.OrderDate, newOrder.TrackingCode, newOrder.BuyerId)
 	if err != nil {
-		log.Println("Error loading orders:", err)
 		return internal.PurchaseOrder{}, err
 	}
 
-	for _, o := range ordersMap {
-		if o.Attributes.OrderNumber == newOrder.OrderNumber {
-			log.Println("Order with this number already exists")
-			return internal.PurchaseOrder{}, utils.ErrConflict
-		}
+	insertedID, err := result.LastInsertId()
+	if err != nil {
+		return internal.PurchaseOrder{}, err
 	}
 
-	newID := int(time.Now().UnixNano())
-	order := internal.PurchaseOrder{
-		ID:         newID,
+	purchaseOrder := internal.PurchaseOrder{
+		ID:         int(insertedID),
 		Attributes: newOrder,
 	}
 
-	ordersMap[newID] = order
-
-	file, err := os.Create(ordersFile)
-	if err != nil {
-		log.Println("Error reopening file:", err)
-		return internal.PurchaseOrder{}, err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	if err := encoder.Encode(ordersMap); err != nil {
-		log.Println("Error encoding JSON:", err)
-		return internal.PurchaseOrder{}, err
-	}
-
-	log.Println("Order saved successfully!")
-	return order, nil
-}
-
-// UpdatePurchaseOrder updates an existing purchase order
-func (repo *PurchaseOrderRepository) UpdatePurchaseOrder(updatedOrder internal.PurchaseOrder) (internal.PurchaseOrder, error) {
-	orders, err := repo.FindAll()
-	if err != nil {
-		log.Println("Error loading orders:", err)
-		return internal.PurchaseOrder{}, err
-	}
-
-	updated := false
-	for i, order := range orders {
-		if order.ID == updatedOrder.ID {
-			orders[i] = updatedOrder
-			updated = true
-			break
-		}
-	}
-
-	if !updated {
-		log.Println("Order with the given ID not found")
-		return internal.PurchaseOrder{}, utils.ErrNotFound
-	}
-
-	file, err := os.Create(ordersFile)
-	if err != nil {
-		log.Println("Error opening file:", err)
-		return internal.PurchaseOrder{}, err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	if err := encoder.Encode(orders); err != nil {
-		log.Println("Error encoding JSON:", err)
-		return internal.PurchaseOrder{}, err
-	}
-	log.Println("Order updated successfully!")
-
-	return updatedOrder, nil
-}
-
-// DeletePurchaseOrder deletes a purchase order by ID
-func (repo *PurchaseOrderRepository) DeletePurchaseOrder(id int) error {
-	ordersMap, err := repo.FindAll()
-	if err != nil {
-		log.Println("Error loading orders:", err)
-		return err
-	}
-
-	if _, exists := ordersMap[id]; !exists {
-		log.Println("Order with the given ID not found")
-		return utils.ErrNotFound
-	}
-
-	delete(ordersMap, id)
-
-	file, err := os.Create(ordersFile)
-	if err != nil {
-		log.Println("Error opening file for writing:", err)
-		return err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	if err := encoder.Encode(ordersMap); err != nil {
-		log.Println("Error encoding JSON:", err)
-		return err
-	}
-
-	log.Println("Order deleted successfully!")
-	return nil
+	return purchaseOrder, nil
 }

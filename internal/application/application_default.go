@@ -144,7 +144,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 6 - Purchase Orders
-	purchaseOrdersRepo := repository.NewPurchaseOrderDb(nil)
+	purchaseOrdersRepo := repository.NewPurchaseOrderDb(a.db)
 	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService)
 	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {

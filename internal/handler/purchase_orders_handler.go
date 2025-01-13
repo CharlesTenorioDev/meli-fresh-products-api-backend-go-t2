@@ -8,7 +8,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/bootcamp-go/web/response"
-	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -23,65 +22,34 @@ func NewPurchaseOrdersHandler(sv internal.PurchaseOrderService) *PurchaseOrderDe
 	return &PurchaseOrderDefault{sv: sv}
 }
 
-// GetAllPurchaseOrders handles the GET /PurchaseOrders route
 func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		PurchaseOrders, err := h.sv.FindAll()
+		queryParams := r.URL.Query()
+		buyerIdParam := queryParams.Get("id")
+		var buyerId int
+		if buyerIdParam != "" {
+			var err error
+			buyerId, err = strconv.Atoi(buyerIdParam)
+			if err != nil {
+				response.JSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid id"})
+				return
+			}
+		}
+
+		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerId(buyerId)
 		if err != nil {
 			response.JSON(w, http.StatusInternalServerError, nil)
 			return
 		}
 
-		data := make(map[int]internal.PurchaseOrder)
-		for key, value := range PurchaseOrders {
-			data[key] = internal.PurchaseOrder{
-				ID: value.ID,
-				Attributes: internal.PurchaseOrderAttributes{
-					OrderNumber:     value.Attributes.OrderNumber,
-					OrderDate:       value.Attributes.OrderDate,
-					TrackingCode:    value.Attributes.TrackingCode,
-					BuyerId:         value.Attributes.BuyerId,
-					ProductRecordId: value.Attributes.ProductRecordId,
-				},
+		data := make(map[int]map[string]any)
+		for _, value := range PurchaseOrdersSummary {
+			data[value.BuyerId] = map[string]any{
+				"total_orders": value.TotalOrders,
+				"order_codes":  value.OrderCodes,
 			}
 		}
 
-		// returns status 200 and the data if all ok
-		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
-		})
-	}
-}
-
-// GetPurchaseOrdersById handles the GET /PurchaseOrders/{id} route
-func (h *PurchaseOrderDefault) GetPurchaseOrdersById() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := chi.URLParam(r, "id")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
-			return
-		}
-
-		PurchaseOrder, err := h.sv.FindById(id)
-		if err != nil {
-			handleError(w, utils.ErrNotFound)
-			return
-		}
-
-		data := internal.PurchaseOrder{
-			ID: PurchaseOrder.ID,
-			Attributes: internal.PurchaseOrderAttributes{
-				OrderNumber:     PurchaseOrder.Attributes.OrderNumber,
-				OrderDate:       PurchaseOrder.Attributes.OrderDate,
-				TrackingCode:    PurchaseOrder.Attributes.TrackingCode,
-				BuyerId:         PurchaseOrder.Attributes.BuyerId,
-				ProductRecordId: PurchaseOrder.Attributes.ProductRecordId,
-			},
-		}
-
-		// returns status 200 and the data if all ok
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
 			"data":    data,
@@ -120,74 +88,6 @@ func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"message": "success",
 			"data":    PurchaseOrder,
-		})
-	}
-}
-
-// PatchPurchaseOrders handles the PATCH /PurchaseOrders route
-func (h *PurchaseOrderDefault) PatchPurchaseOrders() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := chi.URLParam(r, "id")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
-			return
-		}
-
-		var inputPurchaseOrder internal.PurchaseOrder
-		// decode the json request body into PurchaseOrder struct
-		err = json.NewDecoder(r.Body).Decode(&inputPurchaseOrder)
-		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
-			return
-		}
-
-		inputPurchaseOrder.ID = id
-		// update the PurchaseOrder
-		PurchaseOrder, err := h.sv.UpdatePurchaseOrder(inputPurchaseOrder)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				handleError(w, utils.ErrNotFound)
-			} else {
-				handleError(w, utils.ErrWarehouseDoesNotExists)
-			}
-			return
-		}
-
-		// returns status 200 and the data if all ok
-		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    PurchaseOrder,
-		})
-	}
-}
-
-// DeletePurchaseOrders handles the DELETE /PurchaseOrders/{id} route
-// it deletes an existing PurchaseOrder based on the provided ID
-func (h *PurchaseOrderDefault) DeletePurchaseOrders() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// extract the PurchaseOrder ID from the URL parameters and converts it to int
-		idStr := chi.URLParam(r, "id")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
-			return
-		}
-
-		// delete the PurchaseOrder
-		err = h.sv.DeletePurchaseOrder(id)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				handleError(w, utils.ErrNotFound)
-			} else {
-				handleError(w, utils.ErrInvalidArguments)
-			}
-			return
-		}
-
-		// returns status 204 and a success message if all ok
-		response.JSON(w, http.StatusNoContent, map[string]any{
-			"message": "PurchaseOrder deleted successfully",
 		})
 	}
 }
