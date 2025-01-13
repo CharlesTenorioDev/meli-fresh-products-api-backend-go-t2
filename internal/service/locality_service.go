@@ -96,3 +96,14 @@ func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]interna
 	}
 	return s.localityRepo.GetSellersByLocalityId(localityId)
 }
+
+func (s *BasicLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+	// Of id != 0, check if locality exists
+	if localityId != 0 {
+		_, err := s.localityRepo.GetById(localityId)
+		if err != nil {
+			return []internal.CarriesByLocality{}, err
+		}
+	}
+	return s.localityRepo.GetCarriesByLocalityId(localityId)
+}

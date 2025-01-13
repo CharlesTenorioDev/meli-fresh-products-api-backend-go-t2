@@ -29,6 +29,11 @@ func (m *MockLocalityService) GetSellersByLocalityId(localityId int) ([]internal
 	return args.Get(0).([]internal.SellersByLocality), args.Error(1)
 }
 
+func (m *MockLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+	args := m.Called(localityId)
+	return args.Get(0).([]internal.CarriesByLocality), args.Error(1)
+}
+
 func TestUnitLocality_CreateLocality(t *testing.T) {
 	cases := []struct {
 		TestName           string
