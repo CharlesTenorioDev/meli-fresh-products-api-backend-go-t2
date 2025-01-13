@@ -27,6 +27,11 @@ func (m *MockLocalityRepository) GetSellersByLocalityId(localityId int) ([]inter
 	return args.Get(0).([]internal.SellersByLocality), args.Error(1)
 }
 
+func (m *MockLocalityRepository) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+	args := m.Called(localityId)
+	return args.Get(0).([]internal.CarriesByLocality), args.Error(1)
+}
+
 type MockProvinceRepository struct {
 	mock.Mock
 }

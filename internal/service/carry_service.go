@@ -36,6 +36,28 @@ func (s *MySQLCarryService) GetById(id int) (internal.Carry, error) {
 }
 
 func (s *MySQLCarryService) Update(carry *internal.Carry) error {
+
+	existingCarry, err := s.repo.GetById(carry.CID)
+	if err != nil {
+		return err
+	}
+	if carry.CID == 0 {
+		(*carry).CID = existingCarry.CID
+	}
+	if carry.CompanyName == "" {
+		(*carry).CompanyName = existingCarry.CompanyName
+	}
+	if carry.Address == "" {
+		(*carry).Address = existingCarry.Address
+	}
+	if carry.Telephone == "" {
+		(*carry).Telephone = existingCarry.Telephone
+	}
+	if carry.LocalityID == 0 {
+		(*carry).LocalityID = existingCarry.LocalityID
+	} else if _, err := s.validateLocality.GetById(carry.LocalityID); err != nil {
+		return err
+	}
 	return s.repo.Update(carry)
 }
 

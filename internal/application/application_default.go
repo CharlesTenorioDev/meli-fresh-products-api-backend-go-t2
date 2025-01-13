@@ -152,16 +152,9 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
-	// Sprint2 Requisito 2 - Locality
-	localitiesRepo := repository.NewMysqlLocalityRepository(a.db)
-	localityService := service.NewMysqlLocalityService(localitiesRepo)
-	if err = routes.LocalityRoutes(router, localityService); err != nil {
-		panic(err)
-	}
-
 	// Sprint2 Requisito 2 - Carry
 	carriesRepo := repository.NewMySQLCarryRepository(a.db)
-	carryService := service.NewMySQLCarryService(carriesRepo, localitiesRepo)
+	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
 	if err = routes.CarryRoutes(router, carryService); err != nil {
 		panic(err)
 	}
