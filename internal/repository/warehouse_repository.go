@@ -47,6 +47,16 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	return warehouseList, nil
 }
 
+// GetById retrieves a warehouse by its ID from the database.
+// It returns the warehouse details if found, otherwise it returns an error.
+// If the warehouse is not found, it returns a utils.ErrNotFound error.
+//
+// Parameters:
+//   - id: the ID of the warehouse to retrieve.
+//
+// Returns:
+//   - internal.Warehouse: the warehouse details.
+//   - error: an error if the warehouse is not found or if there is a database issue.
 func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
 	row := r.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id` FROM warehouses WHERE id = ?", id)
 	if err := row.Err(); err != nil {
@@ -66,6 +76,15 @@ func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
 
 }
 
+// Save inserts a new warehouse record into the database and returns the saved warehouse with its ID.
+// If there is a conflict (e.g., duplicate entry), it returns an error indicating the conflict.
+//
+// Parameters:
+//   - newWarehouse: The warehouse object to be saved.
+//
+// Returns:
+//   - internal.Warehouse: The saved warehouse object with its ID populated.
+//   - error: An error object if there was an issue during the save operation.
 func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	// prepare the query
 	statement, err := r.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES (?, ?, ?, ?)")
@@ -102,6 +121,16 @@ func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse,
 	return newWarehouse, nil
 }
 
+// Update updates an existing warehouse in the database with the provided updatedWarehouse data.
+// It first checks if the warehouse exists by its ID. If it does not exist, it returns an error.
+// If the warehouse exists, it prepares and executes an SQL update statement to update the warehouse details.
+// If the update is successful, it returns the updated warehouse data.
+// If there is a MySQL error, it checks for specific error codes and returns appropriate errors.
+// Parameters:
+// - updatedWarehouse: The warehouse data to be updated.
+// Returns:
+// - The updated warehouse data if the update is successful.
+// - An error if the warehouse does not exist or if there is an issue with the update operation.
 func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	_, err := r.GetById(updatedWarehouse.ID)
 	if err != nil {
@@ -135,6 +164,15 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 	return updatedWarehouse, nil
 }
 
+// Delete removes a warehouse record from the database by its ID.
+// It first checks if the warehouse exists by calling GetById.
+// If the warehouse exists, it prepares and executes a DELETE SQL statement.
+// If any error occurs during these operations, it returns the error.
+// Parameters:
+//   - id: the ID of the warehouse to be deleted.
+//
+// Returns:
+//   - error: an error object if any error occurs, otherwise nil.
 func (r *WarehouseDB) Delete(id int) error {
 	_, err := r.GetById(id)
 	if err != nil {

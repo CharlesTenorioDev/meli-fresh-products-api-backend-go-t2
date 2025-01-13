@@ -31,6 +31,11 @@ type reqPostLocality struct {
 	} `json:"data"`
 }
 
+// CreateLocality handles the creation of a new locality.
+// It decodes the request body into a reqPostLocality struct, validates it,
+// and then creates a new Locality, Province, and Country based on the provided data.
+// If the locality already exists, it returns a 409 Conflict status.
+// If the provided arguments are invalid, it returns a 422 Unprocessable Entity status.
 func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostLocality
@@ -65,6 +70,12 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	}
 }
 
+// GetSellersByLocalityId handles HTTP requests to retrieve sellers by locality ID.
+// It extracts the 'id' parameter from the query string, validates it, and calls the service layer to get the sellers.
+// If the 'id' parameter is invalid, it responds with a 400 Bad Request status.
+// If no sellers are found for the given ID, it responds with a 404 Not Found status.
+// For any other errors, it responds with a 500 Internal Server Error status.
+// On success, it responds with a 200 OK status and the sellers data in JSON format.
 func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := 0
@@ -89,6 +100,13 @@ func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 	}
 }
 
+// GetCarriesByLocalityId handles HTTP requests to retrieve carriers by locality ID.
+// It extracts the "id" parameter from the query string, converts it to an integer,
+// and calls the service layer to get the carriers associated with the given locality ID.
+// If the "id" parameter is missing or invalid, it defaults to 0.
+// If an error occurs during the service call or while encoding the response, it returns
+// an appropriate HTTP error response.
+// The response is returned as a JSON-encoded list of carriers with a status code of 200 OK.
 func (handler *LocalityHandler) GetCarriesByLocalityId() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")

@@ -9,6 +9,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
 )
 
+// CarryRoutes sets up the routes for carry-related operations on the provided mux router.
 func CarryRoutes(mux *chi.Mux, service internal.CarryService) error {
 	if mux == nil {
 		return errors.New("mux router is nil")

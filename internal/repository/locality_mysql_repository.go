@@ -12,10 +12,29 @@ type MysqlLocalityRepository struct {
 	db *sql.DB
 }
 
+// NewMysqlLocalityRepository creates a new instance of MysqlLocalityRepository with the given database connection.
+// It returns an implementation of the LocalityRepository interface.
+//
+// Parameters:
+//   - db: A pointer to an sql.DB instance representing the database connection.
+//
+// Returns:
+//   - An implementation of the LocalityRepository interface.
 func NewMysqlLocalityRepository(db *sql.DB) internal.LocalityRepository {
 	return &MysqlLocalityRepository{db: db}
 }
 
+// Save inserts a new locality record into the localities table in the MySQL database.
+// It prepares an SQL statement for inserting the locality's ID, name, and province ID.
+// If the preparation or execution of the statement fails, it returns an error.
+//
+// Parameters:
+//
+//	locality (*internal.Locality): A pointer to the Locality struct containing the data to be saved.
+//
+// Returns:
+//
+//	error: An error object if there is an issue with preparing or executing the SQL statement, otherwise nil.
 func (r *MysqlLocalityRepository) Save(locality *internal.Locality) error {
 	stmt, err := r.db.Prepare("INSERT INTO localities(id, locality_name, province_id) VALUES(?, ?, ?);")
 	if err != nil {
@@ -28,6 +47,18 @@ func (r *MysqlLocalityRepository) Save(locality *internal.Locality) error {
 	return nil
 }
 
+// GetById retrieves a locality by its ID from the MySQL database.
+// It prepares a SQL statement to select the locality with the given ID,
+// executes the query, and scans the result into an internal.Locality struct.
+// If the locality is not found, it returns an ErrNotFound error.
+// If any other error occurs during the process, it returns that error.
+//
+// Parameters:
+//   - id: The ID of the locality to retrieve.
+//
+// Returns:
+//   - internal.Locality: The locality with the specified ID.
+//   - error: An error if the locality is not found or if any other error occurs.
 func (r *MysqlLocalityRepository) GetById(id int) (internal.Locality, error) {
 	stmt, err := r.db.Prepare("SELECT id, locality_name, province_id FROM localities WHERE id=?;")
 	if err != nil {
@@ -46,6 +77,16 @@ func (r *MysqlLocalityRepository) GetById(id int) (internal.Locality, error) {
 	return locality, nil
 }
 
+// GetSellersByLocalityId retrieves a list of sellers by locality ID.
+// If the localityId is 0, it retrieves the count of sellers for all localities.
+// Otherwise, it retrieves the count of sellers for the specified locality ID.
+//
+// Parameters:
+//   - localityId: the ID of the locality to filter sellers by.
+//
+// Returns:
+//   - []internal.SellersByLocality: a slice of SellersByLocality containing the locality ID, locality name, and sellers count.
+//   - error: an error if the query fails or if there is an issue scanning the rows.
 func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
 	report := []internal.SellersByLocality{}
 	var rows *sql.Rows
@@ -86,6 +127,15 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 	return report, nil
 }
 
+// GetCarriesByLocalityId retrieves the number of carriers associated with a given locality ID.
+// If the locality ID is 0, it retrieves the carrier count for all localities.
+//
+// Parameters:
+//   - localityId: The ID of the locality to filter by. If 0, retrieves data for all localities.
+//
+// Returns:
+//   - []internal.CarriesByLocality: A slice of CarriesByLocality structs containing the locality ID, locality name, and carrier count.
+//   - error: An error object if an error occurred during the query execution.
 func (r *MysqlLocalityRepository) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
 	report := []internal.CarriesByLocality{}
 	var rows *sql.Rows

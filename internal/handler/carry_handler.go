@@ -15,10 +15,27 @@ type CarryHandler struct {
 	service internal.CarryService
 }
 
+// NewCarryHandler creates a new instance of CarryHandler with the provided CarryService.
+// It returns a pointer to the newly created CarryHandler.
+//
+// Parameters:
+//   - service: an instance of CarryService that will be used by the CarryHandler.
+//
+// Returns:
+//   - A pointer to the newly created CarryHandler.
 func NewCarryHandler(service internal.CarryService) *CarryHandler {
 	return &CarryHandler{service: service}
 }
 
+// SaveCarry handles the HTTP request to save a carry object.
+// It decodes the request body into a Carry struct and calls the service layer to save it.
+// If the decoding fails, it responds with a 400 Bad Request status.
+// If the service layer returns an error, it responds with the appropriate status code:
+// - 409 Conflict if the carry ID already exists
+// - 422 Unprocessable Entity if the carry data is invalid
+// - 404 Not Found if the locality is not found
+// - 500 Internal Server Error for any other errors
+// On success, it responds with a 201 Created status and the saved carry object.
 func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var carry *internal.Carry
@@ -47,6 +64,9 @@ func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 	}
 }
 
+// GetAllCarries handles the HTTP request to retrieve all carries.
+// It returns an HTTP handler function that writes the carries data as a JSON response.
+// If an error occurs while retrieving the carries, it responds with a 404 status code and an error message.
 func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		carries, err := handler.service.GetAll()
@@ -59,6 +79,14 @@ func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 	}
 }
 
+// GetCarryById handles the HTTP request to retrieve a carry by its ID.
+// It extracts the ID from the URL parameters, validates it, and then
+// calls the service layer to fetch the carry. If the ID is invalid or
+// the carry is not found, it responds with the appropriate HTTP error
+// status and message. On success, it responds with the carry data in
+// JSON format.
+//
+// Returns an http.HandlerFunc that can be used to handle the request.
 func (handler *CarryHandler) GetCarryById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -77,6 +105,12 @@ func (handler *CarryHandler) GetCarryById() http.HandlerFunc {
 	}
 }
 
+// UpdateCarry handles the HTTP request for updating a carry item.
+// It extracts the carry ID from the URL parameters, decodes the request body into a Carry struct,
+// and calls the service layer to update the carry item in the database.
+// If the ID is invalid, the request body cannot be decoded, or the update fails,
+// it responds with the appropriate HTTP status code and error message.
+// On success, it responds with the updated carry item and a 200 OK status.
 func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -111,6 +145,12 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 	}
 }
 
+// DeleteCarry handles the HTTP request for deleting a carry item by its ID.
+// It extracts the ID from the URL parameters, validates it, and calls the service layer to delete the carry item.
+// If the ID is invalid, it responds with a 400 Bad Request status.
+// If the carry item is not found, it responds with a 404 Not Found status.
+// If there is an internal server error during deletion, it responds with a 500 Internal Server Error status.
+// On successful deletion, it responds with a 204 No Content status.
 func (handler *CarryHandler) DeleteCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
