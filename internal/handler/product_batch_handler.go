@@ -24,7 +24,7 @@ func (h *ProductBatchHandler) Create() http.HandlerFunc {
 			return
 		}
 
-		newBatch, err := h.service.Save(body)
+		newBatch, err := h.service.Save(&body)
 		if err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())

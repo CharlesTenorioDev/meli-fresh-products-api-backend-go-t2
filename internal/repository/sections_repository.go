@@ -61,6 +61,7 @@ func (r *SectionMysqlRepository) GetById(id int) (internal.Section, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = utils.ErrNotFound
+			return internal.Section{}, err
 		}
 		return internal.Section{}, err
 	}

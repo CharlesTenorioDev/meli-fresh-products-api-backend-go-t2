@@ -8,16 +8,16 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type ProductBatchRepository struct {
+type MySQLProductBatchRepository struct {
 	db *sql.DB
 }
 
-func NewProductBatchRepository(db *sql.DB) *ProductBatchRepository {
-	return &ProductBatchRepository{db: db}
+func NewProductBatchRepository(db *sql.DB) internal.ProductBatchRepository {
+	return &MySQLProductBatchRepository{db: db}
 }
 
 // Get all the sections and return in asc order
-func (r *ProductBatchRepository) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
+func (r *MySQLProductBatchRepository) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
 	result, err := r.db.Exec("INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
 		(*newBatch).BatchNumber, (*newBatch).CurrentQuantity, (*newBatch).CurrentTemperature, (*newBatch).DueDate, (*newBatch).InitialQuantity, (*newBatch).ManufacturingDate, (*newBatch).ManufacturingHour, (*newBatch).MinimumTemperature, (*newBatch).ProductId, (*newBatch).SectionId,
 	)
@@ -44,8 +44,8 @@ func (r *ProductBatchRepository) Save(newBatch *internal.ProductBatchRequest) (i
 	return createdBatch, nil
 }
 
-func (r *SectionMysqlRepository) GetBatchNumber(batchNumber int) error {
-	var exists bool
+func (r *MySQLProductBatchRepository) GetBatchNumber(batchNumber int) (int, error) {
+	var exists int
 
 	row := r.db.QueryRow("SELECT batch_number FROM product_batches WHERE batch_number=?", batchNumber)
 
@@ -54,11 +54,11 @@ func (r *SectionMysqlRepository) GetBatchNumber(batchNumber int) error {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = utils.ErrNotFound
-			return nil
+			return 0, nil
 		}
-		return err
+		return 0, err
 	}
 
-	return utils.ErrConflict
+	return exists, nil
 
 }
