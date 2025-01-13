@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -86,6 +87,7 @@ func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 			case utils.ErrProductDoesNotExists:
 				utils.HandleError(w, utils.ErrProductDoesNotExists)
 			default:
+				log.Fatalln("Error:", err.Error())
 				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
 			return

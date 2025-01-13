@@ -88,9 +88,10 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.P
 
 // CreatePurchaseOrder adds a new purchase order
 func (repo *PurchaseOrderRepository) CreatePurchaseOrder(newOrder internal.PurchaseOrderAttributes) (internal.PurchaseOrder, error) {
-	query := "INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES (?, ?, ?, ?)"
+	query := "INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES (?, ?, ?, ?, ?)"
 	result, err := repo.db.Exec(query, newOrder.OrderNumber, newOrder.OrderDate, newOrder.TrackingCode, newOrder.BuyerId, newOrder.ProductRecordId)
 	if err != nil {
+
 		return internal.PurchaseOrder{}, err
 	}
 

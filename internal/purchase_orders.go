@@ -45,8 +45,8 @@ type PurchaseOrderService interface {
 type PurchaseOrdersBuyerValidation interface {
 	GetOne(int) (*Buyer, error)
 }
-type PurchaseOrdersProductValidation interface {
-	GetProductByID(id int) (Product, error)
+type PurchaseOrdersProductRecordValidation interface {
+	FindById(productRecordID int) (ProductRecords, error)
 }
 
 type PurchaseOrderSummary struct {

@@ -8,15 +8,15 @@ import (
 // PurchaseOrderDefault is the default implementation of the PurchaseOrder service
 // it handles business logic and delegates data operations to the repository
 type PurchaseOrderDefault struct {
-	rp             internal.PurchaseOrderRepository
-	buyerService   internal.PurchaseOrdersBuyerValidation
-	productService internal.PurchaseOrdersProductValidation
+	rp                   internal.PurchaseOrderRepository
+	buyerService         internal.PurchaseOrdersBuyerValidation
+	productRecordService internal.PurchaseOrdersProductRecordValidation
 }
 
 // NewPurchaseOrderService creates a new instance of PurchaseOrderDefault
 // takes an PurchaseOrderRepository as a parameter to handle data operations
-func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService internal.PurchaseOrdersBuyerValidation, productService internal.PurchaseOrdersProductValidation) *PurchaseOrderDefault {
-	return &PurchaseOrderDefault{rp: rp, buyerService: buyerService, productService: productService}
+func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService internal.PurchaseOrdersBuyerValidation, productRecordService internal.PurchaseOrdersProductRecordValidation) *PurchaseOrderDefault {
+	return &PurchaseOrderDefault{rp: rp, buyerService: buyerService, productRecordService: productRecordService}
 }
 
 // FindAll retrieves all PurchaseOrders from the repository
@@ -124,9 +124,10 @@ func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
 }
 
 func (s *PurchaseOrderDefault) productRecordExistsById(id int) error {
-	product, err := s.productService.GetProductByID(id)
+	product, err := s.productRecordService.FindById(id)
 
 	if err != nil {
+
 		if err == utils.ErrNotFound {
 			return utils.ErrProductDoesNotExists
 		}
