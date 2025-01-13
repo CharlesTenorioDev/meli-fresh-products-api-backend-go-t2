@@ -2,14 +2,12 @@ package application
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/loader"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
@@ -105,7 +103,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 2 - Warehouses
-	warehouseRepo := repository.NewWarehouseDB(nil)
+	warehouseRepo := repository.NewWarehouseRepository(a.db)
 	warehouseService := service.NewWarehouseService(warehouseRepo)
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
@@ -121,14 +119,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 5 - Employees
-	filePath := "docs/db/employees.json"
-	ld := loader.NewEmployeeJsonFile(filePath)
-	db, err := ld.Load()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	employeesRepo := repository.NewEmployeeRepository(db)
+	employeesRepo := repository.NewEmployeeRepository(a.db)
 	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
 	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
 		panic(err)

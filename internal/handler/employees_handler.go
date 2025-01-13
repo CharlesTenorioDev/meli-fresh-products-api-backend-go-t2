@@ -2,9 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
@@ -27,27 +28,16 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		employees, err := h.sv.FindAll()
 		if err != nil {
-			response.JSON(w, http.StatusInternalServerError, nil)
+			if err == utils.ErrNotFound {
+				utils.Error(w, http.StatusNotFound, "No employees found")
+			}
+			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
 			return
 		}
-
-		data := make(map[int]internal.Employee)
-		for key, value := range employees {
-			data[key] = internal.Employee{
-				ID: value.ID,
-				Attributes: internal.EmployeeAttributes{
-					CardNumberId: value.Attributes.CardNumberId,
-					FirstName:    value.Attributes.FirstName,
-					LastName:     value.Attributes.LastName,
-					WarehouseId:  value.Attributes.WarehouseId,
-				},
-			}
-		}
-
 		// returns status 200 and the data if all ok
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    data,
+			"data":    employees,
 		})
 	}
 }
