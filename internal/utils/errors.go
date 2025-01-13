@@ -2,6 +2,9 @@ package utils
 
 import (
 	"errors"
+	"net/http"
+
+	"github.com/bootcamp-go/web/response"
 )
 
 var (
@@ -15,3 +18,44 @@ var (
 	ErrBuyerDoesNotExists     = errors.New("buyer's id doesn't exist")     // 409
 	ErrProductDoesNotExists   = errors.New("product's id doesn't exist")   // 409
 )
+
+// handleError centralizes error handling and response formatting
+func HandleError(w http.ResponseWriter, err error) {
+	var status int
+	var message string
+
+	switch err {
+	case ErrInvalidFormat:
+		status = http.StatusBadRequest
+		message = ErrInvalidFormat.Error()
+	case ErrWarehouseDoesNotExists:
+		status = http.StatusUnprocessableEntity
+		message = ErrWarehouseDoesNotExists.Error()
+	case ErrInvalidArguments:
+		status = http.StatusUnprocessableEntity
+		message = ErrInvalidArguments.Error()
+	case ErrEmptyArguments:
+		status = http.StatusUnprocessableEntity
+		message = ErrEmptyArguments.Error()
+	case ErrConflict:
+		status = http.StatusConflict
+		message = ErrConflict.Error()
+	case ErrNotFound:
+		status = http.StatusNotFound
+		message = ErrNotFound.Error()
+	case ErrInvalidProperties:
+		status = http.StatusBadRequest
+		message = ErrInvalidProperties.Error()
+	case ErrBuyerDoesNotExists:
+		status = http.StatusConflict
+		message = ErrBuyerDoesNotExists.Error()
+	case ErrProductDoesNotExists:
+		status = http.StatusConflict
+		message = ErrProductDoesNotExists.Error()
+	default:
+		status = http.StatusInternalServerError
+		message = "internal server error"
+	}
+
+	response.Error(w, status, message)
+}

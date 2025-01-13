@@ -31,14 +31,18 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 			var err error
 			buyerId, err = strconv.Atoi(buyerIdParam)
 			if err != nil {
-				response.JSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid id"})
+				utils.HandleError(w, utils.ErrInvalidFormat)
 				return
 			}
 		}
 
 		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerId(buyerId)
 		if err != nil {
-			response.JSON(w, http.StatusInternalServerError, nil)
+			if err == utils.ErrBuyerDoesNotExists {
+				utils.HandleError(w, utils.ErrNotFound)
+				return
+			}
+			response.JSON(w, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -65,21 +69,24 @@ func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newPurchaseOrder)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
 		// create the PurchaseOrder
 		PurchaseOrder, err := h.sv.CreatePurchaseOrder(newPurchaseOrder)
 		if err != nil {
-			if err == utils.ErrConflict {
-				handleError(w, utils.ErrConflict)
-			} else if err == utils.ErrEmptyArguments {
-				handleError(w, utils.ErrEmptyArguments)
-			} else if err == utils.ErrWarehouseDoesNotExists {
-				handleError(w, utils.ErrWarehouseDoesNotExists)
-			} else {
-				handleError(w, utils.ErrInvalidArguments)
+			switch err {
+			case utils.ErrConflict:
+				utils.HandleError(w, utils.ErrConflict)
+			case utils.ErrEmptyArguments:
+				utils.HandleError(w, utils.ErrEmptyArguments)
+			case utils.ErrBuyerDoesNotExists:
+				utils.HandleError(w, utils.ErrBuyerDoesNotExists)
+			case utils.ErrProductDoesNotExists:
+				utils.HandleError(w, utils.ErrProductDoesNotExists)
+			default:
+				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
 			return
 		}
