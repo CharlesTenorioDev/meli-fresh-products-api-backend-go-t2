@@ -19,7 +19,9 @@ CREATE TABLE warehouses(
     address VARCHAR(255),
     telephone VARCHAR(255),
     warehouse_code VARCHAR(255),
-    locality_id INT
+    locality_id INT,
+    minimum_capacity INT,
+    minimum_temperature INT
 );
 
 -- Sprint 1, requirement 3
@@ -224,9 +226,9 @@ INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
 (2, 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
 
 -- Insert sample warehouses
-INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES
-('1234 Cold Storage St, LA', '555-3456', 'WH001', 1),
-('5678 Cool Goods Ave, Toronto', '555-7890', 'WH002', 2);
+INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES
+('1234 Cold Storage St, LA', '555-3456', 'WH001', 1, 1000, -5),
+('5678 Cool Goods Ave, Toronto', '555-7890', 'WH002', 2, 800, -4);
 
 -- Insert sample product types
 INSERT INTO product_types (description) VALUES

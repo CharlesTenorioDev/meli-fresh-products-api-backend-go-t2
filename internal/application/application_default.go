@@ -64,6 +64,8 @@ func (a *ApplicationDefault) TearDown() {
 	}
 }
 
+// SetUp initializes the application by setting up the database connection,
+// configuring the router, and registering various routes and services.
 func (a *ApplicationDefault) SetUp() (err error) {
 	// connect to db
 	a.db, err = sql.Open("mysql", a.cfgDb.FormatDSN())
@@ -116,7 +118,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Requisito 2 - Warehouses
 	warehouseRepo := repository.NewWarehouseDB(a.db)
-	warehouseService := service.NewWarehouseService(warehouseRepo)
+	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
 		panic(err)

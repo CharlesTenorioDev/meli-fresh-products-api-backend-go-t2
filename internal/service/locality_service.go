@@ -23,6 +23,22 @@ func NewBasicLocalityService(
 	}
 }
 
+// Save validates and saves a locality, province, and country to the repository.
+// It first checks if the locality, province, and country have valid names and IDs.
+// If the locality already exists, it returns an ErrConflict error.
+// If the country does not exist, it creates a new country entry.
+// If the province does not exist, it creates a new province entry.
+// Finally, it saves the locality with the associated province and country IDs.
+//
+// Parameters:
+//
+//	locality - a pointer to the Locality struct to be saved
+//	province - a pointer to the Province struct to be saved
+//	country - a pointer to the Country struct to be saved
+//
+// Returns:
+//
+//	error - an error if any validation or save operation fails, otherwise nil
 func (s *BasicLocalityService) Save(locality *internal.Locality, province *internal.Province, country *internal.Country) error {
 	if locality.LocalityName == "" {
 		return utils.ErrInvalidArguments
@@ -97,6 +113,17 @@ func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]interna
 	return s.localityRepo.GetSellersByLocalityId(localityId)
 }
 
+// GetCarriesByLocalityId retrieves a list of carriers associated with a given locality ID.
+// If the provided locality ID is not zero, it first checks if the locality exists.
+// If the locality does not exist, it returns an error.
+// If the locality exists or the locality ID is zero, it returns the list of carriers.
+//
+// Parameters:
+//   - localityId: The ID of the locality to retrieve carriers for.
+//
+// Returns:
+//   - []internal.CarriesByLocality: A slice of carriers associated with the locality.
+//   - error: An error if the locality does not exist or if there is an issue retrieving the carriers.
 func (s *BasicLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
 	// Of id != 0, check if locality exists
 	if localityId != 0 {
