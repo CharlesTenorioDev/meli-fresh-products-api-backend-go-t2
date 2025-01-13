@@ -10,7 +10,8 @@ import (
 )
 
 type WarehouseService struct {
-	repo internal.WarehouseRepository
+	repo             internal.WarehouseRepository
+	validateLocality internal.LocalityValidation
 }
 
 // NewWarehouseService creates a new instance of WarehouseService with the provided WarehouseRepository.
@@ -21,8 +22,11 @@ type WarehouseService struct {
 //
 // Returns:
 //   - A pointer to the newly created WarehouseService.
-func NewWarehouseService(repo internal.WarehouseRepository) *WarehouseService {
-	return &WarehouseService{repo: repo}
+func NewWarehouseService(repo internal.WarehouseRepository, validateLocality internal.LocalityValidation) *WarehouseService {
+	return &WarehouseService{
+		repo:             repo,
+		validateLocality: validateLocality,
+	}
 }
 
 // GetAll retrieves all warehouses from the repository.
@@ -219,6 +223,14 @@ func (s *WarehouseService) validateWarehouse(warehouse internal.Warehouse) error
 	if warehouse.Telephone == "" {
 		return utils.ErrInvalidArguments
 	}
-	// TODO: Add more validations to localities
+	if warehouse.MinimumCapacity < 0 {
+		return utils.ErrInvalidArguments
+	}
+	if warehouse.MinimumTemperature < -273 {
+		return utils.ErrInvalidArguments
+	}
+	if _, err := s.validateLocality.GetById(warehouse.LocalityID); err != nil {
+		return err
+	}
 	return nil
 }

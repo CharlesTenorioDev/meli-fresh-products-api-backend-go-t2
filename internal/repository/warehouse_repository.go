@@ -23,7 +23,7 @@ func NewWarehouseDB(db *sql.DB) *WarehouseDB {
 func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	var warehouseList []internal.Warehouse
 	// query the database
-	rows, err := w.db.Query("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id` FROM warehouses")
+	rows, err := w.db.Query("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses")
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	for rows.Next() {
 		var warehouse internal.Warehouse
 		// scan the row into the warehouse struct
-		err := rows.Scan(&warehouse.ID, &warehouse.Address, &warehouse.Telephone, &warehouse.WarehouseCode, &warehouse.LocalityID)
+		err := rows.Scan(&warehouse.ID, &warehouse.Address, &warehouse.Telephone, &warehouse.WarehouseCode, &warehouse.LocalityID, &warehouse.MinimumCapacity, &warehouse.MinimumTemperature)
 		if err != nil {
 			return nil, err
 		}
@@ -58,13 +58,13 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 //   - internal.Warehouse: the warehouse details.
 //   - error: an error if the warehouse is not found or if there is a database issue.
 func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
-	row := r.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id` FROM warehouses WHERE id = ?", id)
+	row := r.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses WHERE id = ?", id)
 	if err := row.Err(); err != nil {
 		return internal.Warehouse{}, err
 	}
 
 	var warehouse internal.Warehouse
-	err := row.Scan(&warehouse.ID, &warehouse.Address, &warehouse.Telephone, &warehouse.WarehouseCode, &warehouse.LocalityID)
+	err := row.Scan(&warehouse.ID, &warehouse.Address, &warehouse.Telephone, &warehouse.WarehouseCode, &warehouse.LocalityID, &warehouse.MinimumCapacity, &warehouse.MinimumTemperature)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Warehouse{}, utils.ErrNotFound
@@ -87,14 +87,14 @@ func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
 //   - error: An error object if there was an issue during the save operation.
 func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	// prepare the query
-	statement, err := r.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES (?, ?, ?, ?)")
+	statement, err := r.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return internal.Warehouse{}, err
 	}
 	defer statement.Close()
 
 	// execute the query
-	result, err := statement.Exec(newWarehouse.Address, newWarehouse.Telephone, newWarehouse.WarehouseCode, newWarehouse.LocalityID)
+	result, err := statement.Exec(newWarehouse.Address, newWarehouse.Telephone, newWarehouse.WarehouseCode, newWarehouse.LocalityID, newWarehouse.MinimumCapacity, newWarehouse.MinimumTemperature)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
@@ -138,7 +138,7 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 	}
 	// prepare the query
 	statement, err := r.db.Prepare(
-		"UPDATE `warehouses` AS `w` SET `address` = ?, `telephone` = ?, `warehouse_code` = ?, `locality_id` = ? WHERE `id` = ?",
+		"UPDATE `warehouses` AS `w` SET `address` = ?, `telephone` = ?, `warehouse_code` = ?, `locality_id` = ?, `minimum_capacity`= ?, `minimum_temperature`= ? WHERE `id` = ?",
 	)
 	if err != nil {
 		return internal.Warehouse{}, err
@@ -146,7 +146,7 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 	defer statement.Close()
 
 	// execute the query
-	_, err = statement.Exec(updatedWarehouse.Address, updatedWarehouse.Telephone, updatedWarehouse.WarehouseCode, updatedWarehouse.LocalityID, updatedWarehouse.ID)
+	_, err = statement.Exec(updatedWarehouse.Address, updatedWarehouse.Telephone, updatedWarehouse.WarehouseCode, updatedWarehouse.LocalityID, updatedWarehouse.MinimumCapacity, updatedWarehouse.MinimumTemperature, updatedWarehouse.ID)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
