@@ -98,13 +98,13 @@ func (s *BasicSectionService) validateLogicRules(section internal.Section) error
 // Save a section, check the relations, zero value when applicable, and basic logic
 func (s *BasicSectionService) Save(newSection internal.Section) (internal.Section, error) {
 	// Zero value validation
-	if newSection.SectionNumber == 0 {
+	if newSection.SectionNumber <= 0 {
 		return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("section_number cannot be empty/null"))
 	}
-	if newSection.WarehouseID == 0 {
+	if newSection.WarehouseID <= 0 {
 		return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("warehouse_id cannot be empty/null"))
 	}
-	if newSection.ProductTypeID == 0 {
+	if newSection.ProductTypeID <= 0 {
 		return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
 	}
 
