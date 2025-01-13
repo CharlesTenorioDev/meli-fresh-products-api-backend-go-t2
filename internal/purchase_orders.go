@@ -48,5 +48,5 @@ type PurchaseOrderService interface {
 }
 
 type PurchaseOrdersBuyerValidation interface {
-	GetById(int) (Buyer, error)
+	GetOne(int) (*Buyer, error)
 }
