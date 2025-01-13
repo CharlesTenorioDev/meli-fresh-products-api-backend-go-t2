@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -106,4 +107,22 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 	newProductRecord.ID = int(id)
 
 	return newProductRecord, nil
+}
+
+func (p *ProductRecordDB) FindById(productRecordID int) (internal.ProductRecords, error) {
+	var row *sql.Row
+	var err error
+
+	query := "select `id` from product_records where id = ?"
+
+	row = p.db.QueryRow(query, productRecordID)
+
+	var pr internal.ProductRecords
+	row.Scan(&pr.ID)
+	err = row.Err()
+	if err != nil {
+		return internal.ProductRecords{}, err
+	}
+
+	return pr, nil
 }
