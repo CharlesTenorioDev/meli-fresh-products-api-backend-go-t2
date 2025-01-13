@@ -135,7 +135,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDb(nil)
+	buyersRepo := repository.NewBuyerDb(a.db)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	err = routes.BuyerRoutes(router, buyersService)
