@@ -1,15 +1,15 @@
 package internal
 
 type Locality struct {
-	ID           int
-	LocalityName string
-	ProvinceID   int
+	ID           int    `json:"id"`
+	LocalityName string `json:"locality_name"`
+	ProvinceID   int    `json:"province_id"`
 }
 
 type SellersByLocality struct {
-	LocalityId   int
-	LocalityName string
-	SellersCount int
+	LocalityId   int    `json:"locality_id"`
+	LocalityName string `json:"locality_name"`
+	SellersCount int    `json:"seller_count"`
 }
 
 type LocalityRepository interface {
