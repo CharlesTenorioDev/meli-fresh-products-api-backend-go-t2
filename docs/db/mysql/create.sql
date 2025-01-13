@@ -21,7 +21,7 @@ CREATE TABLE warehouses(
     warehouse_code VARCHAR(255),
     locality_id INT,
     minimum_capacity INT,
-    minimum_temperature INT,
+    minimum_temperature INT
 );
 
 -- Sprint 1, requirement 3
