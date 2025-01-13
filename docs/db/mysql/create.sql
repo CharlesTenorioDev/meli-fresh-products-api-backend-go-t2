@@ -94,7 +94,7 @@ CREATE TABLE countries(
 -- Sprint 2, requirement 2
 CREATE TABLE carriers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid UNIQUE INT,
+    cid INT UNIQUE,
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
