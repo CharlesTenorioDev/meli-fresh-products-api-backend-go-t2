@@ -48,20 +48,3 @@ func (r *MysqlContryRepository) GetByName(name string) (internal.Country, error)
 	}
 	return country, nil
 }
-
-// func (r *MysqlContryRepository) GetById(id int) (internal.Country, error) {
-// 	stmt, err := r.db.Prepare("SELECT id, country_name FROM countries WHERE id=?;")
-// 	if err != nil {
-// 		return internal.Country{}, err
-// 	}
-// 	row := stmt.QueryRow(id)
-// 	var country internal.Country
-// 	err = row.Scan(&country.ID, &country.CountryName)
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			return internal.Country{}, utils.ErrNotFound
-// 		}
-// 		return internal.Country{}, err
-// 	}
-// 	return country, nil
-// }

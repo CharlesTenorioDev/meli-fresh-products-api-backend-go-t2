@@ -1,20 +1,24 @@
 package internal
 
 type SellerService interface {
-	GetAll() (map[int]Seller, error)
+	GetAll() ([]Seller, error)
 	GetById(id int) (Seller, error)
-	Create(SellerRequest) (Seller, error)
+	Create(*Seller) error
 	Update(int, SellerRequestPointer) (Seller, error)
-	Delete(int) (bool, error)
+	Delete(int) error
 }
 
 type SellerRepository interface {
-	GetAll() (s map[int]Seller, err error)
+	GetAll() (s []Seller, err error)
 	GetById(id int) (Seller, error)
 	GetByCid(cid int) (Seller, error)
-	Create(SellerRequest) (Seller, error)
-	Update(Seller) (Seller, error)
-	Delete(int) (bool, error)
+	Create(*Seller) error
+	Update(*Seller) error
+	Delete(int) error
+}
+
+type SellerLocalityValidation interface {
+	GetById(int) (Locality, error)
 }
 
 type Seller struct {
@@ -23,6 +27,7 @@ type Seller struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
+	LocalityId  int    `json:"locality_id"`
 }
 
 type SellerRequest struct {
@@ -30,6 +35,7 @@ type SellerRequest struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
+	LocalityId  int    `json:"locality_id"`
 }
 
 type SellerRequestPointer struct {

@@ -1,19 +1,22 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-func NewSellerService(rp internal.SellerRepository) *SellerService {
-	return &SellerService{rp: rp}
+func NewSellerService(rp internal.SellerRepository, localityRp internal.SellerLocalityValidation) internal.SellerService {
+	return &SellerService{rp: rp, localityRp: localityRp}
 }
 
 type SellerService struct {
-	rp internal.SellerRepository
+	rp         internal.SellerRepository
+	localityRp internal.SellerLocalityValidation
 }
 
-func (s *SellerService) GetAll() (map[int]internal.Seller, error) {
+func (s *SellerService) GetAll() ([]internal.Seller, error) {
 	sellers, err := s.rp.GetAll()
 	if err != nil {
 		return nil, err
@@ -32,20 +35,25 @@ func (s *SellerService) GetById(id int) (internal.Seller, error) {
 	return seller, nil
 }
 
-func (s *SellerService) Create(newSeller internal.SellerRequest) (internal.Seller, error) {
-	sellerValidation := s.verify(newSeller)
-
+func (s *SellerService) Create(newSeller *internal.Seller) error {
+	sellerValidation := s.verify(*newSeller)
 	if sellerValidation != nil {
-		return internal.Seller{}, sellerValidation
+		return sellerValidation
 	}
-
-	createdSeller, err := s.rp.Create(newSeller)
+	_, err := s.localityRp.GetById(newSeller.LocalityId)
 	if err != nil {
-		return internal.Seller{}, err
+		if errors.Is(err, utils.ErrNotFound) {
+			return errors.Join(utils.ErrInvalidArguments, errors.New("invalid locality_id"))
+		}
+		return err
 	}
 
-	return createdSeller, nil
+	err = s.rp.Create(newSeller)
+	if err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) (internal.Seller, error) {
@@ -78,39 +86,38 @@ func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) 
 		existingSeller.Telephone = *newSeller.Telephone
 	}
 
-	updatedSeller, err := s.rp.Update(existingSeller)
+	err = s.rp.Update(&existingSeller)
 	if err != nil {
 		return internal.Seller{}, err
 	}
 
-	return updatedSeller, nil
+	return existingSeller, nil
 
 }
 
-func (s *SellerService) Delete(id int) (bool, error) {
-
+func (s *SellerService) Delete(id int) error {
 	existingSeller, err := s.rp.GetById(id)
 	if err != nil {
-		return false, err
+		return err
 	}
 	if existingSeller == (internal.Seller{}) {
-		return false, utils.ErrNotFound
+		return utils.ErrNotFound
 	}
-	result, err := s.rp.Delete(id)
+	err = s.rp.Delete(id)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return result, nil
+	return nil
 }
 
-func (s *SellerService) verify(newSeller internal.SellerRequest) error {
+func (s *SellerService) verify(newSeller internal.Seller) error {
 
 	if newSeller.Cid <= 0 {
 		return utils.ErrInvalidArguments
 	}
 
 	existingCid, err := s.rp.GetByCid(newSeller.Cid)
-	if err != nil {
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}
 	if existingCid.Cid != 0 {

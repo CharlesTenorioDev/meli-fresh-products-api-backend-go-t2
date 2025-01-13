@@ -6,7 +6,7 @@ USE fresh_products;
 -- Sprint 1, requirement 1
 CREATE TABLE sellers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid INT(11),
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -81,12 +81,12 @@ CREATE TABLE localities(
 );
 
 CREATE TABLE provinces(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     province_name VARCHAR(255),
-    id_country_fk INT
+    country_id INT
 );
 CREATE TABLE countries(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     country_name VARCHAR(255)
 );
 
@@ -192,14 +192,14 @@ ALTER TABLE purchase_orders ADD FOREIGN KEY (order_status_id) REFERENCES order_s
 
 
 -- Insert sample countries
-INSERT INTO countries (id, country_name) VALUES
-(1, 'USA'),
-(2, 'Canada');
+INSERT INTO countries (country_name) VALUES
+('USA'),
+('Canada');
 
 -- Insert sample provinces
-INSERT INTO provinces (id, province_name, id_country_fk) VALUES
-(1, 'California', 1),
-(2, 'Ontario', 2);
+INSERT INTO provinces (province_name, country_id) VALUES
+('California', 1),
+('Ontario', 2);
 
 -- Insert sample localities
 INSERT INTO localities (id, locality_name, province_id) VALUES
@@ -220,8 +220,8 @@ INSERT INTO order_status (id, description) VALUES
 
 -- Insert sample sellers
 INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
-('SELLER001', 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
-('SELLER002', 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
+(1, 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
+(2, 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
 
 -- Insert sample warehouses
 INSERT INTO warehouses (address, telephone, warehouse_code, locality_id) VALUES
