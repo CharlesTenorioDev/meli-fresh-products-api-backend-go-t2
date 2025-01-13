@@ -102,16 +102,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 4 - ProductType
-	productTypeRepo := repository.NewProductTypeDB(nil)
+	productTypeRepo := repository.NewProductTypeDB(a.db)
 	productTypeService := service.NewProductTypeService(productTypeRepo)
 	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - Product
-	productRepo := repository.NewProductDB(nil)
+	productRepo := repository.NewProductDB(a.db)
 	productService := service.NewProductService(productRepo, productTypeService)
 	err = routes.NewProductRoutes(router, productService)
+	if err != nil {
+		panic(err)
+	}
+
+	//Requisito 4 - Product Records
+	productRecordsRepo := repository.NewProductRecordDB(a.db)
+	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
+	err = routes.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
 		panic(err)
 	}
