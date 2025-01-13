@@ -6,7 +6,7 @@ USE fresh_products;
 -- Sprint 1, requirement 1
 CREATE TABLE sellers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid INT(11),
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -20,8 +20,8 @@ CREATE TABLE warehouses(
     telephone VARCHAR(255),
     warehouse_code VARCHAR(255),
     locality_id INT,
-    minimum_capacity INT NOT NULL DEFAULT 0
-    minimum_temperature INT NOT NULL DEFAULT 0
+    minimum_capacity INT,
+    minimum_temperature INT
 );
 
 -- Sprint 1, requirement 3
@@ -83,12 +83,12 @@ CREATE TABLE localities(
 );
 
 CREATE TABLE provinces(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     province_name VARCHAR(255),
-    id_country_fk INT
+    country_id INT
 );
 CREATE TABLE countries(
-    id INT PRIMARY KEY NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     country_name VARCHAR(255)
 );
 
@@ -96,7 +96,7 @@ CREATE TABLE countries(
 -- Sprint 2, requirement 2
 CREATE TABLE carriers(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cid VARCHAR(255),
+    cid INT UNIQUE,
     company_name VARCHAR(255),
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -194,14 +194,14 @@ ALTER TABLE purchase_orders ADD FOREIGN KEY (order_status_id) REFERENCES order_s
 
 
 -- Insert sample countries
-INSERT INTO countries (id, country_name) VALUES
-(1, 'USA'),
-(2, 'Canada');
+INSERT INTO countries (country_name) VALUES
+('USA'),
+('Canada');
 
 -- Insert sample provinces
-INSERT INTO provinces (id, province_name, id_country_fk) VALUES
-(1, 'California', 1),
-(2, 'Ontario', 2);
+INSERT INTO provinces (province_name, country_id) VALUES
+('California', 1),
+('Ontario', 2);
 
 -- Insert sample localities
 INSERT INTO localities (id, locality_name, province_id) VALUES
@@ -211,8 +211,8 @@ INSERT INTO localities (id, locality_name, province_id) VALUES
 
 -- Insert sample carriers
 INSERT INTO carriers (id, cid, company_name, address, telephone, locality_id) VALUES
-(1, 'CARRIER001', 'Fast Logistics', '123 Main St, LA', '555-1234', 1),
-(2, 'CARRIER002', 'Speedy Delivery', '456 Oak St, Toronto', '555-5678', 2);
+(1, 123456, 'Fast Logistics', '123 Main St, LA', '555-1234', 1),
+(2, 123457, 'Speedy Delivery', '456 Oak St, Toronto', '555-5678', 2);
 
 -- Insert sample order statuses
 INSERT INTO order_status (id, description) VALUES
@@ -222,8 +222,8 @@ INSERT INTO order_status (id, description) VALUES
 
 -- Insert sample sellers
 INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
-('SELLER001', 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
-('SELLER002', 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
+(1, 'Fresh Foods Co.', '789 Fruit Rd, LA', '555-9876', 1),
+(2, 'Organic Produce Ltd.', '101 Veggie Blvd, Toronto', '555-2345', 2);
 
 -- Insert sample warehouses
 INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES

@@ -30,3 +30,16 @@ With air installed, just run `air`
 1. In-progress commits: `git commit -m "fix products save service "`
 1. In-progress commits: `git commit -m "..."`
 1. Finish the development: `git commit -m "feat: end <NOME_DO_REQUISITO>"`
+
+
+# Testing
+- Unit tests must have **Unit** after Test, e.g 
+```go
+func TestUnitSeller_Create(t *testing.T){}
+```
+With that, we can run the unit tests apart from integration tests
+
+
+# Features
+**We're going
+**Nice to Have**

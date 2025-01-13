@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
@@ -63,6 +62,8 @@ func (a *ApplicationDefault) TearDown() {
 	}
 }
 
+// SetUp initializes the application by setting up the database connection,
+// configuring the router, and registering various routes and services.
 func (a *ApplicationDefault) SetUp() (err error) {
 	// connect to db
 	a.db, err = sql.Open("mysql", a.cfgDb.FormatDSN())
@@ -74,15 +75,26 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	router := chi.NewRouter()
+	a.router = router
+
+	localityRepo := repository.NewMysqlLocalityRepository(a.db)
+	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
+	countryRepo := repository.NewMysqlCountryRepository(a.db)
+	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	err = routes.NewLocalityRoutes(router, localityService)
+	if err != nil {
+		panic(err)
+	}
 
 	// Requisito 1 - Seller
-	ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
-	dbSellers, err := ldSellers.Load()
-	if err != nil {
-		return
-	}
-	sellerRepo := repository.NewSellerDbRepository(dbSellers)
-	sellerService := service.NewSellerService(sellerRepo)
+	// ldSellers := internal.NewSellerJSONFile("./internal/sellers.json")
+	// dbSellers, err := ldSellers.Load()
+	// if err != nil {
+	// return
+	// }
+	// sellerRepo := repository.NewSellerDbRepository(dbSellers)
+	sellerRepo := repository.NewSellerMysql(a.db)
+	sellerService := service.NewSellerService(sellerRepo, localityRepo)
 	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
 		panic(err)
 	}
@@ -104,7 +116,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Requisito 2 - Warehouses
 	warehouseRepo := repository.NewWarehouseRepository(a.db)
-	warehouseService := service.NewWarehouseService(warehouseRepo)
+	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
 		panic(err)
@@ -129,12 +141,16 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersRepo := repository.NewBuyerDb(nil)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
-	err = routes.BuyerRoutes(router, buyersService)
-	if err != nil {
+	if err = routes.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
 
-	a.router = router
+	// Sprint2 Requisito 2 - Carry
+	carriesRepo := repository.NewMySQLCarryRepository(a.db)
+	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
+	if err = routes.CarryRoutes(router, carryService); err != nil {
+		panic(err)
+	}
 
 	return nil
 }
