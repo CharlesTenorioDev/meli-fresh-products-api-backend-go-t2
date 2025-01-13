@@ -152,6 +152,12 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	inboundOrderRepo := repository.NewInboundOrderRepository(a.db)
+	inboundOrderService := service.NewInboundOrderService(inboundOrderRepo)
+	if err := routes.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
