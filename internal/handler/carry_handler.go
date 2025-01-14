@@ -46,15 +46,15 @@ func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 		}
 		if err := handler.service.Save(carry); err != nil {
 			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, "CID already exists: "+err.Error())
+				utils.Error(w, http.StatusConflict, "CID already exists: "+utils.ErrConflict.Error())
 				return
 			}
 			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, "Invalid carry: "+err.Error())
+				utils.Error(w, http.StatusUnprocessableEntity, "Invalid carry: "+utils.ErrInvalidArguments.Error())
 				return
 			}
 			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, "Locality: "+err.Error())
+				utils.Error(w, http.StatusConflict, "Locality: "+err.Error())
 				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "Failed to save carry: "+err.Error())
