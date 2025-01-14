@@ -222,7 +222,7 @@ func (s *BasicSectionService) GetSectionProductsReport(id int) ([]internal.Secti
 		return report, nil
 
 	} else {
-		sectionExists, err := s.repo.GetBySectionNumber(id)
+		sectionExists, err := s.repo.GetById(id)
 		if err != nil {
 			return nil, err
 		}
