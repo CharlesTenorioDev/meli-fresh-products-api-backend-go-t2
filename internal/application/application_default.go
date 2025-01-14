@@ -133,15 +133,16 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 3 - Section
-	sectionRepo := repository.NewMemorySectionRepository(nil)
+
+	sectionRepo := repository.NewSectionMysql(a.db)
 	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
 	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
 		panic(err)
 	}
 
-	// Requisito 5 - Employees
-	filePath := "docs/db/employees.json"
+	// // Requisito 5 - Employees
+	filePath := "./docs/db/employees.json"
 	ld := loader.NewEmployeeJsonFile(filePath)
 	db, err := ld.Load()
 	if err != nil {
@@ -162,6 +163,13 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	// Sprint2 Requisito 1 - Locality
+	// localitiesRepo := repository.NewMysqlLocalityRepository(a.db)
+	// localityService := service.NewMysqlLocalityService(localitiesRepo)
+	// if err = routes.LocalityRoutes(router, localityService); err != nil {
+	// 	panic(err)
+	// }
+
 	// Sprint2 Requisito 2 - Carry
 	carriesRepo := repository.NewMySQLCarryRepository(a.db)
 	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
@@ -169,6 +177,12 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
+	// Sprint2 Requisito 3 - Product Batch
+	productBatchRepo := repository.NewProductBatchRepository(a.db)
+	productBatchService := service.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
+		panic(err)
+	}
 	return nil
 }
 

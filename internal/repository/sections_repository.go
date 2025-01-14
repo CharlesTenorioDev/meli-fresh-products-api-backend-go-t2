@@ -1,81 +1,208 @@
 package repository
 
 import (
-	"cmp"
+	"database/sql"
+	"errors"
+	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"slices"
-
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type MemorySectionRepository struct {
-	db     map[int]internal.Section
-	nextId int
+type SectionMysqlRepository struct {
+	db *sql.DB
 }
 
 // Initialize a MemorySectionRepository and set the next id to 1
-func NewMemorySectionRepository(load map[int]internal.Section) internal.SectionRepository {
-	repo := &MemorySectionRepository{}
-	if len(load) == 0 {
-		repo.db = make(map[int]internal.Section)
-		repo.nextId = 1
-	} else {
-		repo.db = load
-		repo.nextId = utils.GetBiggestId(load) + 1
-	}
-	return repo
+func NewSectionMysql(db *sql.DB) *SectionMysqlRepository {
+	return &SectionMysqlRepository{db}
 }
 
 // Get all the sections and return in asc order
-func (r MemorySectionRepository) GetAll() ([]internal.Section, error) {
-	sections := []internal.Section{}
-	for _, section := range r.db {
+func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
+	var sections []internal.Section
+
+	rows, err := r.db.Query("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, " +
+		"s.current_capacity, s.minimum_capacity, s.maximum_capacity, s.warehouse_id, s.product_type_id FROM sections AS s")
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var section internal.Section
+		err = rows.Scan(&section.ID, &section.SectionNumber, &section.CurrentTemperature,
+			&section.MinimumTemperature, &section.CurrentCapacity, &section.MinimumCapacity,
+			&section.MaximumCapacity, &section.WarehouseID, &section.ProductTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
 		sections = append(sections, section)
 	}
-	slices.SortFunc(sections, func(a internal.Section, b internal.Section) int {
-		return cmp.Compare(a.ID, b.ID)
-	})
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
 	return sections, nil
 }
 
-// Return the r.db[id]
-func (r *MemorySectionRepository) GetById(id int) (internal.Section, error) {
-	return r.db[id], nil
+func (r *SectionMysqlRepository) GetById(id int) (internal.Section, error) {
+	var section internal.Section
+
+	row := r.db.QueryRow("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, "+
+		"s.current_capacity, s.minimum_capacity, s.maximum_capacity, s.warehouse_id, s.product_type_id FROM sections AS s WHERE id=?", id)
+
+	err := row.Scan(&section.ID, &section.SectionNumber, &section.CurrentTemperature,
+		&section.MinimumTemperature, &section.CurrentCapacity, &section.MinimumCapacity,
+		&section.MaximumCapacity, &section.WarehouseID, &section.ProductTypeID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = utils.ErrNotFound
+			return internal.Section{}, err
+		}
+		return internal.Section{}, err
+	}
+
+	return section, nil
+
 }
 
 // Finds the section by its sectionNumber
 // If not found, pkg.Section{} is returned
-func (r *MemorySectionRepository) GetBySectionNumber(sectionNumber int) (internal.Section, error) {
-	for _, section := range r.db {
-		if section.SectionNumber == sectionNumber {
-			return section, nil
+func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal.Section, error) {
+
+	var section internal.Section
+
+	row := r.db.QueryRow("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, "+
+		"s.current_capacity, s.minimum_capacity, s.maximum_capacity, s.warehouse_id, s.product_type_id FROM sections AS s WHERE section_number=?", sectionNumber)
+
+	err := row.Scan(&section.ID, &section.SectionNumber, &section.CurrentTemperature,
+		&section.MinimumTemperature, &section.CurrentCapacity, &section.MinimumCapacity,
+		&section.MaximumCapacity, &section.WarehouseID, &section.ProductTypeID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = utils.ErrNotFound
 		}
+		return internal.Section{}, err
 	}
-	return internal.Section{}, nil
+
+	return section, nil
+
 }
 
 // Generate a new ID and save the entity
 // All validatinos should be made on service layer
-func (r *MemorySectionRepository) Save(newSection internal.Section) (internal.Section, error) {
-	newSection.ID = r.nextId
-	r.nextId++
-	r.db[newSection.ID] = newSection
-	return r.db[newSection.ID], nil
+func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Section, error) {
+
+	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID)
+
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) {
+			switch mysqlErr.Number {
+			case 1062:
+				err = utils.ErrConflict
+			}
+			return internal.Section{}, err
+		}
+		return internal.Section{}, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return internal.Section{}, err
+	}
+
+	(*newSection).ID = int(id)
+
+	return *newSection, err
+
 }
 
-// Update the map
-// If a section does not exist for the id, a new one will be created
-func (r *MemorySectionRepository) Update(section internal.Section) (internal.Section, error) {
-	r.db[section.ID] = section
-	return r.db[section.ID], nil
+func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.Section, error) {
+
+	_, err := r.db.Exec(
+		"UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, product_type_id=? WHERE id=?",
+		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature,
+		(*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID,
+		(*newSection).ProductTypeID, (*newSection).ID,
+	)
+
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) {
+			switch mysqlErr.Number {
+			case 1062:
+				err = utils.ErrConflict
+			}
+			return internal.Section{}, err
+		}
+		return internal.Section{}, err
+	}
+
+	return *newSection, nil
 }
 
 // Delete the section by its id
 // If no sections exists by id attribute, utils.ErrNotFound is returned
-func (r *MemorySectionRepository) Delete(id int) error {
-	if r.db[id] == (internal.Section{}) {
-		return utils.ErrNotFound
+func (r *SectionMysqlRepository) Delete(id int) error {
+
+	_, err := r.db.Exec("DELETE FROM sections WHERE id=?", id)
+
+	if err != nil {
+		return err
 	}
-	delete(r.db, id)
 	return nil
+}
+
+func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionProductsReport, error) {
+	var reports []internal.SectionProductsReport
+
+	rows, err := r.db.Query("SELECT s.id, s.section_number, ifnull(sum(p.current_quantity), 0) as products_count FROM sections s left join product_batches p on s.id = p.section_id group by s.id, s.section_number")
+
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var report internal.SectionProductsReport
+		err = rows.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+		if err != nil {
+			return nil, err
+		}
+		reports = append(reports, report)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return reports, nil
+}
+func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]internal.SectionProductsReport, error) {
+	var report internal.SectionProductsReport
+	var reports []internal.SectionProductsReport
+
+	row := r.db.QueryRow("SELECT "+
+		"s.id, "+
+		"s.section_number, "+
+		"sum(p.current_quantity) as products_count "+
+		"FROM sections s "+
+		"left join product_batches p "+
+		"on s.id = p.section_id "+
+		"where s.id=? group by s.id", id)
+
+	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = utils.ErrNotFound
+		}
+	}
+
+	reports = append(reports, report)
+	return reports, nil
 }

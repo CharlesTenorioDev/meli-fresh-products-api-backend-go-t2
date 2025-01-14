@@ -23,14 +23,22 @@ type SectionPointers struct {
 	WarehouseID        *int     `json:"warehouse_id"`
 }
 
+type SectionProductsReport struct {
+	SectionId     int `json:"section_id"`
+	SectionNumber int `json:"section_number"`
+	ProductsCount int `json:"products_count"`
+}
+
 type (
 	SectionRepository interface {
 		GetAll() ([]Section, error)
-		Save(Section) (Section, error)
-		Update(Section) (Section, error)
+		Save(*Section) (Section, error)
+		Update(*Section) (Section, error)
 		GetById(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)
 		Delete(int) error
+		GetSectionProductsReport() ([]SectionProductsReport, error)
+		GetSectionProductsReportById(int) ([]SectionProductsReport, error)
 	}
 	SectionService interface {
 		GetAll() ([]Section, error)
@@ -38,6 +46,7 @@ type (
 		Update(int, SectionPointers) (Section, error)
 		GetById(int) (Section, error)
 		Delete(int) error
+		GetSectionProductsReport(int) ([]SectionProductsReport, error)
 	}
 	SectionWarehouseValidation interface {
 		GetById(int) (Warehouse, error)

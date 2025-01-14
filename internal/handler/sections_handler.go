@@ -7,6 +7,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -164,5 +165,31 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 			return
 		}
 		utils.JSON(w, http.StatusNoContent, nil)
+	}
+}
+
+func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idReq := strings.TrimSpace(r.URL.Query().Get("id"))
+		id := 0
+		var err error
+		if idReq != "" {
+			id, err = strconv.Atoi(idReq)
+			if err != nil {
+				utils.Error(w, http.StatusBadRequest, "invalid id")
+				return
+			}
+
+		}
+
+		sectionProductReport, err := h.service.GetSectionProductsReport(id)
+		if err != nil {
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
+			}
+			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+			return
+		}
+		utils.JSON(w, http.StatusOK, sectionProductReport)
 	}
 }

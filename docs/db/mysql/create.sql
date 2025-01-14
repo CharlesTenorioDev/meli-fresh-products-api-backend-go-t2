@@ -27,7 +27,8 @@ CREATE TABLE warehouses(
 -- Sprint 1, requirement 3
 CREATE TABLE sections(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    section_number VARCHAR(255),
+    -- section_number é int, não varchar
+    section_number INT,
     current_capacity INT,
     maximum_capacity INT,
     minimum_capacity INT,
@@ -106,13 +107,13 @@ CREATE TABLE carriers(
 -- Sprint 2, requirement 3
 CREATE TABLE product_batches(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    batch_number VARCHAR(255),
+    batch_number INT,
     current_quantity INT,
     current_temperature DECIMAL(19,2),
     due_date DATETIME(6),
     initial_quantity INT,
     manufacturing_date DATETIME(6),
-    manufacturing_hour DATETIME(6),
+    manufacturing_hour INT(2),
     minimum_temperature DECIMAL(19,2),
     product_id INT,
     section_id INT
@@ -246,10 +247,11 @@ INSERT INTO products (description, expiration_rate, freezing_rate, height, lengt
 
 -- Insert sample sections
 INSERT INTO sections (section_number, current_capacity, maximum_capacity, minimum_capacity, current_temperature, minimum_temperature, product_type_id, warehouse_id) VALUES
-('S1', 50, 100, 20, 5.0, -2.0, 1, 1),
-('S2', 30, 80, 15, 4.0, -3.0, 2, 2),
-('S3', 20, 50, 10, 7.0, -5.0, 3, 1),
-('S4', 40, 100, 20, 6.0, -4.0, 4, 2);
+(1, 50, 100, 20, 5.0, -2.0, 1, 1),
+(2, 30, 80, 15, 4.0, -3.0, 2, 2),
+(3, 20, 50, 10, 7.0, -5.0, 3, 1),
+(4, 40, 100, 20, 6.0, -4.0, 4, 2);
+
 
 -- Insert sample employees
 INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) VALUES
@@ -263,8 +265,8 @@ INSERT INTO buyers (id_card_number, first_name, last_name) VALUES
 
 -- Insert sample product batches
 INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
-('BATCH001', 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', '2025-01-10 08:00:00', 3.0, 1, 1),
-('BATCH002', 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', '2025-01-12 09:00:00', 2.0, 2, 2);
+(100, 500, 5.0, '2025-01-15 12:00:00', 1000, '2025-01-10', 8, 3.0, 1, 1),
+(200, 300, 4.0, '2025-01-18 12:00:00', 800, '2025-01-12', 9, 2.0, 2, 2);
 
 -- Insert sample product records
 INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES
