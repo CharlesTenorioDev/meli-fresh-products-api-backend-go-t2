@@ -15,15 +15,9 @@ func RegisterInboundOrderRoutes(mux *chi.Mux, service internal.InboundOrderServi
 		router.Post("/", handler.CreateInboundOrder())
 	})
 
-	return nil
-}
-
-// RegisterInboundOrdersReportRoute is used to register the route for generating the employee's inbound orders report
-func RegisterInboundOrdersReportRoute(mux *chi.Mux, service internal.InboundOrderService) error {
-	handler := handler.NewInboundOrderHandler(service)
-
-	// GET /api/v1/employees/reportInboundOrders?id=1
-	mux.Get("/api/v1/employees/reportInboundOrders", handler.GetInboundOrdersReport())
+	mux.Route("/api/v1/employees/reportInboundOrders", func(router chi.Router) {
+		router.Get("/", handler.GetInboundOrdersReport())
+	})
 
 	return nil
 }
