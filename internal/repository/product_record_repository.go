@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -28,9 +29,9 @@ func (p *ProductRecordDB) Read(productID int) ([]internal.ProductReport, error) 
 				p.description,
 				COUNT(pr.id) AS records_count
 			FROM 
-				Products p
+				products p
 			INNER JOIN 
-				Product_Records pr ON p.id = pr.product_id
+				product_records pr ON p.id = pr.product_id
 			WHERE 
 				p.id = ?
 			GROUP BY 
@@ -43,9 +44,9 @@ func (p *ProductRecordDB) Read(productID int) ([]internal.ProductReport, error) 
 				p.description,
 				COUNT(pr.id) AS records_count
 			FROM 
-				Products p
+				products p
 			INNER JOIN 
-				Product_Records pr ON p.id = pr.product_id
+				product_records pr ON p.id = pr.product_id
 			GROUP BY 
 				p.id, p.description
 		`)
