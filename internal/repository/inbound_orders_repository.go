@@ -71,3 +71,25 @@ func (r *InboundOrderRepository) GenerateReportForEmployee(employeeID int) (inte
 	}
 	return report, nil
 }
+
+func (r *InboundOrderRepository) GenerateReport() ([]internal.EmployeeInboundOrdersReport, error) {
+	report := []internal.EmployeeInboundOrdersReport{}
+	rows, err := r.db.Query(`
+		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
+		FROM employees e
+		LEFT JOIN inbound_orders o ON e.id = o.employee_id
+		GROUP BY e.id
+	`)
+	if err != nil {
+		return report, err
+	}
+	for rows.Next() {
+		var row internal.EmployeeInboundOrdersReport
+		if err := rows.Scan(&row.ID, &row.CardNumberID, &row.FirstName, &row.LastName, &row.WarehouseID, &row.InboundOrdersCount); err != nil {
+			return []internal.EmployeeInboundOrdersReport{}, err
+		}
+		report = append(report, row)
+	}
+
+	return report, nil
+}

@@ -29,15 +29,24 @@ func (s *InboundOrderService) CreateOrder(newOrder internal.InboundOrderAttribut
 
 func (s *InboundOrderService) GenerateInboundOrdersReport(ids []int) ([]internal.EmployeeInboundOrdersReport, error) {
 	var reports []internal.EmployeeInboundOrdersReport
-	for _, id := range ids {
-		report, err := s.repo.GenerateReportForEmployee(id)
+	if len(ids) == 0 {
+		var err error
+		reports, err = s.repo.GenerateReport()
 		if err != nil {
-			if err == utils.ErrNotFound {
-				return nil, utils.ErrNotFound
-			}
-			return nil, err
+			return []internal.EmployeeInboundOrdersReport{}, err
 		}
-		reports = append(reports, report)
+	} else {
+		for _, id := range ids {
+			report, err := s.repo.GenerateReportForEmployee(id)
+			if err != nil {
+				if err == utils.ErrNotFound {
+					return nil, utils.ErrNotFound
+				}
+				return nil, err
+			}
+			reports = append(reports, report)
+		}
 	}
+
 	return reports, nil
 }
