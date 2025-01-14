@@ -27,6 +27,17 @@ func (s *InboundOrderService) CreateOrder(newOrder internal.InboundOrderAttribut
 	return s.repo.Create(newOrder)
 }
 
-func (s *InboundOrderService) GetInboundOrdersReport(employeeID int) ([]internal.EmployeeInboundOrdersReport, error) {
-	return s.repo.GenerateReport(employeeID)
+func (s *InboundOrderService) GenerateInboundOrdersReport(ids []int) ([]internal.EmployeeInboundOrdersReport, error) {
+	var reports []internal.EmployeeInboundOrdersReport
+	for _, id := range ids {
+		report, err := s.repo.GenerateReportForEmployee(id)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				return nil, utils.ErrNotFound
+			}
+			return nil, err
+		}
+		reports = append(reports, report)
+	}
+	return reports, nil
 }

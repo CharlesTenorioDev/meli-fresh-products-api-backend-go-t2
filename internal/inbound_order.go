@@ -15,14 +15,14 @@ type InboundOrderAttributes struct {
 
 type InboundOrderService interface {
 	CreateOrder(newOrder InboundOrderAttributes) (InboundOrder, error)
-	GetInboundOrdersReport(employeeID int) ([]EmployeeInboundOrdersReport, error)
+	GenerateInboundOrdersReport(ids []int) ([]EmployeeInboundOrdersReport, error)
 }
 
 type InboundOrderRepository interface {
 	Create(newOrder InboundOrderAttributes) (InboundOrder, error)
 	FindByID(id int) (InboundOrder, error)
 	FindByOrderNumber(orderNumber string) (InboundOrder, error)
-	GenerateReport(employeeID int) ([]EmployeeInboundOrdersReport, error)
+	GenerateReportForEmployee(employeeID int) (EmployeeInboundOrdersReport, error)
 }
 
 type EmployeeInboundOrdersReport struct {

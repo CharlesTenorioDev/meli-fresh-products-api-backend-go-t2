@@ -52,26 +52,22 @@ func (r *InboundOrderRepository) FindByOrderNumber(orderNumber string) (internal
 	return order, err
 }
 
-func (r *InboundOrderRepository) GenerateReport(employeeID int) ([]internal.EmployeeInboundOrdersReport, error) {
-	rows, err := r.db.Query(`
+func (r *InboundOrderRepository) GenerateReportForEmployee(employeeID int) (internal.EmployeeInboundOrdersReport, error) {
+	var report internal.EmployeeInboundOrdersReport
+	err := r.db.QueryRow(`
 		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
 		FROM employees e
 		LEFT JOIN inbound_orders o ON e.id = o.employee_id
 		WHERE e.id = ?
-		GROUP BY e.id`, employeeID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+		GROUP BY e.id
+	`, employeeID).Scan(&report.ID, &report.CardNumberID, &report.FirstName, &report.LastName, &report.WarehouseID, &report.InboundOrdersCount)
 
-	var report []internal.EmployeeInboundOrdersReport
-	for rows.Next() {
-		var r internal.EmployeeInboundOrdersReport
-		err := rows.Scan(&r.ID, &r.CardNumberID, &r.FirstName, &r.LastName, &r.WarehouseID, &r.InboundOrdersCount)
-		if err != nil {
-			return nil, err
-		}
-		report = append(report, r)
+	if err == sql.ErrNoRows {
+		return report, utils.ErrNotFound
+	}
+
+	if err != nil {
+		return report, err
 	}
 	return report, nil
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -51,7 +52,6 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 
 		// Retorna o JSON com apenas os dados diretamente na resposta
 		utils.JSON(w, http.StatusCreated, map[string]any{
-			"message":          "Order created successfully",
 			"order_date":       order.Attributes.OrderDate,
 			"order_number":     order.Attributes.OrderNumber,
 			"employee_id":      order.Attributes.EmployeeID,
@@ -62,34 +62,34 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 }
 
 // Handle GET /api/v1/employees/reportInboundOrders
+// GetInboundOrdersReport handles the generation of the report.
 func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		employeeIDStr := r.URL.Query().Get("id")
-		if employeeIDStr == "" {
-			utils.Error(w, http.StatusBadRequest, "Missing 'id' parameter")
-			return
+		idsParam := r.URL.Query().Get("id")
+		var ids []int
+
+		if idsParam != "" {
+			idsStrings := strings.Split(idsParam, ",")
+			for _, idStr := range idsStrings {
+				id, err := strconv.Atoi(strings.TrimSpace(idStr))
+				if err != nil {
+					utils.Error(w, http.StatusBadRequest, "Invalid 'id' parameter format")
+					return
+				}
+				ids = append(ids, id)
+			}
 		}
 
-		employeeID, err := strconv.Atoi(employeeIDStr)
-		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid 'id' parameter")
-			return
-		}
-
-		report, err := h.service.GetInboundOrdersReport(employeeID)
+		report, err := h.service.GenerateInboundOrdersReport(ids)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				utils.Error(w, http.StatusNotFound, "No data found for the given employee ID")
+				utils.Error(w, http.StatusNotFound, "No data found for the given employee(s)")
 			} else {
-				utils.Error(w, http.StatusInternalServerError, "Failed to retrieve report")
+				utils.Error(w, http.StatusInternalServerError, "Failed to generate report")
 			}
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, map[string]any{
-			"message": "Report generated successfully",
-			"data":    report,
-		})
-
+		utils.JSON(w, http.StatusOK, report)
 	}
 }
