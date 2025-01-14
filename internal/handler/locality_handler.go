@@ -116,14 +116,14 @@ func (handler *LocalityHandler) GetCarriesByLocalityId() http.HandlerFunc {
 		}
 		buyers, err := handler.service.GetCarriesByLocalityId(idInt)
 		if err != nil {
-			http.Error(w, "500 Erro Internal server error", http.StatusInternalServerError)
+			utils.Error(w, http.StatusNotFound, "Locality: "+utils.ErrNotFound.Error())
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
 		if err := json.NewEncoder(w).Encode(buyers); err != nil {
-			http.Error(w, "Failed to encode buyers: "+err.Error(), http.StatusInternalServerError)
+			utils.Error(w, http.StatusInternalServerError, "Failed to encode buyers: "+err.Error())
 			return
 		}
 	}
