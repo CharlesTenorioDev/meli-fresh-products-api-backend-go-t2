@@ -20,7 +20,6 @@ type BuyerService interface {
 }
 
 type BuyerRepository interface {
-	LoadBuyers() (map[int]Buyer, error)
 	GetAll() ([]Buyer, error)
 	GetOne(id int) (*Buyer, error)
 	CreateBuyer(Buyer) (*Buyer, error)

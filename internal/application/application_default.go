@@ -77,7 +77,6 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	router := chi.NewRouter()
-	a.router = router
 
 	localityRepo := repository.NewMysqlLocalityRepository(a.db)
 	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
@@ -156,19 +155,20 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDb(nil)
+	buyersRepo := repository.NewBuyerDb(a.db)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	if err = routes.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
 
-	// Sprint2 Requisito 1 - Locality
-	// localitiesRepo := repository.NewMysqlLocalityRepository(a.db)
-	// localityService := service.NewMysqlLocalityService(localitiesRepo)
-	// if err = routes.LocalityRoutes(router, localityService); err != nil {
-	// 	panic(err)
-	// }
+	// Requisito 6 - Purchase Orders
+	purchaseOrdersRepo := repository.NewPurchaseOrderDb(a.db)
+	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService)
+	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
+	if err != nil {
+		panic(err)
+	}
 
 	// Sprint2 Requisito 2 - Carry
 	carriesRepo := repository.NewMySQLCarryRepository(a.db)
@@ -183,6 +183,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
 	}
+	a.router = router
+
 	return nil
 }
 
