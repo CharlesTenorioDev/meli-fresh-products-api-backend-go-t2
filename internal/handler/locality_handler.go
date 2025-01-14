@@ -76,16 +76,16 @@ func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 				return
 			}
 		}
-		section, err := h.service.GetSellersByLocalityId(id)
+		locality, err := h.service.GetSellersByLocalityId(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
+				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no locality for id %d", id))
 				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
 			return
 		}
-		utils.JSON(w, http.StatusOK, section)
+		utils.JSON(w, http.StatusOK, locality)
 	}
 }
 
