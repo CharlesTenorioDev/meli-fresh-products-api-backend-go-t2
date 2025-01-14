@@ -190,7 +190,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 	row := r.db.QueryRow("SELECT "+
 		"s.id, "+
 		"s.section_number, "+
-		"sum(p.current_quantity) as products_count "+
+		"ifnull(sum(p.current_quantity), 0) as products_count "+
 		"FROM sections s "+
 		"left join product_batches p "+
 		"on s.id = p.section_id "+
