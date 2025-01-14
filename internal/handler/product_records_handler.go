@@ -3,9 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
