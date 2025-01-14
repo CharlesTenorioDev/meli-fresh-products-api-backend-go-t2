@@ -23,6 +23,7 @@ type InboundOrderRepository interface {
 	FindByID(id int) (InboundOrder, error)
 	FindByOrderNumber(orderNumber string) (InboundOrder, error)
 	GenerateReportForEmployee(employeeID int) (EmployeeInboundOrdersReport, error)
+	GenerateReport() ([]EmployeeInboundOrdersReport, error)
 }
 
 type EmployeeInboundOrdersReport struct {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -42,6 +43,7 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 		// Cria a ordem usando o serviço
 		order, err := h.service.CreateOrder(newOrder)
 		if err != nil {
+			fmt.Println(err.Error())
 			if err == utils.ErrConflict {
 				utils.Error(w, http.StatusConflict, "Order number already exists or employee ID is invalid")
 			} else {
