@@ -8,20 +8,27 @@ import (
 // PurchaseOrderDefault is the default implementation of the PurchaseOrder service
 // it handles business logic and delegates data operations to the repository
 type PurchaseOrderDefault struct {
-	rp           internal.PurchaseOrderRepository
-	buyerService internal.PurchaseOrdersBuyerValidation
+	rp                   internal.PurchaseOrderRepository
+	buyerService         internal.PurchaseOrdersBuyerValidation
+	productRecordService internal.PurchaseOrdersProductRecordValidation
 }
 
 // NewPurchaseOrderService creates a new instance of PurchaseOrderDefault
 // takes an PurchaseOrderRepository as a parameter to handle data operations
-func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService internal.PurchaseOrdersBuyerValidation) *PurchaseOrderDefault {
-	return &PurchaseOrderDefault{rp: rp, buyerService: buyerService}
+func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService internal.PurchaseOrdersBuyerValidation, productRecordService internal.PurchaseOrdersProductRecordValidation) *PurchaseOrderDefault {
+	return &PurchaseOrderDefault{rp: rp, buyerService: buyerService, productRecordService: productRecordService}
 }
 
 // FindAll retrieves all PurchaseOrders from the repository
 func (s *PurchaseOrderDefault) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
 	purchaseOrdersSummary, err := s.rp.FindAllByBuyerId(buyerId)
-	return purchaseOrdersSummary, err
+	if err != nil {
+		if err == utils.ErrBuyerDoesNotExists {
+			return nil, utils.ErrBuyerDoesNotExists
+		}
+		return nil, err
+	}
+	return purchaseOrdersSummary, nil
 }
 
 // CreatePurchaseOrder adds a new purchaseOrder to the repository
@@ -45,13 +52,19 @@ func (s *PurchaseOrderDefault) CreatePurchaseOrder(newPurchaseOrder internal.Pur
 		return
 	}
 
+	// verify if product_record_id exists
+	err = s.productRecordExistsById(newPurchaseOrder.ProductRecordId)
+	if err != nil {
+		return
+	}
+
 	// attempt to create the new purchaseOrder
 	return s.rp.CreatePurchaseOrder(newPurchaseOrder)
 }
 
 // validateFields checks if the required fields of a new purchaseOrder are not empty
 func (s *PurchaseOrderDefault) validateFields(newPurchaseOrder internal.PurchaseOrderAttributes) (err error) {
-	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerId == 0 || newPurchaseOrder.ProductRecordId == 0 {
+	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.OrderDate == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerId == 0 || newPurchaseOrder.ProductRecordId == 0 {
 		return utils.ErrEmptyArguments
 	}
 	return
@@ -107,5 +120,23 @@ func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
 	if possibleBuyer == nil {
 		return utils.ErrBuyerDoesNotExists
 	}
+	return nil
+}
+
+func (s *PurchaseOrderDefault) productRecordExistsById(id int) error {
+	product, err := s.productRecordService.FindById(id)
+
+	if err != nil {
+
+		if err == utils.ErrNotFound {
+			return utils.ErrProductDoesNotExists
+		}
+		return err
+	}
+
+	if product.ID == 0 {
+		return utils.ErrProductDoesNotExists
+	}
+
 	return nil
 }

@@ -2,9 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
@@ -58,13 +59,13 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
 		employee, err := h.sv.FindById(id)
 		if err != nil {
-			handleError(w, utils.ErrNotFound)
+			utils.HandleError(w, utils.ErrNotFound)
 			return
 		}
 
@@ -94,7 +95,7 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newEmployee)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
@@ -102,13 +103,13 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 		employee, err := h.sv.CreateEmployee(newEmployee)
 		if err != nil {
 			if err == utils.ErrConflict {
-				handleError(w, utils.ErrConflict)
+				utils.HandleError(w, utils.ErrConflict)
 			} else if err == utils.ErrEmptyArguments {
-				handleError(w, utils.ErrEmptyArguments)
+				utils.HandleError(w, utils.ErrEmptyArguments)
 			} else if err == utils.ErrWarehouseDoesNotExists {
-				handleError(w, utils.ErrWarehouseDoesNotExists)
+				utils.HandleError(w, utils.ErrWarehouseDoesNotExists)
 			} else {
-				handleError(w, utils.ErrInvalidArguments)
+				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
 			return
 		}
@@ -127,7 +128,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
@@ -135,7 +136,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		// decode the json request body into Employee struct
 		err = json.NewDecoder(r.Body).Decode(&inputEmployee)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
@@ -144,9 +145,9 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		employee, err := h.sv.UpdateEmployee(inputEmployee)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				handleError(w, utils.ErrNotFound)
+				utils.HandleError(w, utils.ErrNotFound)
 			} else {
-				handleError(w, utils.ErrWarehouseDoesNotExists)
+				utils.HandleError(w, utils.ErrWarehouseDoesNotExists)
 			}
 			return
 		}
@@ -167,7 +168,7 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			handleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
@@ -175,9 +176,9 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 		err = h.sv.DeleteEmployee(id)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				handleError(w, utils.ErrNotFound)
+				utils.HandleError(w, utils.ErrNotFound)
 			} else {
-				handleError(w, utils.ErrInvalidArguments)
+				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
 			return
 		}
@@ -187,36 +188,4 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 			"message": "employee deleted successfully",
 		})
 	}
-}
-
-// handleError centralizes error handling and response formatting
-func handleError(w http.ResponseWriter, err error) {
-	var status int
-	var message string
-
-	switch err {
-	case utils.ErrInvalidFormat:
-		status = http.StatusBadRequest
-		message = utils.ErrInvalidFormat.Error()
-	case utils.ErrWarehouseDoesNotExists:
-		status = http.StatusUnprocessableEntity
-		message = utils.ErrWarehouseDoesNotExists.Error()
-	case utils.ErrInvalidArguments:
-		status = http.StatusUnprocessableEntity
-		message = utils.ErrInvalidArguments.Error()
-	case utils.ErrEmptyArguments:
-		status = http.StatusUnprocessableEntity
-		message = utils.ErrEmptyArguments.Error()
-	case utils.ErrConflict:
-		status = http.StatusConflict
-		message = utils.ErrConflict.Error()
-	case utils.ErrNotFound:
-		status = http.StatusNotFound
-		message = utils.ErrNotFound.Error()
-	default:
-		status = http.StatusInternalServerError
-		message = "internal server error"
-	}
-
-	response.Error(w, status, message)
 }
