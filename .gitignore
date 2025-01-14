@@ -24,4 +24,5 @@ go.work.sum
 tmp/
 
 mysql_data/
-
+*.swp
+.vscode/

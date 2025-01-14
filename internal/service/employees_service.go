@@ -39,7 +39,7 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 	}
 
 	// check for duplicates
-	employees, _ := s.rp.FindAll()
+	employees, err := s.rp.FindAll()
 	err = s.validateDuplicates(employees, newEmployee)
 	if err != nil {
 		return
@@ -52,7 +52,9 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 	}
 
 	// attempt to create the new employee
-	return s.rp.CreateEmployee(newEmployee)
+	employee, err = s.rp.CreateEmployee(newEmployee)
+
+	return employee, nil
 }
 
 // UpdateEmployee updates an employee in the repository
@@ -97,7 +99,7 @@ func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 
 // validateFields checks if the required fields of a new employee are not empty
 func (s *EmployeeDefault) validateFields(newEmployee internal.EmployeeAttributes) (err error) {
-	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == 0 {
+	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == "" {
 		return utils.ErrEmptyArguments
 	}
 	return
@@ -129,7 +131,7 @@ func mergeEmployeeFields(inputEmployee, internalEmployee internal.Employee) (upd
 		updatedEmployee.Attributes.LastName = internalEmployee.Attributes.LastName
 	}
 
-	if inputEmployee.Attributes.CardNumberId != 0 {
+	if inputEmployee.Attributes.CardNumberId != "" {
 		updatedEmployee.Attributes.CardNumberId = inputEmployee.Attributes.CardNumberId
 	} else {
 		updatedEmployee.Attributes.CardNumberId = internalEmployee.Attributes.CardNumberId

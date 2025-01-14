@@ -61,10 +61,10 @@ CREATE TABLE product_types(
 -- Sprint 1, requirement 5
 CREATE TABLE employees(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    id_card_number VARCHAR(255),
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    warehouse_id INT
+    id_card_number VARCHAR(255) NOT NULL UNIQUE,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    warehouse_id INT NOT NULL
 );
 
 -- Sprint 1, requirement 6
@@ -224,8 +224,8 @@ INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
 
 -- Insert sample warehouses
 INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES
-('1234 Cold Storage St, LA', '555-3456', 'WH001', 1, 1000, -5),
-('5678 Cool Goods Ave, Toronto', '555-7890', 'WH002', 2, 800, -4);
+('1234 Cold Storage St, LA', '555-3456', 'WH001', 1, 30, 20),
+('5678 Cool Goods Ave, Toronto', '555-7890', 'WH002', 2, 30, 15);
 
 -- Insert sample product types
 INSERT INTO product_types (description) VALUES

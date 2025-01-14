@@ -13,7 +13,7 @@ type WarehouseDB struct {
 	db *sql.DB
 }
 
-func NewWarehouseDB(db *sql.DB) *WarehouseDB {
+func NewWarehouseRepository(db *sql.DB) *WarehouseDB {
 	return &WarehouseDB{db: db}
 }
 
@@ -43,6 +43,7 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	return warehouseList, nil
 }

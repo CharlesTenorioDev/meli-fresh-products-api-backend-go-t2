@@ -8,7 +8,7 @@ type Employee struct {
 
 // EmployeeAttributes defines the details associated with an employee
 type EmployeeAttributes struct {
-	CardNumberId int    `json:"card_number_id"`
+	CardNumberId string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
 	WarehouseId  int    `json:"warehouse_id"`
@@ -17,7 +17,7 @@ type EmployeeAttributes struct {
 // EmployeeJson defines the structure of the employee data as it appears in a json file
 type EmployeeJson struct {
 	ID           int    `json:"id"`
-	CardNumberId int    `json:"card_number_id"`
+	CardNumberId string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
 	WarehouseId  int    `json:"warehouse_id"`
