@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -186,6 +187,7 @@ func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
+				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
 			return
