@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"log"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -60,9 +61,7 @@ func (service *BuyerService) CreateBuyer(buyer internal.BuyerAttributes) (*inter
 		return nil, err
 	}
 
-	service.repo.CreateBuyer(newBuyer)
-
-	return &newBuyer, nil
+	return service.repo.CreateBuyer(newBuyer)
 }
 
 func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*internal.Buyer, error) {
@@ -90,9 +89,8 @@ func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*interna
 		}
 	}
 
-	service.repo.UpdateBuyer(updatedBuyer)
+	return service.repo.UpdateBuyer(updatedBuyer)
 
-	return updatedBuyer, nil
 }
 
 func (service *BuyerService) DeleteBuyer(id int) error {
@@ -105,7 +103,9 @@ func (service *BuyerService) DeleteBuyer(id int) error {
 
 	for _, buyer := range buyers {
 		if int(buyer.ID) == id {
-			service.repo.DeleteBuyer(id)
+			if err := service.repo.DeleteBuyer(id); err != nil {
+				return err
+			}
 			return nil
 		}
 	}
