@@ -87,6 +87,9 @@ func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newBuyer internal.BuyerAttributes
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
+		}
 
 		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
 			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)

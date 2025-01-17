@@ -80,37 +80,6 @@ func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders []internal.Purc
 	return nil
 }
 
-// mergePurchaseOrderFields merges the fields of the input purchaseOrder with the internal purchaseOrder
-func mergePurchaseOrderFields(inputPurchaseOrder, internalPurchaseOrder internal.PurchaseOrder) (updatedPurchaseOrder internal.PurchaseOrder) {
-	updatedPurchaseOrder.ID = internalPurchaseOrder.ID
-
-	if inputPurchaseOrder.Attributes.OrderNumber != "" {
-		updatedPurchaseOrder.Attributes.OrderNumber = inputPurchaseOrder.Attributes.OrderNumber
-	} else {
-		updatedPurchaseOrder.Attributes.OrderNumber = internalPurchaseOrder.Attributes.OrderNumber
-	}
-
-	if inputPurchaseOrder.Attributes.TrackingCode != "" {
-		updatedPurchaseOrder.Attributes.TrackingCode = inputPurchaseOrder.Attributes.TrackingCode
-	} else {
-		updatedPurchaseOrder.Attributes.TrackingCode = internalPurchaseOrder.Attributes.TrackingCode
-	}
-
-	if inputPurchaseOrder.Attributes.BuyerId != 0 {
-		updatedPurchaseOrder.Attributes.BuyerId = inputPurchaseOrder.Attributes.BuyerId
-	} else {
-		updatedPurchaseOrder.Attributes.BuyerId = internalPurchaseOrder.Attributes.BuyerId
-	}
-
-	if inputPurchaseOrder.Attributes.ProductRecordId != 0 {
-		updatedPurchaseOrder.Attributes.ProductRecordId = inputPurchaseOrder.Attributes.ProductRecordId
-	} else {
-		updatedPurchaseOrder.Attributes.ProductRecordId = internalPurchaseOrder.Attributes.ProductRecordId
-	}
-
-	return updatedPurchaseOrder
-}
-
 func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
 	possibleBuyer, err := s.buyerService.GetOne(id)
 	// When internal server error

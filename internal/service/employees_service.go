@@ -40,6 +40,9 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 
 	// check for duplicates
 	employees, err := s.rp.FindAll()
+	if err != nil {
+		return
+	}
 	err = s.validateDuplicates(employees, newEmployee)
 	if err != nil {
 		return
@@ -53,6 +56,9 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 
 	// attempt to create the new employee
 	employee, err = s.rp.CreateEmployee(newEmployee)
+	if err != nil {
+		return
+	}
 
 	return employee, nil
 }

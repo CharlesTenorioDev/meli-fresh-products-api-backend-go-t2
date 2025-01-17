@@ -197,10 +197,10 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 		"where s.id=? group by s.id", id)
 
 	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			err = utils.ErrNotFound
-		}
+	if err != nil && err == sql.ErrNoRows {
+		err = utils.ErrNotFound
+		return nil, err
+
 	}
 
 	reports = append(reports, report)

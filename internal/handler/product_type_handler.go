@@ -20,7 +20,7 @@ func NewProductTypeHandler(service internal.ProductTypeService) *ProductTypeHand
 	return &ProductTypeHandler{service: service}
 }
 
-func (h *ProductTypeHandler) GetProductTypes(w http.ResponseWriter, r *http.Request) {
+func (h *ProductTypeHandler) GetProductTypes(w http.ResponseWriter, _ *http.Request) {
 	productTypes, err := h.service.GetProductTypes()
 	if err != nil {
 		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
@@ -29,7 +29,7 @@ func (h *ProductTypeHandler) GetProductTypes(w http.ResponseWriter, r *http.Requ
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productTypes,
 	})
-	return
+
 }
 
 func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,7 @@ func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.R
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productType,
 	})
-	return
+
 }
 
 func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Re
 	response.JSON(w, http.StatusCreated, map[string]interface{}{
 		"data": productType,
 	})
-	return
+
 }
 
 func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Re
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productType,
 	})
-	return
+
 }
 
 func (h *ProductTypeHandler) DeleteProductType(w http.ResponseWriter, r *http.Request) {
@@ -108,5 +108,5 @@ func (h *ProductTypeHandler) DeleteProductType(w http.ResponseWriter, r *http.Re
 		return
 	}
 	response.JSON(w, http.StatusNoContent, nil)
-	return
+
 }

@@ -53,8 +53,8 @@ func (r *MySQLProductBatchRepository) GetBatchNumber(batchNumber int) (int, erro
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = utils.ErrNotFound
-			return 0, nil
+			err = nil
+			return 0, err
 		}
 		return 0, err
 	}
