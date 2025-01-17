@@ -51,7 +51,6 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 			return
 		}
 		utils.JSON(w, http.StatusOK, seller)
-
 	}
 }
 
@@ -85,7 +84,6 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 
 		}
 		utils.JSON(w, http.StatusCreated, newSeller)
-
 	}
 }
 
@@ -120,7 +118,6 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 
 		}
 		utils.JSON(w, http.StatusOK, seller)
-
 	}
 }
 
