@@ -48,7 +48,7 @@ func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
 	return sections, nil
 }
 
-func (r *SectionMysqlRepository) GetById(id int) (internal.Section, error) {
+func (r *SectionMysqlRepository) GetByID(id int) (internal.Section, error) {
 	var section internal.Section
 
 	row := r.db.QueryRow("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, "+

@@ -75,7 +75,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 		return utils.ErrConflict
 	}
 
-	sectionExists, err := s.sectionRepo.GetById(newBatch.SectionId)
+	sectionExists, err := s.sectionRepo.GetByID(newBatch.SectionId)
 
 	if sectionExists == (internal.Section{}) {
 		return utils.ErrConflict

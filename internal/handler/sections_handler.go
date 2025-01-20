@@ -59,7 +59,7 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
-		section, err := h.service.GetById(id)
+		section, err := h.service.GetByID(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))

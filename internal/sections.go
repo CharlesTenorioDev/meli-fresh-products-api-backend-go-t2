@@ -34,7 +34,7 @@ type (
 		GetAll() ([]Section, error)
 		Save(*Section) (Section, error)
 		Update(*Section) (Section, error)
-		GetById(int) (Section, error)
+		GetByID(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)
 		Delete(int) error
 		GetSectionProductsReport() ([]SectionProductsReport, error)
@@ -44,7 +44,7 @@ type (
 		GetAll() ([]Section, error)
 		Save(Section) (Section, error)
 		Update(int, SectionPointers) (Section, error)
-		GetById(int) (Section, error)
+		GetByID(int) (Section, error)
 		Delete(int) error
 		GetSectionProductsReport(int) ([]SectionProductsReport, error)
 	}
