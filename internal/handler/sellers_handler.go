@@ -60,7 +60,7 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 //	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID"
 //	@Failure		404	{object}	utils.ErrorResponse	"Seller not found"
 //	@Failure		500	{object}	utils.ErrorResponse	"Internal server error"
-//	@Router			/sellers/{id} [get]
+//	@Router			/api/v1/sellers/{id} [get]
 func (h *SellerHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

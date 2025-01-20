@@ -123,6 +123,37 @@ info:
   title: Meli Fresh Products API
   version: 0.0.2.1
 paths:
+  /api/v1/sellers/{id}:
+    get:
+      description: Retrieve a seller by its ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Seller details
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get seller by ID
+      tags:
+      - sellers
   /sellers:
     get:
       description: Retrieve a list of all sellers
@@ -206,36 +237,6 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Delete a seller
-      tags:
-      - sellers
-    get:
-      description: Retrieve a seller by its ID
-      parameters:
-      - description: Seller ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Seller details
-          schema:
-            $ref: '#/definitions/internal.Seller'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Seller not found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Get seller by ID
       tags:
       - sellers
     put:

@@ -16,6 +16,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/sellers/{id}": {
+            "get": {
+                "description": "Retrieve a seller by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sellers"
+                ],
+                "summary": "Get seller by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Seller ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Seller details",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Seller"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Seller not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/sellers": {
             "get": {
                 "description": "Retrieve a list of all sellers",
@@ -102,51 +149,6 @@ const docTemplate = `{
             }
         },
         "/sellers/{id}": {
-            "get": {
-                "description": "Retrieve a seller by its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sellers"
-                ],
-                "summary": "Get seller by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Seller ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Seller details",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Seller"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Seller not found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Update an existing seller with the provided details",
                 "consumes": [
