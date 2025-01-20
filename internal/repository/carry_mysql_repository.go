@@ -93,7 +93,7 @@ func (r *MySQLCarryRepository) GetAll() ([]internal.Carry, error) {
 // Returns:
 //   - internal.Carry: The carrier object retrieved from the database.
 //   - error: An error object if any error occurs, including sql.ErrNoRows if the carrier is not found.
-func (r *MySQLCarryRepository) GetById(id int) (internal.Carry, error) {
+func (r *MySQLCarryRepository) GetByID(id int) (internal.Carry, error) {
 	stmt, err := r.db.Prepare("SELECT id, cid, company_name, address, telephone, locality_id FROM carriers WHERE id=?;")
 	if err != nil {
 		return internal.Carry{}, err
@@ -150,7 +150,7 @@ func (r *MySQLCarryRepository) Update(carry *internal.Carry) error {
 // Returns:
 //   - error: An error if the carrier does not exist or if there is an issue with the database operation, otherwise nil.
 func (r *MySQLCarryRepository) Delete(id int) error {
-	_, err := r.GetById(id)
+	_, err := r.GetByID(id)
 	if err != nil {
 		return err
 	}

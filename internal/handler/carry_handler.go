@@ -95,7 +95,7 @@ func (handler *CarryHandler) GetCarryById() http.HandlerFunc {
 			return
 		}
 
-		carry, err := handler.service.GetById(id)
+		carry, err := handler.service.GetByID(id)
 		if err != nil {
 			utils.Error(w, http.StatusNotFound, "Failed to get carry")
 			return

@@ -47,7 +47,7 @@ func (r *MysqlLocalityRepository) Save(locality *internal.Locality) error {
 	return nil
 }
 
-// GetById retrieves a locality by its ID from the MySQL database.
+// GetByID retrieves a locality by its ID from the MySQL database.
 // It prepares a SQL statement to select the locality with the given ID,
 // executes the query, and scans the result into an internal.Locality struct.
 // If the locality is not found, it returns an ErrNotFound error.
@@ -59,7 +59,7 @@ func (r *MysqlLocalityRepository) Save(locality *internal.Locality) error {
 // Returns:
 //   - internal.Locality: The locality with the specified ID.
 //   - error: An error if the locality is not found or if any other error occurs.
-func (r *MysqlLocalityRepository) GetById(id int) (internal.Locality, error) {
+func (r *MysqlLocalityRepository) GetByID(id int) (internal.Locality, error) {
 	stmt, err := r.db.Prepare("SELECT id, locality_name, province_id FROM localities WHERE id=?;")
 	if err != nil {
 		return internal.Locality{}, err

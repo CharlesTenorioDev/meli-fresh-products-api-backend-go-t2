@@ -16,8 +16,8 @@ func (s *MysqlLocalityService) Save(*internal.Locality, *internal.Province, *int
 	return nil
 }
 
-func (s *MysqlLocalityService) GetById(id int) (internal.Locality, error) {
-	return s.Repo.GetById(id)
+func (s *MysqlLocalityService) GetByID(id int) (internal.Locality, error) {
+	return s.Repo.GetByID(id)
 }
 
 func (s *MysqlLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {

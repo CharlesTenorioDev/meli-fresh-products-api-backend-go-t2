@@ -244,7 +244,7 @@ func (s *WarehouseService) validateWarehouse(warehouse internal.Warehouse) error
 		return utils.ErrInvalidArguments
 	}
 
-	if _, err := s.validateLocality.GetById(warehouse.LocalityID); err != nil {
+	if _, err := s.validateLocality.GetByID(warehouse.LocalityID); err != nil {
 		return err
 	}
 

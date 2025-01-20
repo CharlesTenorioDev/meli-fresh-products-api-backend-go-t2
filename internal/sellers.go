@@ -18,7 +18,7 @@ type SellerRepository interface {
 }
 
 type SellerLocalityValidation interface {
-	GetById(int) (Locality, error)
+	GetByID(int) (Locality, error)
 }
 
 type Seller struct {

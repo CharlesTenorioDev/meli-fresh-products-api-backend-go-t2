@@ -47,7 +47,7 @@ func (s *SellerService) Create(newSeller *internal.Seller) error {
 		return sellerValidation
 	}
 
-	_, err := s.localityRp.GetById(newSeller.LocalityId)
+	_, err := s.localityRp.GetByID(newSeller.LocalityId)
 
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {

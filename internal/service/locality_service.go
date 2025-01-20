@@ -53,7 +53,7 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 		return utils.ErrInvalidArguments
 	}
 	// If locality exists by id
-	possibleLocality, err := s.localityRepo.GetById(locality.ID)
+	possibleLocality, err := s.localityRepo.GetByID(locality.ID)
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}
@@ -105,7 +105,7 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
 	// Of id != 0, check if locality exists
 	if localityId != 0 {
-		_, err := s.localityRepo.GetById(localityId)
+		_, err := s.localityRepo.GetByID(localityId)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
@@ -127,7 +127,7 @@ func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]interna
 func (s *BasicLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
 	// Of id != 0, check if locality exists
 	if localityId != 0 {
-		_, err := s.localityRepo.GetById(localityId)
+		_, err := s.localityRepo.GetByID(localityId)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}
