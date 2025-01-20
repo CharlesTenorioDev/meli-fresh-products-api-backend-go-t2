@@ -48,35 +48,28 @@ type reqPostWarehouse struct {
 }
 
 // WarehouseHandler handles HTTP requests related to warehouse operations.
-// @Summary Handles warehouse operations
-// @Description This handler provides endpoints to manage warehouse operations such as creating, updating, and retrieving warehouse information.
-// @Tags warehouse
+//
+//	@Summary		Handles warehouse operations
+//	@Description	This handler provides endpoints to manage warehouse operations such as creating, updating, and retrieving warehouse information.
+//	@Tags			warehouse
 type WarehouseHandler struct {
 	service internal.WarehouseService
 }
 
-// NewWarehouseHandler creates a new instance of WarehouseHandler.
-// @Summary Create a new WarehouseHandler
-// @Description This function initializes a new WarehouseHandler with the provided WarehouseService.
-// @Tags Warehouse
-// @Accept json
-// @Produce json
-// @Param service body internal.WarehouseService true "Warehouse Service"
-// @Success 200 {object} WarehouseHandler
-// @Router /warehouse-handler [post]
 func NewWarehouseHandler(service internal.WarehouseService) *WarehouseHandler {
 	return &WarehouseHandler{service}
 }
 
 // GetAll handles the HTTP request to retrieve all warehouses.
-// @Summary Get all warehouses
-// @Description Retrieve a list of all warehouses
-// @Tags warehouses
-// @Produce json
-// @Success 200 {array} internal.Warehouse "List of warehouses"
-// @Failure 404 {object} utils.ErrorResponse "No warehouses found"
-// @Failure 500 {object} utils.ErrorResponse "An error occurred while retrieving warehouses"
-// @Router /warehouses [get]
+//
+//	@Summary		Get all warehouses
+//	@Description	Retrieve a list of all warehouses
+//	@Tags			warehouses
+//	@Produce		json
+//	@Success		200	{array}		internal.Warehouse	"List of warehouses"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouses found"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while retrieving warehouses"
+//	@Router			/warehouses [get]
 func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		warehouses, err := h.service.GetAll()
@@ -96,16 +89,17 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 }
 
 // GetByID handles the HTTP request to retrieve a warehouse by its ID.
-// @Summary Get warehouse by ID
-// @Description Get a warehouse by its ID
-// @Tags warehouses
-// @Produce json
-// @Param id path int true "Warehouse ID"
-// @Success 200 {object} internal.Warehouse
-// @Failure 400 {object} utils.ErrorResponse "Invalid ID format"
-// @Failure 404 {object} utils.ErrorResponse "No warehouse found with ID"
-// @Failure 500 {object} utils.ErrorResponse "An error occurred while retrieving the warehouse"
-// @Router /warehouses/{id} [get]
+//
+//	@Summary		Get warehouse by ID
+//	@Description	Get a warehouse by its ID
+//	@Tags			warehouses
+//	@Produce		json
+//	@Param			id	path		int	true	"Warehouse ID"
+//	@Success		200	{object}	internal.Warehouse
+//	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID format"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouse found with ID"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while retrieving the warehouse"
+//	@Router			/warehouses/{id} [get]
 func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -145,7 +139,7 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 //	@Failure		409			{object}	utils.ErrorResponse	"Warehouse code conflict"
 //	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
 //	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
-//	@Router			/api/v1/warehouses [post]
+//	@Router			/warehouses [post]
 func (h *WarehouseHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostWarehouse
@@ -186,20 +180,21 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 }
 
 // Update godoc
-// @Summary Update a warehouse
-// @Description Update the details of an existing warehouse by ID
-// @Tags warehouses
-// @Accept json
-// @Produce json
-// @Param id path int true "Warehouse ID"
-// @Param warehouse body internal.WarehousePointers true "Warehouse data"
-// @Success 200 {object} internal.Warehouse
-// @Failure 400 {object} utils.ErrorResponse "Invalid ID format or request body"
-// @Failure 404 {object} utils.ErrorResponse "Warehouse not found"
-// @Failure 409 {object} utils.ErrorResponse "Conflict error"
-// @Failure 422 {object} utils.ErrorResponse "Invalid arguments"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
-// @Router /warehouses/{id} [put]
+//
+//	@Summary		Update a warehouse
+//	@Description	Update the details of an existing warehouse by ID
+//	@Tags			warehouses
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		int							true	"Warehouse ID"
+//	@Param			warehouse	body		internal.WarehousePointers	true	"Warehouse data"
+//	@Success		200			{object}	internal.Warehouse
+//	@Failure		400			{object}	utils.ErrorResponse	"Invalid ID format or request body"
+//	@Failure		404			{object}	utils.ErrorResponse	"Warehouse not found"
+//	@Failure		409			{object}	utils.ErrorResponse	"Conflict error"
+//	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
+//	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
+//	@Router			/warehouses/{id} [put]
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -243,17 +238,18 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 }
 
 // Delete handles the deletion of a warehouse by its ID.
-// @Summary Delete a warehouse
-// @Description Deletes a warehouse by its ID
-// @Tags warehouses
-// @Accept json
-// @Produce json
-// @Param id path int true "Warehouse ID"
-// @Success 204 {object} nil "No Content"
-// @Failure 400 {object} utils.ErrorResponse "Invalid ID format"
-// @Failure 404 {object} utils.ErrorResponse "No warehouse found with the given ID"
-// @Failure 500 {object} utils.ErrorResponse "An error occurred while deleting the warehouse"
-// @Router /warehouses/{id} [delete]
+//
+//	@Summary		Delete a warehouse
+//	@Description	Deletes a warehouse by its ID
+//	@Tags			warehouses
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int					true	"Warehouse ID"
+//	@Success		204	{object}	nil					"No Content"
+//	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID format"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouse found with the given ID"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while deleting the warehouse"
+//	@Router			/warehouses/{id} [delete]
 func (h *WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

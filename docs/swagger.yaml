@@ -1,8 +1,4 @@
 definitions:
-  handler.WarehouseHandler:
-    description: This handler provides endpoints to manage warehouse operations such
-      as creating, updating, and retrieving warehouse information.
-    type: object
   handler.reqPostWarehouse:
     properties:
       address:
@@ -40,6 +36,45 @@ definitions:
           The unique code of the warehouse
           required: true
           example: WH-001
+        type: string
+    type: object
+  internal.Seller:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      id:
+        type: integer
+      locality_id:
+        type: integer
+      telephone:
+        type: string
+    type: object
+  internal.SellerRequest:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      locality_id:
+        type: integer
+      telephone:
+        type: string
+    type: object
+  internal.SellerRequestPointer:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      telephone:
         type: string
     type: object
   internal.Warehouse:
@@ -88,7 +123,186 @@ info:
   title: Meli Fresh Products API
   version: 0.0.2.1
 paths:
-  /api/v1/warehouses:
+  /sellers:
+    get:
+      description: Retrieve a list of all sellers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sellers
+          schema:
+            items:
+              $ref: '#/definitions/internal.Seller'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all sellers
+      tags:
+      - sellers
+    post:
+      consumes:
+      - application/json
+      description: Create a new seller with the provided details
+      parameters:
+      - description: Seller details
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SellerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created seller
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Seller already exists
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new seller
+      tags:
+      - sellers
+  /sellers/{id}:
+    delete:
+      description: Delete a seller by its ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a seller
+      tags:
+      - sellers
+    get:
+      description: Retrieve a seller by its ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Seller details
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get seller by ID
+      tags:
+      - sellers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing seller with the provided details
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated seller details
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SellerRequestPointer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated seller
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Seller already exists
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a seller
+      tags:
+      - sellers
+  /warehouses:
+    get:
+      description: Retrieve a list of all warehouses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of warehouses
+          schema:
+            items:
+              $ref: '#/definitions/internal.Warehouse'
+            type: array
+        "404":
+          description: No warehouses found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while retrieving warehouses
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all warehouses
+      tags:
+      - warehouses
     post:
       consumes:
       - application/json
@@ -128,51 +342,6 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create a new warehouse
-      tags:
-      - warehouses
-  /warehouse-handler:
-    post:
-      consumes:
-      - application/json
-      description: This function initializes a new WarehouseHandler with the provided
-        WarehouseService.
-      parameters:
-      - description: Warehouse Service
-        in: body
-        name: service
-        required: true
-        schema: {}
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.WarehouseHandler'
-      summary: Create a new WarehouseHandler
-      tags:
-      - Warehouse
-  /warehouses:
-    get:
-      description: Retrieve a list of all warehouses
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of warehouses
-          schema:
-            items:
-              $ref: '#/definitions/internal.Warehouse'
-            type: array
-        "404":
-          description: No warehouses found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: An error occurred while retrieving warehouses
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Get all warehouses
       tags:
       - warehouses
   /warehouses/{id}:
