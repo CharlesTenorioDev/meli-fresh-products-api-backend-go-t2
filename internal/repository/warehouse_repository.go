@@ -48,7 +48,7 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 	return warehouseList, nil
 }
 
-// GetById retrieves a warehouse by its ID from the database.
+// GetByID retrieves a warehouse by its ID from the database.
 // It returns the warehouse details if found, otherwise it returns an error.
 // If the warehouse is not found, it returns a utils.ErrNotFound error.
 //
@@ -166,7 +166,7 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 }
 
 // Delete removes a warehouse record from the database by its ID.
-// It first checks if the warehouse exists by calling GetById.
+// It first checks if the warehouse exists by calling GetByID.
 // If the warehouse exists, it prepares and executes a DELETE SQL statement.
 // If any error occurs during these operations, it returns the error.
 // Parameters:

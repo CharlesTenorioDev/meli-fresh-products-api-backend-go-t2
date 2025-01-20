@@ -41,7 +41,7 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 			return
 		}
 
-		seller, err := h.service.GetById(id)
+		seller, err := h.service.GetByID(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintln("id:", id, "not found"))

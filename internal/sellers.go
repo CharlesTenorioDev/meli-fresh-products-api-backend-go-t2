@@ -2,7 +2,7 @@ package internal
 
 type SellerService interface {
 	GetAll() ([]Seller, error)
-	GetById(id int) (Seller, error)
+	GetByID(id int) (Seller, error)
 	Create(*Seller) error
 	Update(int, SellerRequestPointer) (Seller, error)
 	Delete(int) error
