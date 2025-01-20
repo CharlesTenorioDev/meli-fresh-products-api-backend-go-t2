@@ -123,7 +123,10 @@ func (p *ProductRecordDB) FindByID(productRecordID int) (internal.ProductRecords
 
 	var pr internal.ProductRecords
 
-	row.Scan(&pr.ID)
+	err = row.Scan(&pr.ID)
+	if err != nil {
+		return internal.ProductRecords{}, err
+	}
 
 	err = row.Err()
 	if err != nil {

@@ -15,14 +15,14 @@ func CarryRoutes(mux *chi.Mux, service internal.CarryService) error {
 		return errors.New("mux router is nil")
 	}
 
-	handler := handler.NewCarryHandler(service)
+	carryHandler := handler.NewCarryHandler(service)
 
 	mux.Route("/api/v1/carries", func(router chi.Router) {
-		router.Post("/", handler.SaveCarry())
-		router.Get("/", handler.GetAllCarries())
-		router.Get("/{id}", handler.GetCarryById())
-		router.Patch("/{id}", handler.UpdateCarry())
-		router.Delete("/{id}", handler.DeleteCarry())
+		router.Post("/", carryHandler.SaveCarry())
+		router.Get("/", carryHandler.GetAllCarries())
+		router.Get("/{id}", carryHandler.GetCarryByID())
+		router.Patch("/{id}", carryHandler.UpdateCarry())
+		router.Delete("/{id}", carryHandler.DeleteCarry())
 	})
 
 	return nil

@@ -8,15 +8,15 @@ import (
 
 // RegisterInboundOrderRoutes is used to register the routes associated with the inboundOrder entity
 func RegisterInboundOrderRoutes(mux *chi.Mux, service internal.InboundOrderService) error {
-	handler := handler.NewInboundOrderHandler(service)
+	orderHandler := handler.NewInboundOrderHandler(service)
 
 	// POST /api/v1/inboundOrders
 	mux.Route("/api/v1/inboundOrders", func(router chi.Router) {
-		router.Post("/", handler.CreateInboundOrder())
+		router.Post("/", orderHandler.CreateInboundOrder())
 	})
 
 	mux.Route("/api/v1/employees/reportInboundOrders", func(router chi.Router) {
-		router.Get("/", handler.GetInboundOrdersReport())
+		router.Get("/", orderHandler.GetInboundOrdersReport())
 	})
 
 	return nil

@@ -26,7 +26,7 @@ func NewWarehouseRoutes(mux *chi.Mux, service internal.WarehouseService) error {
 	mux.Route("/api/v1/warehouses", func(router chi.Router) {
 		router.Get("/", warehouseHandler.GetAll())
 		router.Post("/", warehouseHandler.Post())
-		router.Get("/{id}", warehouseHandler.GetById())
+		router.Get("/{id}", warehouseHandler.GetByID())
 		router.Patch("/{id}", warehouseHandler.Update())
 		router.Delete("/{id}", warehouseHandler.Delete())
 	})

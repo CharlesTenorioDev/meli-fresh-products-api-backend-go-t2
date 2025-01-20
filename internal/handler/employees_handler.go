@@ -44,8 +44,8 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 	}
 }
 
-// GetEmployeesById handles the GET /employees/{id} route
-func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
+// GetEmployeesByID handles the GET /employees/{id} route
+func (h *EmployeeDefault) GetEmployeesByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
 

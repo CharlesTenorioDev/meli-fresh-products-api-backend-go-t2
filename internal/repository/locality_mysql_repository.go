@@ -94,12 +94,12 @@ func (r *MysqlLocalityRepository) GetByID(id int) (internal.Locality, error) {
 // Returns:
 //   - []internal.SellersByLocality: a slice of SellersByLocality containing the locality ID, locality name, and sellers count.
 //   - error: an error if the query fails or if there is an issue scanning the rows.
-func (r *MysqlLocalityRepository) GetSellersByLocalityID(localityId int) ([]internal.SellersByLocality, error) {
+func (r *MysqlLocalityRepository) GetSellersByLocalityID(localityID int) ([]internal.SellersByLocality, error) {
 	report := []internal.SellersByLocality{}
 
 	var rows *sql.Rows
 
-	if localityId == 0 {
+	if localityID == 0 {
 		var err error
 
 		rows, err = r.db.Query(`SELECT l.id, l.locality_name, COUNT(s.id) AS 'sellers_count' 
@@ -123,7 +123,7 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityID(localityId int) ([]inte
 
 		defer stmt.Close()
 
-		rows, err = stmt.Query(localityId)
+		rows, err = stmt.Query(localityID)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
@@ -154,12 +154,12 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityID(localityId int) ([]inte
 // Returns:
 //   - []internal.CarriesByLocality: A slice of CarriesByLocality structs containing the locality ID, locality name, and carrier count.
 //   - error: An error object if an error occurred during the query execution.
-func (r *MysqlLocalityRepository) GetCarriesByLocalityID(localityId int) ([]internal.CarriesByLocality, error) {
+func (r *MysqlLocalityRepository) GetCarriesByLocalityID(localityID int) ([]internal.CarriesByLocality, error) {
 	report := []internal.CarriesByLocality{}
 
 	var rows *sql.Rows
 
-	if localityId == 0 {
+	if localityID == 0 {
 		var err error
 
 		rows, err = r.db.Query(`SELECT l.id, l.locality_name, COUNT(c.id) AS 'carries_count' 
@@ -179,7 +179,7 @@ func (r *MysqlLocalityRepository) GetCarriesByLocalityID(localityId int) ([]inte
 			return []internal.CarriesByLocality{}, err
 		}
 
-		rows, err = stmt.Query(localityId)
+		rows, err = stmt.Query(localityID)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}

@@ -11,7 +11,7 @@ type PurchaseOrderRepository struct {
 	db *sql.DB
 }
 
-func NewPurchaseOrderDb(db *sql.DB) *PurchaseOrderRepository {
+func NewPurchaseOrderDB(db *sql.DB) *PurchaseOrderRepository {
 	return &PurchaseOrderRepository{db}
 }
 
@@ -45,21 +45,21 @@ func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error)
 }
 
 // FindAllByBuyerID retrieves all purchase orders by buyer id
-func (repo *PurchaseOrderRepository) FindAllByBuyerID(buyerId int) ([]internal.PurchaseOrderSummary, error) {
+func (repo *PurchaseOrderRepository) FindAllByBuyerID(buyerID int) ([]internal.PurchaseOrderSummary, error) {
 	var query string
 
 	var rows *sql.Rows
 
 	var err error
 
-	if buyerId != 0 {
+	if buyerID != 0 {
 		query = `
 			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes
 			FROM purchase_orders po
 			INNER JOIN buyers b ON po.buyer_id = b.id
 			WHERE po.buyer_id = ?
 			GROUP BY po.buyer_id`
-		rows, err = repo.db.Query(query, buyerId)
+		rows, err = repo.db.Query(query, buyerID)
 	} else {
 		query = `
 			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes

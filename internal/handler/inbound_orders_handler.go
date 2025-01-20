@@ -19,7 +19,7 @@ func NewInboundOrderHandler(service internal.InboundOrderService) *InboundOrderH
 	return &InboundOrderHandler{service: service}
 }
 
-// Handle POST /api/v1/inboundOrders
+// CreateInboundOrder Handle POST /api/v1/inboundOrders
 func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request struct {
@@ -65,8 +65,9 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 	}
 }
 
-// Handle GET /api/v1/employees/reportInboundOrders
-// GetInboundOrdersReport handles the generation of the report.
+// GetInboundOrdersReport sHandle GET /api/v1/employees/reportInboundOrders
+//
+//	handles the generation of the report.
 func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idsParam := r.URL.Query().Get("id")

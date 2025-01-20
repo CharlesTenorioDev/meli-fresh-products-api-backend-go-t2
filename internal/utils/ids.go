@@ -1,6 +1,6 @@
 package utils
 
-// Returns the biggest id of a int map
+// GetBiggestID Returns the biggest id of a int map
 // if len(map) == 0, returns 1
 func GetBiggestID[K int, V any](db map[K]V) int {
 	if len(db) == 0 {

@@ -8,13 +8,13 @@ import (
 
 // RegisterPurchaseOrdersRoutes is used to record the routes associated to the purchase orders entity
 func RegisterPurchaseOrdersRoutes(mux *chi.Mux, service internal.PurchaseOrderService) error {
-	handler := handler.NewPurchaseOrdersHandler(service)
+	purchaseOrdersHandler := handler.NewPurchaseOrdersHandler(service)
 
 	mux.Route("/api/v1/purchaseOrders", func(router chi.Router) {
 		// Post
-		router.Post("/", handler.PostPurchaseOrders())
+		router.Post("/", purchaseOrdersHandler.PostPurchaseOrders())
 	})
-	mux.HandleFunc("/api/v1/buyers/reportPurchaseOrders", handler.GetAllPurchaseOrders())
+	mux.HandleFunc("/api/v1/buyers/reportPurchaseOrders", purchaseOrdersHandler.GetAllPurchaseOrders())
 
 	return nil
 }

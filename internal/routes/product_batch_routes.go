@@ -13,10 +13,10 @@ func ProductBatchRoutes(mux *chi.Mux, service internal.ProductBatchService) erro
 		return errors.New("mux router is nil")
 	}
 
-	handler := handler.NewProductBatchHandler(service)
+	batchHandler := handler.NewProductBatchHandler(service)
 
 	mux.Route("/api/v1/productBatches", func(router chi.Router) {
-		router.Post("/", handler.Create())
+		router.Post("/", batchHandler.Create())
 	})
 
 	return nil

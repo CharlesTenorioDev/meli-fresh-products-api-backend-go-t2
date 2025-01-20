@@ -49,11 +49,11 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-// GetById the section by Id - 200
+// GetByID the section by Id - 200
 // If the id is in the wrong format - 400
 // If the section doesn't exist - 404
 // An error not mapped - 500
-func (h *SectionHandler) GetById() http.HandlerFunc {
+func (h *SectionHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {

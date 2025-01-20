@@ -17,8 +17,8 @@ type PurchaseOrderAttributes struct {
 	ProductRecordID int    `json:"product_record_id"`
 }
 
-// PurchaseOrderJson defines the structure of the PurchaseOrder data as it appears in a json file
-type PurchaseOrderJson struct {
+// PurchaseOrderJSON defines the structure of the PurchaseOrder data as it appears in a json file
+type PurchaseOrderJSON struct {
 	ID              int       `json:"id"`
 	OrderNumber     string    `json:"order_number"`
 	OrderDate       time.Time `json:"order_date"`

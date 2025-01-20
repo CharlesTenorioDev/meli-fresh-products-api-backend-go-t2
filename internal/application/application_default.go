@@ -158,7 +158,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDb(a.db)
+	buyersRepo := repository.NewBuyerDB(a.db)
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	if err = routes.BuyerRoutes(router, buyersService); err != nil {
@@ -166,7 +166,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 6 - Purchase Orders
-	purchaseOrdersRepo := repository.NewPurchaseOrderDb(a.db)
+	purchaseOrdersRepo := repository.NewPurchaseOrderDB(a.db)
 	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
 
 	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)

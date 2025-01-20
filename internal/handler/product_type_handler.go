@@ -27,7 +27,7 @@ func (h *ProductTypeHandler) GetProductTypes(w http.ResponseWriter, _ *http.Requ
 		return
 	}
 
-	response.JSON(w, http.StatusOK, map[string]interface{}{
+	response.JSON(w, http.StatusOK, map[string]any{
 		"data": productTypes,
 	})
 }
@@ -45,7 +45,7 @@ func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	response.JSON(w, http.StatusOK, map[string]interface{}{
+	response.JSON(w, http.StatusOK, map[string]any{
 		"data": productType,
 	})
 }
@@ -70,7 +70,7 @@ func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	response.JSON(w, http.StatusCreated, map[string]interface{}{
+	response.JSON(w, http.StatusCreated, map[string]any{
 		"data": productType,
 	})
 }
@@ -98,7 +98,7 @@ func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	response.JSON(w, http.StatusOK, map[string]interface{}{
+	response.JSON(w, http.StatusOK, map[string]any{
 		"data": productType,
 	})
 }

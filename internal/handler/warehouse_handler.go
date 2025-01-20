@@ -58,8 +58,8 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-// GetById handles the HTTP request to retrieve a warehouse by its ID.
-func (h *WarehouseHandler) GetById() http.HandlerFunc {
+// GetByID handles the HTTP request to retrieve a warehouse by its ID.
+func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {

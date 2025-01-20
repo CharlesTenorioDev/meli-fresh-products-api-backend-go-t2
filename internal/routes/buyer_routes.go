@@ -13,14 +13,14 @@ func BuyerRoutes(mux *chi.Mux, service internal.BuyerService) error {
 		return errors.New("mux router is nil")
 	}
 
-	handler := handler.NewBuyerHandler(service)
+	buyerHandler := handler.NewBuyerHandler(service)
 
 	mux.Route("/api/v1/buyers", func(router chi.Router) {
-		router.Get("/", handler.GetAll())
-		router.Get("/{id}", handler.GetOne())
-		router.Post("/", handler.CreateBuyer())
-		router.Patch("/{id}", handler.UpdateBuyer())
-		router.Delete("/{id}", handler.DeleteBuyer())
+		router.Get("/", buyerHandler.GetAll())
+		router.Get("/{id}", buyerHandler.GetOne())
+		router.Post("/", buyerHandler.CreateBuyer())
+		router.Patch("/{id}", buyerHandler.UpdateBuyer())
+		router.Delete("/{id}", buyerHandler.DeleteBuyer())
 	})
 
 	return nil
