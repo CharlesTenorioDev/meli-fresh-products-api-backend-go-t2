@@ -26,10 +26,10 @@ func (h *ProductTypeHandler) GetProductTypes(w http.ResponseWriter, _ *http.Requ
 		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
 		return
 	}
+
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productTypes,
 	})
-
 }
 
 func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.Request) {
@@ -38,24 +38,27 @@ func (h *ProductTypeHandler) GetProductTypeByID(w http.ResponseWriter, r *http.R
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
+
 	productType, err := h.service.GetProductTypeByID(id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
 		return
 	}
+
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productType,
 	})
-
 }
 
 func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Request) {
 	var newProductType internal.ProductType
+
 	err := json.NewDecoder(r.Body).Decode(&newProductType)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
+
 	productType, err := h.service.CreateProductType(newProductType)
 	if err != nil {
 		if errors.Is(err, utils.ErrConflict) {
@@ -66,10 +69,10 @@ func (h *ProductTypeHandler) CreateProductType(w http.ResponseWriter, r *http.Re
 			return
 		}
 	}
+
 	response.JSON(w, http.StatusCreated, map[string]interface{}{
 		"data": productType,
 	})
-
 }
 
 func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Request) {
@@ -78,22 +81,26 @@ func (h *ProductTypeHandler) UpdateProductType(w http.ResponseWriter, r *http.Re
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
+
 	var inputProductType internal.ProductType
+
 	err = json.NewDecoder(r.Body).Decode(&inputProductType)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
+
 	inputProductType.ID = id
+
 	productType, err := h.service.UpdateProductType(inputProductType)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
 		return
 	}
+
 	response.JSON(w, http.StatusOK, map[string]interface{}{
 		"data": productType,
 	})
-
 }
 
 func (h *ProductTypeHandler) DeleteProductType(w http.ResponseWriter, r *http.Request) {
@@ -102,11 +109,12 @@ func (h *ProductTypeHandler) DeleteProductType(w http.ResponseWriter, r *http.Re
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 		return
 	}
+
 	err = h.service.DeleteProductType(id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
 		return
 	}
-	response.JSON(w, http.StatusNoContent, nil)
 
+	response.JSON(w, http.StatusNoContent, nil)
 }

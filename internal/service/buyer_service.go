@@ -40,6 +40,7 @@ func (service *BuyerService) GetOne(id int) (*internal.Buyer, error) {
 
 func (service *BuyerService) CreateBuyer(buyer internal.BuyerAttributes) (*internal.Buyer, error) {
 	buyers, err := service.GetAll()
+
 	if err != nil {
 		log.Println("Error to load - ", err)
 		return nil, err
@@ -116,6 +117,7 @@ func (service *BuyerService) DeleteBuyer(id int) error {
 
 func (service *BuyerService) validation(newBuyer internal.Buyer) error {
 	buyers, err := service.repo.GetAll()
+
 	if err != nil {
 		log.Println("Error in load -", err)
 		return err

@@ -39,27 +39,34 @@ func NewCarryHandler(service internal.CarryService) *CarryHandler {
 func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var carry *internal.Carry
+
 		err := json.NewDecoder(r.Body).Decode(&carry)
 		if err != nil {
 			http.Error(w, "Failed to decode carry: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		if err := handler.service.Save(carry); err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, "CID already exists: "+utils.ErrConflict.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, "Invalid carry: "+utils.ErrInvalidArguments.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusConflict, "Locality: "+err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Failed to save carry: "+err.Error())
+
 			return
 		}
+
 		utils.JSON(w, http.StatusCreated, carry)
 	}
 }
@@ -95,7 +102,7 @@ func (handler *CarryHandler) GetCarryById() http.HandlerFunc {
 			return
 		}
 
-		carry, err := handler.service.GetById(id)
+		carry, err := handler.service.GetByID(id)
 		if err != nil {
 			utils.Error(w, http.StatusNotFound, "Failed to get carry")
 			return
@@ -120,6 +127,7 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 		}
 
 		carry := &internal.Carry{}
+
 		err = json.NewDecoder(r.Body).Decode(carry)
 		if err != nil {
 			utils.Error(w, http.StatusBadRequest, "Failed to decode carry: "+err.Error())
@@ -133,11 +141,14 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Failed to update carry: "+err.Error())
+
 			return
 		}
 
@@ -164,7 +175,9 @@ func (handler *CarryHandler) DeleteCarry() http.HandlerFunc {
 				utils.Error(w, http.StatusNotFound, "Carry not found")
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Failed to delete carry")
+
 			return
 		}
 

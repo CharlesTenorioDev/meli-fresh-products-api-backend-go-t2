@@ -27,9 +27,12 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		queryParams := r.URL.Query()
 		buyerIdParam := queryParams.Get("id")
+
 		var buyerId int
+
 		if buyerIdParam != "" {
 			var err error
+
 			buyerId, err = strconv.Atoi(buyerIdParam)
 			if err != nil {
 				utils.HandleError(w, utils.ErrInvalidFormat)
@@ -43,7 +46,9 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 				utils.HandleError(w, utils.ErrNotFound)
 				return
 			}
+
 			response.JSON(w, http.StatusInternalServerError, err)
+
 			return
 		}
 
@@ -90,6 +95,7 @@ func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 				log.Fatalln("Error:", err.Error())
 				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
+
 			return
 		}
 

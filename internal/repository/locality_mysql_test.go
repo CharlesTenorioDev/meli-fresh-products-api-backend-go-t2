@@ -18,7 +18,7 @@ func TestIntegrationLocality_GetById(t *testing.T) {
 	repo := repository.NewMysqlLocalityRepository(db)
 
 	t.Run("Given an existing ID, return the ", func(t *testing.T) {
-		locality, err := repo.GetById(1)
+		locality, err := repo.GetByID(1)
 		require.NoError(t, err)
 		require.Equal(t, "Los Angeles", locality.LocalityName)
 		require.NotZero(t, locality.ProvinceID)
@@ -26,7 +26,7 @@ func TestIntegrationLocality_GetById(t *testing.T) {
 	})
 
 	t.Run("Given a not existing ID, return empty locality and utils.ErrNotFound", func(t *testing.T) {
-		locality, err := repo.GetById(9999)
+		locality, err := repo.GetByID(9999)
 		require.ErrorIs(t, err, utils.ErrNotFound)
 		require.Empty(t, locality)
 	})

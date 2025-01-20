@@ -34,6 +34,7 @@ func (l *SellerJSONFile) Load() (v map[int]Seller, err error) {
 
 	// decode file
 	var sellersJSON []SellerJSON
+
 	err = json.NewDecoder(file).Decode(&sellersJSON)
 	if err != nil {
 		return

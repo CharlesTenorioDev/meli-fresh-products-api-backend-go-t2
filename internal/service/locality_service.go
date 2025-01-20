@@ -43,20 +43,24 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 	if locality.LocalityName == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if locality.ID == 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if province.ProvinceName == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if country.CountryName == "" {
 		return utils.ErrInvalidArguments
 	}
 	// If locality exists by id
-	possibleLocality, err := s.localityRepo.GetById(locality.ID)
+	possibleLocality, err := s.localityRepo.GetByID(locality.ID)
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}
+
 	if possibleLocality != (internal.Locality{}) {
 		return utils.ErrConflict
 	}
@@ -75,6 +79,7 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 	} else {
 		country.ID = possibleCountry.ID
 	}
+
 	(*province).CountryID = country.ID
 
 	// Check if we find a province by its name
@@ -91,8 +96,10 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 	} else {
 		province.ID = possibleProvince.ID
 	}
+
 	(*locality).ProvinceID = province.ID
 	fmt.Printf("%+v %+v %+v\n\n", locality, province, country)
+
 	if err = s.localityRepo.Save(locality); err != nil {
 		return err
 	}
@@ -100,16 +107,17 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 	return nil
 }
 
-// Get the sellers quantity by ther location
+// Get the sellers quantity by there location
 // if id == 0, then all location are returned
 func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
 	// Of id != 0, check if locality exists
 	if localityId != 0 {
-		_, err := s.localityRepo.GetById(localityId)
+		_, err := s.localityRepo.GetByID(localityId)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
 	}
+
 	return s.localityRepo.GetSellersByLocalityId(localityId)
 }
 
@@ -127,10 +135,11 @@ func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]interna
 func (s *BasicLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
 	// Of id != 0, check if locality exists
 	if localityId != 0 {
-		_, err := s.localityRepo.GetById(localityId)
+		_, err := s.localityRepo.GetByID(localityId)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}
 	}
+
 	return s.localityRepo.GetCarriesByLocalityId(localityId)
 }

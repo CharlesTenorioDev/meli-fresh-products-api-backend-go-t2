@@ -20,7 +20,7 @@ type CarriesByLocality struct {
 
 type LocalityRepository interface {
 	Save(*Locality) error
-	GetById(id int) (Locality, error)
+	GetByID(id int) (Locality, error)
 	GetSellersByLocalityId(localityId int) ([]SellersByLocality, error)
 	GetCarriesByLocalityId(localityId int) ([]CarriesByLocality, error)
 }

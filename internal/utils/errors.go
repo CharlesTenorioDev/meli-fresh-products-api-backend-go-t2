@@ -22,6 +22,7 @@ var (
 // handleError centralizes error handling and response formatting
 func HandleError(w http.ResponseWriter, err error) {
 	var status int
+
 	var message string
 
 	switch err {

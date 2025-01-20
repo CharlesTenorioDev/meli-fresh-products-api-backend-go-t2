@@ -8,9 +8,11 @@ import (
 
 func NewProductRecordsRoutes(mux *chi.Mux, service internal.ProductRecordsService) error {
 	recordsHandler := handler.NewProductRecordsHandler(service)
+
 	mux.Route("/api/v1/productRecords", func(router chi.Router) {
 		router.Post("/", recordsHandler.CreateProductRecord)
 	})
 	mux.HandleFunc("/api/v1/products/reportRecords", recordsHandler.GetProductRecords)
+
 	return nil
 }

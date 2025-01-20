@@ -18,7 +18,7 @@ func (m *MockLocalityRepository) Save(locality *internal.Locality) error {
 	args := m.Called(locality)
 	return args.Error(0)
 }
-func (m *MockLocalityRepository) GetById(id int) (internal.Locality, error) {
+func (m *MockLocalityRepository) GetByID(id int) (internal.Locality, error) {
 	args := m.Called(id)
 	return args.Get(0).(internal.Locality), args.Error(1)
 }

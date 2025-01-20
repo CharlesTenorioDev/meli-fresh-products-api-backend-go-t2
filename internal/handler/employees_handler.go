@@ -31,7 +31,9 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 			if err == utils.ErrNotFound {
 				utils.Error(w, http.StatusNotFound, "No employees found")
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
+
 			return
 		}
 		// returns status 200 and the data if all ok
@@ -46,13 +48,14 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
+
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			utils.HandleError(w, utils.ErrInvalidFormat)
 			return
 		}
 
-		employee, err := h.sv.FindById(id)
+		employee, err := h.sv.FindByID(id)
 		if err != nil {
 			utils.HandleError(w, utils.ErrNotFound)
 			return
@@ -61,10 +64,10 @@ func (h *EmployeeDefault) GetEmployeesById() http.HandlerFunc {
 		data := internal.Employee{
 			ID: employee.ID,
 			Attributes: internal.EmployeeAttributes{
-				CardNumberId: employee.Attributes.CardNumberId,
+				CardNumberID: employee.Attributes.CardNumberID,
 				FirstName:    employee.Attributes.FirstName,
 				LastName:     employee.Attributes.LastName,
-				WarehouseId:  employee.Attributes.WarehouseId,
+				WarehouseID:  employee.Attributes.WarehouseID,
 			},
 		}
 
@@ -100,6 +103,7 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 			} else {
 				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
+
 			return
 		}
 
@@ -115,6 +119,7 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
+
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			utils.HandleError(w, utils.ErrInvalidFormat)
@@ -138,6 +143,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 			} else {
 				utils.HandleError(w, utils.ErrWarehouseDoesNotExists)
 			}
+
 			return
 		}
 
@@ -155,6 +161,7 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// extract the employee ID from the URL parameters and converts it to int
 		idStr := chi.URLParam(r, "id")
+
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			utils.HandleError(w, utils.ErrInvalidFormat)
@@ -169,6 +176,7 @@ func (h *EmployeeDefault) DeleteEmployees() http.HandlerFunc {
 			} else {
 				utils.HandleError(w, utils.ErrInvalidArguments)
 			}
+
 			return
 		}
 

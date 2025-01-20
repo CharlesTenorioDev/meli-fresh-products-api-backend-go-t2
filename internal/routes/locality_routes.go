@@ -8,11 +8,12 @@ import (
 
 func NewLocalityRoutes(mux *chi.Mux, service internal.LocalityService) error {
 	handler := handler.NewLocalityHandler(service)
+
 	mux.Route("/api/v1/localities", func(router chi.Router) {
 		router.Get("/reportSellers", handler.GetSellersByLocalityId())
 		router.Post("/", handler.CreateLocality())
 		router.Get("/reportCarries", handler.GetCarriesByLocalityId())
-
 	})
+
 	return nil
 }

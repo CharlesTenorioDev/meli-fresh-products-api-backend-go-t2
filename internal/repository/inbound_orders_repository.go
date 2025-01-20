@@ -18,6 +18,7 @@ func NewInboundOrderRepository(db *sql.DB) *InboundOrderRepository {
 func (r *InboundOrderRepository) FindByID(id int) (internal.InboundOrder, error) {
 	var order internal.InboundOrder
 	order.Attributes = internal.InboundOrderAttributes{}
+
 	err := r.db.QueryRow(`
 		SELECT id, order_date, order_number, employee_id, product_batch_id, warehouse_id
 		FROM inbound_orders
@@ -29,6 +30,7 @@ func (r *InboundOrderRepository) FindByID(id int) (internal.InboundOrder, error)
 	if err != nil {
 		return internal.InboundOrder{}, err
 	}
+
 	return order, nil
 }
 
@@ -39,16 +41,19 @@ func (r *InboundOrderRepository) Create(newOrder internal.InboundOrderAttributes
 	}
 
 	id, _ := result.LastInsertId()
+
 	return r.FindByID(int(id))
 }
 
 func (r *InboundOrderRepository) FindByOrderNumber(orderNumber string) (internal.InboundOrder, error) {
 	var order internal.InboundOrder
 	order.Attributes = internal.InboundOrderAttributes{}
+
 	err := r.db.QueryRow("SELECT id, order_date, order_number, employee_id, product_batch_id, warehouse_id FROM inbound_orders WHERE order_number = ?", orderNumber).Scan(&order.ID, &order.Attributes.OrderDate, &order.Attributes.OrderNumber, &order.Attributes.EmployeeID, &order.Attributes.ProductBatchID, &order.Attributes.WarehouseID)
 	if err == sql.ErrNoRows {
 		return internal.InboundOrder{}, utils.ErrNotFound
 	}
+
 	return order, err
 }
 
@@ -69,6 +74,7 @@ func (r *InboundOrderRepository) GenerateReportForEmployee(employeeID int) (inte
 	if err != nil {
 		return report, err
 	}
+
 	return report, nil
 }
 
@@ -80,14 +86,17 @@ func (r *InboundOrderRepository) GenerateReport() ([]internal.EmployeeInboundOrd
 		LEFT JOIN inbound_orders o ON e.id = o.employee_id
 		GROUP BY e.id
 	`)
+
 	if err != nil {
 		return report, err
 	}
+
 	for rows.Next() {
 		var row internal.EmployeeInboundOrdersReport
 		if err := rows.Scan(&row.ID, &row.CardNumberID, &row.FirstName, &row.LastName, &row.WarehouseID, &row.InboundOrdersCount); err != nil {
 			return []internal.EmployeeInboundOrdersReport{}, err
 		}
+
 		report = append(report, row)
 	}
 

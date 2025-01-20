@@ -26,8 +26,10 @@ func (s *PurchaseOrderDefault) FindAllByBuyerId(buyerId int) ([]internal.Purchas
 		if err == utils.ErrBuyerDoesNotExists {
 			return nil, utils.ErrBuyerDoesNotExists
 		}
+
 		return nil, err
 	}
+
 	return purchaseOrdersSummary, nil
 }
 
@@ -41,6 +43,7 @@ func (s *PurchaseOrderDefault) CreatePurchaseOrder(newPurchaseOrder internal.Pur
 
 	// check for duplicates
 	purchaseOrders, _ := s.rp.FindAll()
+
 	err = s.validateDuplicates(purchaseOrders, newPurchaseOrder)
 	if err != nil {
 		return
@@ -67,16 +70,18 @@ func (s *PurchaseOrderDefault) validateFields(newPurchaseOrder internal.Purchase
 	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.OrderDate == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerId == 0 || newPurchaseOrder.ProductRecordId == 0 {
 		return utils.ErrEmptyArguments
 	}
+
 	return
 }
 
-// validateDuplicates ensures that no existing purchaseOrder has the same CardNumberId as the new purchaseOrder
+// validateDuplicates ensures that no existing purchaseOrder has the same CardNumberID as the new purchaseOrder
 func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders []internal.PurchaseOrder, newPurchaseOrder internal.PurchaseOrderAttributes) error {
 	for _, purchaseOrder := range purchaseOrders {
 		if purchaseOrder.Attributes.OrderNumber == newPurchaseOrder.OrderNumber {
 			return utils.ErrConflict
 		}
 	}
+
 	return nil
 }
 
@@ -86,9 +91,11 @@ func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
+
 	if possibleBuyer == nil {
 		return utils.ErrBuyerDoesNotExists
 	}
+
 	return nil
 }
 
@@ -96,10 +103,10 @@ func (s *PurchaseOrderDefault) productRecordExistsById(id int) error {
 	product, err := s.productRecordService.FindById(id)
 
 	if err != nil {
-
 		if err == utils.ErrNotFound {
 			return utils.ErrProductDoesNotExists
 		}
+
 		return err
 	}
 

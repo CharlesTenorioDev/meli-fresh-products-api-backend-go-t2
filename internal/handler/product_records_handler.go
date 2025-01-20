@@ -22,10 +22,12 @@ func NewProductRecordsHandler(service internal.ProductRecordsService) *ProductRe
 
 func (p *ProductRecordsHandler) GetProductRecords(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
+
 	var id int
 
 	if idStr != "" {
 		var err error
+
 		id, err = strconv.Atoi(idStr)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid 'id' format")
@@ -46,6 +48,7 @@ func (p *ProductRecordsHandler) GetProductRecords(w http.ResponseWriter, r *http
 
 func (p *ProductRecordsHandler) CreateProductRecord(w http.ResponseWriter, r *http.Request) {
 	var newProduct internal.ProductRecords
+
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
@@ -57,7 +60,6 @@ func (p *ProductRecordsHandler) CreateProductRecord(w http.ResponseWriter, r *ht
 		if errors.Is(err, utils.ErrConflict) {
 			response.Error(w, http.StatusConflict, utils.ErrConflict.Error())
 			return
-
 		} else if errors.Is(err, utils.ErrInvalidArguments) {
 			response.Error(w, http.StatusUnprocessableEntity, utils.ErrInvalidArguments.Error())
 			return
@@ -66,6 +68,7 @@ func (p *ProductRecordsHandler) CreateProductRecord(w http.ResponseWriter, r *ht
 			return
 		}
 	}
+
 	response.JSON(w, http.StatusCreated, map[string]any{
 		"data": product,
 	})

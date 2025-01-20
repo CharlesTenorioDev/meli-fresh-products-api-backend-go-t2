@@ -156,9 +156,9 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 			MinimumCapacity:    body.MinimumCapacity,
 			MinimumTemperature: body.MinimumTemperature,
 		}
+
 		newWarehouse, err := h.service.Save(newWarehouse)
 		if err != nil {
-
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
@@ -197,7 +197,6 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 //	@Router			/warehouses/{id} [put]
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
@@ -206,7 +205,6 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 
 		var body internal.WarehousePointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
-
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}

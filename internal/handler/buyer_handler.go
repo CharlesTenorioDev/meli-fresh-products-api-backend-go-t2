@@ -27,6 +27,7 @@ func (handler *BuyerHandler) GetAll() http.HandlerFunc {
 			http.Error(w, "500 Erro Internal server error", http.StatusInternalServerError)
 			return
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -34,7 +35,6 @@ func (handler *BuyerHandler) GetAll() http.HandlerFunc {
 			http.Error(w, "Failed to encode buyers: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 	}
 }
 
@@ -55,7 +55,6 @@ func (handler *BuyerHandler) GetOne() http.HandlerFunc {
 
 		utils.JSON(w, http.StatusOK, buyer)
 	}
-
 }
 
 func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
@@ -71,11 +70,14 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "500")
+
 			return
 		}
 
@@ -86,6 +88,7 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newBuyer internal.BuyerAttributes
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
@@ -111,11 +114,14 @@ func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "500")
+
 			return
 		}
 
@@ -140,5 +146,4 @@ func (handler *BuyerHandler) DeleteBuyer() http.HandlerFunc {
 
 		utils.JSON(w, http.StatusNoContent, nil)
 	}
-
 }

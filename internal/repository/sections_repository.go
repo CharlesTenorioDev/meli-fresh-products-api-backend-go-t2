@@ -48,7 +48,7 @@ func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
 	return sections, nil
 }
 
-func (r *SectionMysqlRepository) GetById(id int) (internal.Section, error) {
+func (r *SectionMysqlRepository) GetByID(id int) (internal.Section, error) {
 	var section internal.Section
 
 	row := r.db.QueryRow("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, "+
@@ -63,17 +63,16 @@ func (r *SectionMysqlRepository) GetById(id int) (internal.Section, error) {
 			err = utils.ErrNotFound
 			return internal.Section{}, err
 		}
+
 		return internal.Section{}, err
 	}
 
 	return section, nil
-
 }
 
 // Finds the section by its sectionNumber
 // If not found, pkg.Section{} is returned
 func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal.Section, error) {
-
 	var section internal.Section
 
 	row := r.db.QueryRow("SELECT s.id, s.section_number, s.current_temperature, s.minimum_temperature, "+
@@ -87,17 +86,16 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 		if err == sql.ErrNoRows {
 			err = utils.ErrNotFound
 		}
+
 		return internal.Section{}, err
 	}
 
 	return section, nil
-
 }
 
 // Generate a new ID and save the entity
 // All validatinos should be made on service layer
 func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Section, error) {
-
 	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID)
 
@@ -108,8 +106,10 @@ func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Se
 			case 1062:
 				err = utils.ErrConflict
 			}
+
 			return internal.Section{}, err
 		}
+
 		return internal.Section{}, err
 	}
 
@@ -121,11 +121,9 @@ func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Se
 	(*newSection).ID = int(id)
 
 	return *newSection, err
-
 }
 
 func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.Section, error) {
-
 	_, err := r.db.Exec(
 		"UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, product_type_id=? WHERE id=?",
 		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature,
@@ -140,8 +138,10 @@ func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.
 			case 1062:
 				err = utils.ErrConflict
 			}
+
 			return internal.Section{}, err
 		}
+
 		return internal.Section{}, err
 	}
 
@@ -151,12 +151,12 @@ func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.
 // Delete the section by its id
 // If no sections exists by id attribute, utils.ErrNotFound is returned
 func (r *SectionMysqlRepository) Delete(id int) error {
-
 	_, err := r.db.Exec("DELETE FROM sections WHERE id=?", id)
 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -168,12 +168,15 @@ func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionP
 	if err != nil {
 		return nil, err
 	}
+
 	for rows.Next() {
 		var report internal.SectionProductsReport
+
 		err = rows.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
 		if err != nil {
 			return nil, err
 		}
+
 		reports = append(reports, report)
 	}
 
@@ -181,10 +184,12 @@ func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionP
 	if err != nil {
 		return nil, err
 	}
+
 	return reports, nil
 }
 func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]internal.SectionProductsReport, error) {
 	var report internal.SectionProductsReport
+
 	var reports []internal.SectionProductsReport
 
 	row := r.db.QueryRow("SELECT "+
@@ -200,9 +205,9 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 	if err != nil && err == sql.ErrNoRows {
 		err = utils.ErrNotFound
 		return nil, err
-
 	}
 
 	reports = append(reports, report)
+
 	return reports, nil
 }

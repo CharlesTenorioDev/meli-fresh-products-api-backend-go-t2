@@ -10,8 +10,8 @@ func NewSellerDbRepository(db map[int]internal.Seller) *SellerDbRepository {
 	if db != nil {
 		defaultDb = db
 	}
-	return &SellerDbRepository{db: defaultDb}
 
+	return &SellerDbRepository{db: defaultDb}
 }
 
 type SellerDbRepository struct {
@@ -33,6 +33,7 @@ func (r *SellerDbRepository) GetById(id int) (internal.Seller, error) {
 	if !exists {
 		return internal.Seller{}, utils.ErrNotFound
 	}
+
 	return seller, nil
 }
 
@@ -42,6 +43,7 @@ func (r *SellerDbRepository) GetByCid(cid int) (internal.Seller, error) {
 			return r.db[v.ID], nil
 		}
 	}
+
 	return internal.Seller{}, nil
 }
 
@@ -57,8 +59,8 @@ func (r *SellerDbRepository) Create(newSeller internal.SellerRequest) (internal.
 	}
 
 	r.db[newSellerId] = createdSeller
-	return createdSeller, nil
 
+	return createdSeller, nil
 }
 
 func (r *SellerDbRepository) Update(seller internal.Seller) (internal.Seller, error) {

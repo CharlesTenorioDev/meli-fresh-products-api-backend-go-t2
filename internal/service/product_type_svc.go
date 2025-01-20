@@ -29,6 +29,7 @@ func (s *ProductTypeSvc) UpdateProductType(inputProductType internal.ProductType
 	if err != nil {
 		return internal.ProductType{}, err
 	}
+
 	return s.repo.Update(inputProductType)
 }
 

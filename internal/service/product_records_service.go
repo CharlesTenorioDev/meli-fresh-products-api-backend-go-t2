@@ -49,12 +49,15 @@ func (s *ProductRecordsService) validateEmptyFields(newProduct internal.ProductR
 	if newProduct.LastUpdateDate == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if newProduct.PurchasePrice == 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newProduct.SalePrice == 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newProduct.ProductId == 0 {
 		return utils.ErrInvalidArguments
 	}

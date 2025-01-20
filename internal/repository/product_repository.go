@@ -13,7 +13,6 @@ type ProductDB struct {
 }
 
 func NewProductDB(db *sql.DB) *ProductDB {
-
 	return &ProductDB{db: db}
 }
 
@@ -23,7 +22,9 @@ func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
+
 	for rows.Next() {
 		var product internal.Product
 
@@ -34,6 +35,7 @@ func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 
 		listProducts = append(listProducts, product)
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return nil, err
@@ -54,11 +56,11 @@ func (p *ProductDB) GetByID(id int) (product internal.Product, err error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Product{}, utils.ErrNotFound
 		}
+
 		return internal.Product{}, err
 	}
 
 	return product, nil
-
 }
 
 // Create a product
@@ -81,6 +83,7 @@ func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product inter
 				return internal.Product{}, err
 			}
 		}
+
 		return internal.Product{}, err
 	}
 
@@ -124,6 +127,7 @@ func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Prod
 				return internal.Product{}, err
 			}
 		}
+
 		return internal.Product{}, err
 	}
 
