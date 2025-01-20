@@ -27,8 +27,8 @@ func NewApplicationDefault(config *ConfigApplicationDefault) *ApplicationDefault
 		DB:   nil,
 		Addr: ":8080",
 	}
-	if config != nil {
 
+	if config != nil {
 		if config.DB != nil {
 			defaultCfg.DB = config.DB
 		}
@@ -71,12 +71,10 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	a.db, err = sql.Open("mysql", a.cfgDB.FormatDSN())
 
 	if err != nil {
-
 		log.Fatalf("error opening db: %s", err.Error())
 	}
 
 	if err = a.db.Ping(); err != nil {
-
 		log.Fatalf("error pinging db: %s", err.Error())
 	}
 
@@ -89,7 +87,6 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	err = routes.NewLocalityRoutes(router, localityService)
 
 	if err != nil {
-
 		panic(err)
 	}
 
@@ -104,15 +101,14 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	sellerService := service.NewSellerService(sellerRepo, localityRepo)
 
 	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
-
 		panic(err)
 	}
 
 	// Requisito 4 - ProductType
 	productTypeRepo := repository.NewProductTypeDB(a.db)
+
 	productTypeService := service.NewProductTypeService(productTypeRepo)
 	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
-
 		panic(err)
 	}
 
@@ -122,25 +118,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	err = routes.NewProductRoutes(router, productService)
 
 	if err != nil {
-
 		panic(err)
 	}
 
 	//Requisito 4 - Product Records
 	productRecordsRepo := repository.NewProductRecordDB(a.db)
 	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
+
 	err = routes.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
-
 		panic(err)
 	}
 
 	// Requisito 2 - Warehouses
 	warehouseRepo := repository.NewWarehouseRepository(a.db)
 	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
+
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
-
 		panic(err)
 	}
 
@@ -148,17 +143,17 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	sectionRepo := repository.NewSectionMysql(a.db)
 	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
+
 	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
-
 		panic(err)
 	}
 
 	// Requisito 5 - Employees
 	employeesRepo := repository.NewEmployeeRepository(a.db)
+
 	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
 	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
-
 		panic(err)
 	}
 
@@ -167,24 +162,23 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	if err = routes.BuyerRoutes(router, buyersService); err != nil {
-
 		panic(err)
 	}
 
 	// Requisito 6 - Purchase Orders
 	purchaseOrdersRepo := repository.NewPurchaseOrderDb(a.db)
 	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
+
 	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {
-
 		panic(err)
 	}
 
 	// Sprint2 Requisito 2 - Carry
 	carriesRepo := repository.NewMySQLCarryRepository(a.db)
+
 	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
 	if err = routes.CarryRoutes(router, carryService); err != nil {
-
 		panic(err)
 	}
 

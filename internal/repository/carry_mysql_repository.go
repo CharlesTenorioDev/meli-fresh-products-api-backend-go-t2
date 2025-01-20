@@ -50,6 +50,7 @@ func (r *MySQLCarryRepository) Save(carry *internal.Carry) error {
 				return utils.ErrConflict
 			}
 		}
+
 		return err
 	}
 	// get the last inserted id
@@ -57,7 +58,9 @@ func (r *MySQLCarryRepository) Save(carry *internal.Carry) error {
 	if err != nil {
 		return err
 	}
+
 	carry.ID = int(id)
+
 	return nil
 }
 
@@ -72,14 +75,18 @@ func (r *MySQLCarryRepository) GetAll() ([]internal.Carry, error) {
 	defer rows.Close()
 
 	carries := []internal.Carry{}
+
 	for rows.Next() {
 		var carry internal.Carry
+
 		err := rows.Scan(&carry.ID, &carry.CID, &carry.CompanyName, &carry.Address, &carry.Telephone, &carry.LocalityID)
 		if err != nil {
 			return []internal.Carry{}, err
 		}
+
 		carries = append(carries, carry)
 	}
+
 	return carries, nil
 }
 
@@ -98,16 +105,21 @@ func (r *MySQLCarryRepository) GetByID(id int) (internal.Carry, error) {
 	if err != nil {
 		return internal.Carry{}, err
 	}
+
 	row := stmt.QueryRow(id)
+
 	var carry internal.Carry
+
 	err = row.Scan(&carry.ID, &carry.CID, &carry.CompanyName, &carry.Address, &carry.Telephone, &carry.LocalityID)
 	if err !=
 		nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Carry{}, utils.ErrNotFound
 		}
+
 		return internal.Carry{}, err
 	}
+
 	return carry, nil
 }
 
@@ -124,6 +136,7 @@ func (r *MySQLCarryRepository) Update(carry *internal.Carry) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = stmt.Exec(carry.CID, carry.CompanyName, carry.Address, carry.Telephone, carry.LocalityID, carry.ID)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
@@ -132,8 +145,10 @@ func (r *MySQLCarryRepository) Update(carry *internal.Carry) error {
 				return utils.ErrConflict
 			}
 		}
+
 		return err
 	}
+
 	return nil
 }
 
@@ -154,13 +169,16 @@ func (r *MySQLCarryRepository) Delete(id int) error {
 	if err != nil {
 		return err
 	}
+
 	stmt, err := r.db.Prepare("DELETE FROM carriers WHERE id=?;")
 	if err != nil {
 		return err
 	}
+
 	_, err = stmt.Exec(id)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

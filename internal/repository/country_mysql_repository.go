@@ -21,15 +21,19 @@ func (r *MysqlContryRepository) Save(country *internal.Country) error {
 	if err != nil {
 		return err
 	}
+
 	res, err := stmt.Exec(country.CountryName)
 	if err != nil {
 		return err
 	}
+
 	id, err := res.LastInsertId()
 	if err != nil {
 		return err
 	}
+
 	(*country).ID = int(id)
+
 	return nil
 }
 func (r *MysqlContryRepository) GetByName(name string) (internal.Country, error) {
@@ -37,14 +41,19 @@ func (r *MysqlContryRepository) GetByName(name string) (internal.Country, error)
 	if err != nil {
 		return internal.Country{}, err
 	}
+
 	row := stmt.QueryRow(name)
+
 	var country internal.Country
+
 	err = row.Scan(&country.ID, &country.CountryName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Country{}, utils.ErrNotFound
 		}
+
 		return internal.Country{}, err
 	}
+
 	return country, nil
 }

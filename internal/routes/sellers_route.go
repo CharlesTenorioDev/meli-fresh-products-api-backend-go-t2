@@ -8,13 +8,13 @@ import (
 
 func RegisterSellerRoutes(mux *chi.Mux, service internal.SellerService) error {
 	handler := handler.NewSellerHandler(service)
+
 	mux.Route("/api/v1/sellers", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetById())
 		router.Post("/", handler.Create())
 		router.Patch("/{id}", handler.Update())
 		router.Delete("/{id}", handler.Delete())
-
 	})
 
 	return nil

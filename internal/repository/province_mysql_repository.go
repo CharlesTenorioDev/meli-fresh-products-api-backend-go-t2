@@ -21,15 +21,20 @@ func (r *MysqlProvinceRepository) GetByName(name string) (internal.Province, err
 	if err != nil {
 		return internal.Province{}, err
 	}
+
 	row := stmt.QueryRow(name)
+
 	var province internal.Province
+
 	err = row.Scan(&province.ID, &province.ProvinceName, &province.CountryID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Province{}, utils.ErrNotFound
 		}
+
 		return internal.Province{}, err
 	}
+
 	return province, nil
 }
 
@@ -38,14 +43,18 @@ func (r *MysqlProvinceRepository) Save(province *internal.Province) error {
 	if err != nil {
 		return err
 	}
+
 	res, err := stmt.Exec(province.ProvinceName, province.CountryID)
 	if err != nil {
 		return err
 	}
+
 	id, err := res.LastInsertId()
 	if err != nil {
 		return err
 	}
+
 	(*province).ID = int(id)
+
 	return nil
 }

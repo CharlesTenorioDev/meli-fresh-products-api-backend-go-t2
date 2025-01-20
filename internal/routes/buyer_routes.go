@@ -14,6 +14,7 @@ func BuyerRoutes(mux *chi.Mux, service internal.BuyerService) error {
 	}
 
 	handler := handler.NewBuyerHandler(service)
+
 	mux.Route("/api/v1/buyers", func(router chi.Router) {
 		router.Get("/", handler.GetAll())
 		router.Get("/{id}", handler.GetOne())
@@ -21,5 +22,6 @@ func BuyerRoutes(mux *chi.Mux, service internal.BuyerService) error {
 		router.Patch("/{id}", handler.UpdateBuyer())
 		router.Delete("/{id}", handler.DeleteBuyer())
 	})
+
 	return nil
 }

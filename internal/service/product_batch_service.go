@@ -33,29 +33,33 @@ func (s *MySQLProductBatchService) Save(newBatch *internal.ProductBatchRequest) 
 	}
 
 	return createdBatch, nil
-
 }
 
 func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest) error {
-
 	if newBatch.BatchNumber <= 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newBatch.CurrentQuantity < 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newBatch.CurrentTemperature <= 0.0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if len(newBatch.DueDate) == 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newBatch.InitialQuantity < 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if len(newBatch.ManufacturingDate) == 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newBatch.ManufacturingHour < 0 {
 		return utils.ErrInvalidArguments
 	}
@@ -63,6 +67,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 	if newBatch.ProductId <= 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if newBatch.SectionId <= 0 {
 		return utils.ErrInvalidArguments
 	}
@@ -71,6 +76,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 	if err != nil {
 		return err
 	}
+
 	if batchExists != 0 {
 		return utils.ErrConflict
 	}
@@ -80,6 +86,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 	if sectionExists == (internal.Section{}) {
 		return utils.ErrConflict
 	}
+
 	if err != nil {
 		return err
 	}
@@ -88,6 +95,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 	if productExists == (internal.Product{}) {
 		return utils.ErrConflict
 	}
+
 	if err != nil {
 		return err
 	}

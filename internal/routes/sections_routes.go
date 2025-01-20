@@ -13,6 +13,7 @@ func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error 
 	if mux == nil {
 		return errors.New("mux router is nil")
 	}
+
 	handler := handler.NewSectionHandler(service)
 
 	mux.Route("/api/v1/sections", func(router chi.Router) {
@@ -23,5 +24,6 @@ func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error 
 		router.Patch("/{id}", handler.Update())
 		router.Delete("/{id}", handler.Delete())
 	})
+
 	return nil
 }

@@ -14,12 +14,12 @@ type ProductRecordDB struct {
 }
 
 func NewProductRecordDB(db *sql.DB) *ProductRecordDB {
-
 	return &ProductRecordDB{db: db}
 }
 
 func (p *ProductRecordDB) Read(productID int) ([]internal.ProductReport, error) {
 	var rows *sql.Rows
+
 	var err error
 
 	if productID > 0 {
@@ -55,9 +55,11 @@ func (p *ProductRecordDB) Read(productID int) ([]internal.ProductReport, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var listProducts []internal.ProductReport
+
 	for rows.Next() {
 		var productRecord internal.ProductReport
 
@@ -96,6 +98,7 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 				return internal.ProductRecords{}, err
 			}
 		}
+
 		return internal.ProductRecords{}, err
 	}
 
@@ -111,6 +114,7 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 
 func (p *ProductRecordDB) FindById(productRecordID int) (internal.ProductRecords, error) {
 	var row *sql.Row
+
 	var err error
 
 	query := "select `id` from product_records where id = ?"
@@ -118,7 +122,9 @@ func (p *ProductRecordDB) FindById(productRecordID int) (internal.ProductRecords
 	row = p.db.QueryRow(query, productRecordID)
 
 	var pr internal.ProductRecords
+
 	row.Scan(&pr.ID)
+
 	err = row.Err()
 	if err != nil {
 		return internal.ProductRecords{}, err

@@ -8,6 +8,7 @@ import (
 
 func NewProductTypeRoutes(mux *chi.Mux, service internal.ProductTypeService) error {
 	handler := handler.NewProductTypeHandler(service)
+
 	mux.Route("/api/v1/product_types", func(router chi.Router) {
 		router.Get("/", handler.GetProductTypes)
 		router.Post("/", handler.CreateProductType)

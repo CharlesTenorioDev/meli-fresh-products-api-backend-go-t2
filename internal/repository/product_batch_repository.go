@@ -27,8 +27,10 @@ func (r *MySQLProductBatchRepository) Save(newBatch *internal.ProductBatchReques
 			if mySQLError.Number == 1062 {
 				err = utils.ErrConflict
 			}
+
 			return internal.ProductBatch{}, err
 		}
+
 		return internal.ProductBatch{}, err
 	}
 
@@ -36,6 +38,7 @@ func (r *MySQLProductBatchRepository) Save(newBatch *internal.ProductBatchReques
 	if err != nil {
 		return internal.ProductBatch{}, err
 	}
+
 	createdBatch := internal.ProductBatch{
 		ID:                  int(id),
 		ProductBatchRequest: *newBatch,
@@ -56,9 +59,9 @@ func (r *MySQLProductBatchRepository) GetBatchNumber(batchNumber int) (int, erro
 			err = nil
 			return 0, err
 		}
+
 		return 0, err
 	}
 
 	return exists, nil
-
 }

@@ -27,8 +27,10 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 		if err != nil {
 			fmt.Println(err.Error())
 			utils.JSON(w, http.StatusInternalServerError, nil)
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, sellers)
 	}
 }
@@ -47,9 +49,12 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintln("id:", id, "not found"))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Internal error")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, seller)
 	}
 }
@@ -60,6 +65,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
+
 		newSeller := internal.Seller{
 			Cid:         reqBody.Cid,
 			CompanyName: reqBody.CompanyName,
@@ -67,22 +73,26 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			Telephone:   reqBody.Telephone,
 			LocalityId:  reqBody.LocalityId,
 		}
+
 		err := h.service.Create(&newSeller)
 		if err != nil {
 			fmt.Println(err.Error())
+
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
 
 			utils.Error(w, http.StatusInternalServerError, "Internal error")
-			return
 
+			return
 		}
+
 		utils.JSON(w, http.StatusCreated, newSeller)
 	}
 }
@@ -103,20 +113,21 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 
 		seller, err := h.service.Update(id, reqBody)
 		if err != nil {
-
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, err.Error())
 				return
 			}
 
 			utils.Error(w, http.StatusInternalServerError, "Internal error")
-			return
 
+			return
 		}
+
 		utils.JSON(w, http.StatusOK, seller)
 	}
 }
@@ -135,9 +146,12 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 				utils.Error(w, http.StatusNotFound, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Internal error")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusNoContent, nil)
 	}
 }

@@ -30,13 +30,17 @@ func (h *ProductBatchHandler) Create() http.HandlerFunc {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusCreated, newBatch)
 	}
 }

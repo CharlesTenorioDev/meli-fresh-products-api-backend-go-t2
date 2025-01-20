@@ -32,6 +32,7 @@ func (r *SellerMysql) GetAll() (sellers []internal.Seller, err error) {
 	for rows.Next() {
 		// create a new seller
 		var seller internal.Seller
+
 		err = rows.Scan(&seller.ID, &seller.Cid, &seller.CompanyName, &seller.Address, &seller.Telephone, &seller.LocalityId)
 		if err != nil {
 			return
@@ -62,6 +63,7 @@ func (r *SellerMysql) GetById(id int) (seller internal.Seller, err error) {
 			err = utils.ErrNotFound
 			return
 		}
+
 		return
 	}
 
@@ -78,6 +80,7 @@ func (r *SellerMysql) GetByCid(cid int) (seller internal.Seller, err error) {
 			err = utils.ErrNotFound
 			return
 		}
+
 		return
 	}
 
@@ -100,22 +103,23 @@ func (r *SellerMysql) Create(seller *internal.Seller) (err error) {
 			default:
 				// ...
 			}
-			return
+
+			return err
 		}
 
-		return
+		return err
 	}
 
 	// get the last inserted id
 	id, err := result.LastInsertId()
 	if err != nil {
-		return
+		return err
 	}
 
 	// set the id of the seller
 	(*seller).ID = int(id)
 
-	return
+	return err
 }
 
 // Update updates a seller in the database
@@ -134,6 +138,7 @@ func (r *SellerMysql) Update(seller *internal.Seller) (err error) {
 			default:
 				// ...
 			}
+
 			return
 		}
 
@@ -150,5 +155,6 @@ func (r *SellerMysql) Delete(id int) error {
 	if err != nil {
 		return err
 	}
+
 	return err
 }

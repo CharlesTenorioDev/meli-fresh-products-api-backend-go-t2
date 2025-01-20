@@ -43,6 +43,7 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
+
 		newLocality := internal.Locality{
 			ID:           body.Data.ID,
 			LocalityName: body.Data.LocalityName,
@@ -53,19 +54,24 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 		country := internal.Country{
 			CountryName: body.Data.CountryName,
 		}
+
 		err := h.service.Save(&newLocality, &province, &country)
 		if err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusCreated, newLocality)
 	}
 }
@@ -79,7 +85,9 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := 0
+
 		var err error
+
 		if strings.TrimSpace(r.URL.Query().Get("id")) != "" {
 			id, err = strconv.Atoi(r.URL.Query().Get("id"))
 			if err != nil {
@@ -87,15 +95,19 @@ func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 				return
 			}
 		}
+
 		locality, err := h.service.GetSellersByLocalityId(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no locality for id %d", id))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, locality)
 	}
 }
@@ -110,15 +122,18 @@ func (h *LocalityHandler) GetSellersByLocalityId() http.HandlerFunc {
 func (handler *LocalityHandler) GetCarriesByLocalityId() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
+
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
 			idInt = 0
 		}
+
 		buyers, err := handler.service.GetCarriesByLocalityId(idInt)
 		if err != nil {
 			utils.Error(w, http.StatusNotFound, "Locality: "+utils.ErrNotFound.Error())
 			return
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 

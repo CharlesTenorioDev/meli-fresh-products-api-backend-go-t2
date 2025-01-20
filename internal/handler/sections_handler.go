@@ -44,6 +44,7 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, sections)
 	}
 }
@@ -59,15 +60,19 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
+
 		section, err := h.service.GetByID(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, section)
 	}
 }
@@ -84,6 +89,7 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
+
 		newSection := internal.Section{
 			SectionNumber:      body.SectionNumber,
 			CurrentCapacity:    body.CurrentCapacity,
@@ -94,19 +100,24 @@ func (h *SectionHandler) Post() http.HandlerFunc {
 			ProductTypeID:      body.ProductTypeID,
 			WarehouseID:        body.WarehouseID,
 		}
+
 		newSection, err := h.service.Save(newSection)
 		if err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusCreated, newSection)
 	}
 }
@@ -123,24 +134,30 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
+
 		var body internal.SectionPointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
+
 		updatedSection, err := h.service.Update(id, body)
 		if err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
+
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, updatedSection)
 	}
 }
@@ -156,15 +173,19 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
+
 		err = h.service.Delete(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusNoContent, nil)
 	}
 }
@@ -173,14 +194,15 @@ func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idReq := strings.TrimSpace(r.URL.Query().Get("id"))
 		id := 0
+
 		var err error
+
 		if idReq != "" {
 			id, err = strconv.Atoi(idReq)
 			if err != nil {
 				utils.Error(w, http.StatusBadRequest, "invalid id")
 				return
 			}
-
 		}
 
 		sectionProductReport, err := h.service.GetSectionProductsReport(id)
@@ -189,9 +211,12 @@ func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no section for id %d", id))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, sectionProductReport)
 	}
 }

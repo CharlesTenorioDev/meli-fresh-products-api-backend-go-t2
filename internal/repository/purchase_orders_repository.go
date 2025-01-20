@@ -29,12 +29,15 @@ func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error)
 	defer rows.Close()
 
 	var purchaseOrders []internal.PurchaseOrder
+
 	for rows.Next() {
 		var po internal.PurchaseOrder
+
 		err := rows.Scan(&po.ID, &po.Attributes.OrderNumber, &po.Attributes.TrackingCode, &po.Attributes.OrderDate, &po.Attributes.BuyerId)
 		if err != nil {
 			return nil, err
 		}
+
 		purchaseOrders = append(purchaseOrders, po)
 	}
 
@@ -44,7 +47,9 @@ func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error)
 // FindAllByBuyerId retrieves all purchase orders by buyer id
 func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
 	var query string
+
 	var rows *sql.Rows
+
 	var err error
 
 	if buyerId != 0 {
@@ -67,15 +72,19 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.P
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var purchaseOrders []internal.PurchaseOrderSummary
+
 	for rows.Next() {
 		var summary internal.PurchaseOrderSummary
+
 		err := rows.Scan(&summary.BuyerId, &summary.TotalOrders, &summary.OrderCodes)
 		if err != nil {
 			return nil, err
 		}
+
 		purchaseOrders = append(purchaseOrders, summary)
 	}
 
@@ -89,9 +98,9 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.P
 // CreatePurchaseOrder adds a new purchase order
 func (repo *PurchaseOrderRepository) CreatePurchaseOrder(newOrder internal.PurchaseOrderAttributes) (internal.PurchaseOrder, error) {
 	query := "INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES (?, ?, ?, ?, ?)"
+
 	result, err := repo.db.Exec(query, newOrder.OrderNumber, newOrder.OrderDate, newOrder.TrackingCode, newOrder.BuyerId, newOrder.ProductRecordId)
 	if err != nil {
-
 		return internal.PurchaseOrder{}, err
 	}
 

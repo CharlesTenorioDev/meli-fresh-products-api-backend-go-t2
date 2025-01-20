@@ -25,8 +25,8 @@ func (s *EmployeeDefault) FindAll() (employees map[int]internal.Employee, err er
 }
 
 // FindById retrieves an employee by ID from the repository
-func (s *EmployeeDefault) FindById(id int) (employee internal.Employee, err error) {
-	employee, err = s.rp.FindById(id)
+func (s *EmployeeDefault) FindByID(id int) (employee internal.Employee, err error) {
+	employee, err = s.rp.FindByID(id)
 	return
 }
 
@@ -43,13 +43,14 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 	if err != nil {
 		return
 	}
+
 	err = s.validateDuplicates(employees, newEmployee)
 	if err != nil {
 		return
 	}
 
 	// verify if warehouse_id exists
-	err = s.warehouseExistsById(newEmployee.WarehouseId)
+	err = s.warehouseExistsById(newEmployee.WarehouseID)
 	if err != nil {
 		return
 	}
@@ -66,14 +67,14 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 // UpdateEmployee updates an employee in the repository
 func (s *EmployeeDefault) UpdateEmployee(inputEmployee internal.Employee) (employee internal.Employee, err error) {
 	// find the existing employee
-	internalEmployee, err := s.rp.FindById(inputEmployee.ID)
+	internalEmployee, err := s.rp.FindByID(inputEmployee.ID)
 	if err != nil {
 		err = utils.ErrNotFound
 		return
 	}
 
 	// verify if warehouse_id exists
-	err = s.warehouseExistsById(inputEmployee.Attributes.WarehouseId)
+	err = s.warehouseExistsById(inputEmployee.Attributes.WarehouseID)
 	if err != nil {
 		return
 	}
@@ -83,13 +84,14 @@ func (s *EmployeeDefault) UpdateEmployee(inputEmployee internal.Employee) (emplo
 
 	// update the employee in the repository
 	employee, err = s.rp.UpdateEmployee(updatedEmployee)
+
 	return
 }
 
 // DeleteEmployee deletes an employee from the repository based on the provided ID
 func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 	// find the employee to ensure it exists
-	employee, err := s.rp.FindById(id)
+	employee, err := s.rp.FindByID(id)
 	if err != nil {
 		return utils.ErrNotFound
 	}
@@ -105,19 +107,21 @@ func (s *EmployeeDefault) DeleteEmployee(id int) (err error) {
 
 // validateFields checks if the required fields of a new employee are not empty
 func (s *EmployeeDefault) validateFields(newEmployee internal.EmployeeAttributes) (err error) {
-	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberId == "" {
+	if newEmployee.FirstName == "" || newEmployee.LastName == "" || newEmployee.CardNumberID == "" {
 		return utils.ErrEmptyArguments
 	}
+
 	return
 }
 
-// validateDuplicates ensures that no existing employee has the same CardNumberId as the new employee
+// validateDuplicates ensures that no existing employee has the same CardNumberID as the new employee
 func (s *EmployeeDefault) validateDuplicates(employees map[int]internal.Employee, newEmployee internal.EmployeeAttributes) error {
 	for _, employee := range employees {
-		if employee.Attributes.CardNumberId == newEmployee.CardNumberId {
+		if employee.Attributes.CardNumberID == newEmployee.CardNumberID {
 			return utils.ErrConflict
 		}
 	}
+
 	return nil
 }
 
@@ -137,16 +141,16 @@ func mergeEmployeeFields(inputEmployee, internalEmployee internal.Employee) (upd
 		updatedEmployee.Attributes.LastName = internalEmployee.Attributes.LastName
 	}
 
-	if inputEmployee.Attributes.CardNumberId != "" {
-		updatedEmployee.Attributes.CardNumberId = inputEmployee.Attributes.CardNumberId
+	if inputEmployee.Attributes.CardNumberID != "" {
+		updatedEmployee.Attributes.CardNumberID = inputEmployee.Attributes.CardNumberID
 	} else {
-		updatedEmployee.Attributes.CardNumberId = internalEmployee.Attributes.CardNumberId
+		updatedEmployee.Attributes.CardNumberID = internalEmployee.Attributes.CardNumberID
 	}
 
-	if inputEmployee.Attributes.WarehouseId != 0 {
-		updatedEmployee.Attributes.WarehouseId = inputEmployee.Attributes.WarehouseId
+	if inputEmployee.Attributes.WarehouseID != 0 {
+		updatedEmployee.Attributes.WarehouseID = inputEmployee.Attributes.WarehouseID
 	} else {
-		updatedEmployee.Attributes.WarehouseId = internalEmployee.Attributes.WarehouseId
+		updatedEmployee.Attributes.WarehouseID = internalEmployee.Attributes.WarehouseID
 	}
 
 	return updatedEmployee
@@ -158,8 +162,10 @@ func (s *EmployeeDefault) warehouseExistsById(id int) error {
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
+
 	if possibleWarehouse == (internal.Warehouse{}) {
 		return utils.ErrWarehouseDoesNotExists
 	}
+
 	return nil
 }

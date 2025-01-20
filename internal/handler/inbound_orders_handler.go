@@ -44,11 +44,13 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 		order, err := h.service.CreateOrder(newOrder)
 		if err != nil {
 			fmt.Println(err.Error())
+
 			if err == utils.ErrConflict {
 				utils.Error(w, http.StatusConflict, "Order number already exists or employee ID is invalid")
 			} else {
 				utils.Error(w, http.StatusInternalServerError, "Failed to create order")
 			}
+
 			return
 		}
 
@@ -68,6 +70,7 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idsParam := r.URL.Query().Get("id")
+
 		var ids []int
 
 		if idsParam != "" {
@@ -78,6 +81,7 @@ func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 					utils.Error(w, http.StatusBadRequest, "Invalid 'id' parameter format")
 					return
 				}
+
 				ids = append(ids, id)
 			}
 		}
@@ -89,6 +93,7 @@ func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 			} else {
 				utils.Error(w, http.StatusInternalServerError, "Failed to generate report")
 			}
+
 			return
 		}
 

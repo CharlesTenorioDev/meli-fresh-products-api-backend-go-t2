@@ -9,6 +9,7 @@ import (
 // RegisterEmployeesRoutes is used to record the routes associated to the employee entity
 func RegisterEmployeesRoutes(mux *chi.Mux, service internal.EmployeeService) error {
 	handler := handler.NewEmployeeHandler(service)
+
 	mux.Route("/api/v1/employees", func(router chi.Router) {
 		// Get
 		router.Get("/", handler.GetAllEmployees())

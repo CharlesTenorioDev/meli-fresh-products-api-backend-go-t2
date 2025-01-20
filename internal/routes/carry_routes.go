@@ -16,6 +16,7 @@ func CarryRoutes(mux *chi.Mux, service internal.CarryService) error {
 	}
 
 	handler := handler.NewCarryHandler(service)
+
 	mux.Route("/api/v1/carries", func(router chi.Router) {
 		router.Post("/", handler.SaveCarry())
 		router.Get("/", handler.GetAllCarries())
@@ -23,5 +24,6 @@ func CarryRoutes(mux *chi.Mux, service internal.CarryService) error {
 		router.Patch("/{id}", handler.UpdateCarry())
 		router.Delete("/{id}", handler.DeleteCarry())
 	})
+
 	return nil
 }
