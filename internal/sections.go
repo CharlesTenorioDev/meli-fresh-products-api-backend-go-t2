@@ -49,7 +49,7 @@ type (
 		GetSectionProductsReport(int) ([]SectionProductsReport, error)
 	}
 	SectionWarehouseValidation interface {
-		GetById(int) (Warehouse, error)
+		GetByID(int) (Warehouse, error)
 	}
 	SectionProductTypeValidation interface {
 		GetProductTypeByID(int) (ProductType, error)

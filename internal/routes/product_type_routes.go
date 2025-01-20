@@ -15,5 +15,6 @@ func NewProductTypeRoutes(mux *chi.Mux, service internal.ProductTypeService) err
 		router.Patch("/{id}", handler.UpdateProductType)
 		router.Delete("/{id}", handler.DeleteProductType)
 	})
+
 	return nil
 }

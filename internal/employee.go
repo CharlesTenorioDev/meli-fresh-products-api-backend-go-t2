@@ -44,5 +44,5 @@ type EmployeeService interface {
 }
 
 type EmployeesWarehouseValidation interface {
-	GetById(int) (Warehouse, error)
+	GetByID(int) (Warehouse, error)
 }

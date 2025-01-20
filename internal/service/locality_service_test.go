@@ -120,7 +120,7 @@ func TestUnitLocality_Save(t *testing.T) {
 		{
 			TestName: "given an existing locality ID, return utils.ErrConflict",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
-				mlr.On("GetById", mock.Anything).Return(internal.Locality{ID: 2, LocalityName: "Westails"}, nil)
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{ID: 2, LocalityName: "Westails"}, nil)
 			},
 			ErrorToReturn: utils.ErrConflict,
 			DataLocality: internal.Locality{
@@ -137,7 +137,7 @@ func TestUnitLocality_Save(t *testing.T) {
 		{
 			TestName: "given an existing locality ID, return ",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
-				mlr.On("GetById", mock.Anything).Return(internal.Locality{}, nil)
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, nil)
 			},
 			ErrorToReturn: utils.ErrConflict,
@@ -178,7 +178,7 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 		lr := new(MockLocalityRepository)
 		pr := new(MockProvinceRepository)
 		cr := new(MockCountryRepository)
-		lr.On("GetById", mock.Anything).Return(internal.Locality{}, nil)
+		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 		lr.On("GetSellersByLocalityId", mock.Anything).Return([]internal.SellersByLocality{sampleSellerByLocality}, nil)
 		service := service.NewBasicLocalityService(lr, pr, cr)
 
@@ -190,7 +190,7 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 		lr := new(MockLocalityRepository)
 		pr := new(MockProvinceRepository)
 		cr := new(MockCountryRepository)
-		lr.On("GetById", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
+		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
 		service := service.NewBasicLocalityService(lr, pr, cr)
 
 		report, err := service.GetSellersByLocalityId(99)

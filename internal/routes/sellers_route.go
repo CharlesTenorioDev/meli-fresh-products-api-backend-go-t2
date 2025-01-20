@@ -16,5 +16,6 @@ func RegisterSellerRoutes(mux *chi.Mux, service internal.SellerService) error {
 		router.Delete("/{id}", handler.Delete())
 
 	})
+
 	return nil
 }

@@ -33,13 +33,13 @@ package repository
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
 // 		1: simpleSection,
 // 	})
-// 	section, _ := repo.GetById(1)
+// 	section, _ := repo.GetByID(1)
 // 	require.Equal(t, simpleSection, section)
 // }
 
 // func Test_GetById_WhenNotExists(t *testing.T) {
 // 	repo := NewMemorySectionRepository(nil)
-// 	section, _ := repo.GetById(1)
+// 	section, _ := repo.GetByID(1)
 // 	require.Empty(t, section)
 // }
 

@@ -14,8 +14,8 @@ import (
 
 // ConfigApplicationDefault is the configuration for NewApplicationDefault.
 type ConfigApplicationDefault struct {
-	// Db is the database configuration.
-	Db *mysql.Config
+	// DB is the database configuration.
+	DB *mysql.Config
 	// Addr is the server address.
 	Addr string
 }
@@ -24,28 +24,30 @@ type ConfigApplicationDefault struct {
 func NewApplicationDefault(config *ConfigApplicationDefault) *ApplicationDefault {
 	// default values
 	defaultCfg := &ConfigApplicationDefault{
-		Db:   nil,
+		DB:   nil,
 		Addr: ":8080",
 	}
 	if config != nil {
-		if config.Db != nil {
-			defaultCfg.Db = config.Db
+
+		if config.DB != nil {
+			defaultCfg.DB = config.DB
 		}
+
 		if config.Addr != "" {
 			defaultCfg.Addr = config.Addr
 		}
 	}
 
 	return &ApplicationDefault{
-		cfgDb:   defaultCfg.Db,
+		cfgDB:   defaultCfg.DB,
 		cfgAddr: defaultCfg.Addr,
 	}
 }
 
 // ApplicationDefault is an implementation of the Application interface.
 type ApplicationDefault struct {
-	// cfgDb is the database configuration.
-	cfgDb *mysql.Config
+	// cfgDB is the database configuration.
+	cfgDB *mysql.Config
 	// cfgAddr is the server address.
 	cfgAddr string
 	// db is the database connection.
@@ -66,11 +68,15 @@ func (a *ApplicationDefault) TearDown() {
 // configuring the router, and registering various routes and services.
 func (a *ApplicationDefault) SetUp() (err error) {
 	// connect to db
-	a.db, err = sql.Open("mysql", a.cfgDb.FormatDSN())
+	a.db, err = sql.Open("mysql", a.cfgDB.FormatDSN())
+
 	if err != nil {
+
 		log.Fatalf("error opening db: %s", err.Error())
 	}
+
 	if err = a.db.Ping(); err != nil {
+
 		log.Fatalf("error pinging db: %s", err.Error())
 	}
 
@@ -81,7 +87,9 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	countryRepo := repository.NewMysqlCountryRepository(a.db)
 	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
 	err = routes.NewLocalityRoutes(router, localityService)
+
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -94,7 +102,9 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// sellerRepo := repository.NewSellerDbRepository(dbSellers)
 	sellerRepo := repository.NewSellerMysql(a.db)
 	sellerService := service.NewSellerService(sellerRepo, localityRepo)
+
 	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
+
 		panic(err)
 	}
 
@@ -102,6 +112,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productTypeRepo := repository.NewProductTypeDB(a.db)
 	productTypeService := service.NewProductTypeService(productTypeRepo)
 	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
+
 		panic(err)
 	}
 
@@ -109,7 +120,9 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productRepo := repository.NewProductDB(a.db)
 	productService := service.NewProductService(productRepo, productTypeService)
 	err = routes.NewProductRoutes(router, productService)
+
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -118,6 +131,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
 	err = routes.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -126,6 +140,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -135,6 +150,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
 	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -142,6 +158,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	employeesRepo := repository.NewEmployeeRepository(a.db)
 	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
 	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
+
 		panic(err)
 	}
 
@@ -150,6 +167,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersService := service.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	if err = routes.BuyerRoutes(router, buyersService); err != nil {
+
 		panic(err)
 	}
 
@@ -158,6 +176,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
 	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {
+
 		panic(err)
 	}
 
@@ -165,20 +184,25 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	carriesRepo := repository.NewMySQLCarryRepository(a.db)
 	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
 	if err = routes.CarryRoutes(router, carryService); err != nil {
+
 		panic(err)
 	}
 
 	// Sprint2 Requisito 3 - Product Batch
 	productBatchRepo := repository.NewProductBatchRepository(a.db)
 	productBatchService := service.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+
 	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
 	}
+
 	inboundOrderRepo := repository.NewInboundOrderRepository(a.db)
 	inboundOrderService := service.NewInboundOrderService(inboundOrderRepo)
+
 	if err := routes.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
 		panic(err)
 	}
+
 	a.router = router
 
 	return nil
@@ -190,5 +214,6 @@ func (a *ApplicationDefault) Run() (err error) {
 	log.Printf("starting server at %s\n", a.cfgAddr)
 
 	err = http.ListenAndServe(a.cfgAddr, a.router)
+
 	return
 }

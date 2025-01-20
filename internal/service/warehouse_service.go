@@ -45,7 +45,7 @@ func (s *WarehouseService) GetAll() ([]internal.Warehouse, error) {
 	return warehouses, nil
 }
 
-// GetById retrieves a warehouse by its ID.
+// GetByID retrieves a warehouse by its ID.
 // If the warehouse is not found, it returns an ErrNotFound error.
 // If any other error occurs during the retrieval, it returns that error.
 // Parameters:
@@ -54,13 +54,13 @@ func (s *WarehouseService) GetAll() ([]internal.Warehouse, error) {
 // Returns:
 //   - internal.Warehouse: the warehouse with the specified ID.
 //   - error: an error if the warehouse is not found or if any other error occurs.
-func (s *WarehouseService) GetById(id int) (internal.Warehouse, error) {
-
-	warehouse, err := s.repo.GetById(id)
+func (s *WarehouseService) GetByID(id int) (internal.Warehouse, error) {
+	warehouse, err := s.repo.GetByID(id)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return internal.Warehouse{}, utils.ErrNotFound
 		}
+
 		return internal.Warehouse{}, err
 	}
 
@@ -120,8 +120,8 @@ func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse
 				return utils.ErrConflict
 			}
 		}
-
 	}
+
 	return nil
 }
 
@@ -137,28 +137,35 @@ func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse
 //   - internal.Warehouse: The updated warehouse.
 //   - error: An error if the update process fails, or nil if successful.
 func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePointers) (internal.Warehouse, error) {
-	warehouse, err := s.repo.GetById(id)
+	warehouse, err := s.repo.GetByID(id)
 	if err != nil {
 		return internal.Warehouse{}, err
 	}
+
 	if warehouse == (internal.Warehouse{}) {
 		return internal.Warehouse{}, utils.ErrNotFound
 	}
+
 	if updatedWarehouse.Address != nil {
 		warehouse.Address = *updatedWarehouse.Address
 	}
+
 	if updatedWarehouse.Telephone != nil {
 		warehouse.Telephone = *updatedWarehouse.Telephone
 	}
+
 	if updatedWarehouse.WarehouseCode != nil {
 		warehouse.WarehouseCode = *updatedWarehouse.WarehouseCode
 	}
+
 	if updatedWarehouse.LocalityID != nil {
 		warehouse.LocalityID = *updatedWarehouse.LocalityID
 	}
+
 	if updatedWarehouse.MinimumCapacity != nil {
 		warehouse.MinimumCapacity = *updatedWarehouse.MinimumCapacity
 	}
+
 	if updatedWarehouse.MinimumTemperature != nil {
 		warehouse.MinimumTemperature = *updatedWarehouse.MinimumTemperature
 	}
@@ -170,15 +177,18 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 	if err := s.existingWarehouseCode(warehouse, true); err != nil {
 		return internal.Warehouse{}, err
 	}
+
 	warehouse, err = s.repo.Update(warehouse)
+
 	if err != nil {
 		return internal.Warehouse{}, err
 	}
+
 	return warehouse, nil
 }
 
 // Delete removes a warehouse entry from the repository by its ID.
-// It first checks if the warehouse exists by calling GetById method.
+// It first checks if the warehouse exists by calling GetByID method.
 // If the warehouse does not exist or any error occurs during the check, it returns the error.
 // If the warehouse exists, it proceeds to delete it by calling the Delete method of the repository.
 // If any error occurs during the deletion, it returns the error.
@@ -190,7 +200,7 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 // Returns:
 //   - error: an error if the warehouse does not exist or if there is an issue during deletion, otherwise nil.
 func (s *WarehouseService) Delete(id int) error {
-	_, err := s.repo.GetById(id)
+	_, err := s.repo.GetByID(id)
 
 	if err != nil {
 		return err
@@ -217,20 +227,26 @@ func (s *WarehouseService) validateWarehouse(warehouse internal.Warehouse) error
 	if warehouse.WarehouseCode == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if warehouse.Address == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if warehouse.Telephone == "" {
 		return utils.ErrInvalidArguments
 	}
+
 	if warehouse.MinimumCapacity < 0 {
 		return utils.ErrInvalidArguments
 	}
+
 	if warehouse.MinimumTemperature < -273 {
 		return utils.ErrInvalidArguments
 	}
+
 	if _, err := s.validateLocality.GetById(warehouse.LocalityID); err != nil {
 		return err
 	}
+
 	return nil
 }

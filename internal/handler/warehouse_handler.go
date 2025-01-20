@@ -49,6 +49,7 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 				return
 			}
 			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving warehouses")
+
 			return
 		}
 		utils.JSON(w, http.StatusOK, warehouses)
@@ -63,15 +64,18 @@ func (h *WarehouseHandler) GetById() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
-		warehouse, err := h.service.GetById(id)
+		warehouse, err := h.service.GetByID(id)
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving the warehouse")
+
 			return
 		}
+
 		utils.JSON(w, http.StatusOK, warehouse)
 	}
 }
@@ -96,6 +100,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
+
 		newWarehouse := internal.Warehouse{
 			WarehouseCode:      body.Code,
 			Address:            body.Address,
@@ -106,16 +111,19 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 		}
 		newWarehouse, err := h.service.Save(newWarehouse)
 		if err != nil {
+
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
 			}
 			if errors.Is(err, utils.ErrInvalidArguments) {
 				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+
 				return
 			}
 
 			utils.Error(w, http.StatusInternalServerError, "An error occurred while saving the warehouse")
+
 			return
 		}
 		utils.JSON(w, http.StatusCreated, newWarehouse)
@@ -133,13 +141,16 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 // On success, it returns the updated warehouse with a 200 OK status.
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
 		var body internal.WarehousePointers
+
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
+
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
@@ -172,18 +183,24 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 // On successful deletion, it responds with a 204 No Content status.
 func (h *WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
 		err = h.service.Delete(id)
+
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
+
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
+
 				return
 			}
+
 			utils.Error(w, http.StatusInternalServerError, "An error occurred while deleting the warehouse")
+
 			return
 		}
 		utils.JSON(w, http.StatusNoContent, nil)

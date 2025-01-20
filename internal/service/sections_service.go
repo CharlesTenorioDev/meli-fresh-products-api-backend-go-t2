@@ -48,7 +48,7 @@ func (s BasicSectionService) GetById(id int) (internal.Section, error) {
 }
 
 func (s *BasicSectionService) warehouseExistsById(id int) error {
-	possibleWarehouse, err := s.warehouseService.GetById(id)
+	possibleWarehouse, err := s.warehouseService.GetByID(id)
 	// When internal server error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err

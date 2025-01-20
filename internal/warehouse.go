@@ -23,7 +23,7 @@ type WarehouseService interface {
 	GetAll() ([]Warehouse, error)
 	Save(Warehouse) (Warehouse, error)
 	Update(int, WarehousePointers) (Warehouse, error)
-	GetById(int) (Warehouse, error)
+	GetByID(int) (Warehouse, error)
 	Delete(int) error
 }
 
@@ -31,6 +31,6 @@ type WarehouseRepository interface {
 	GetAll() ([]Warehouse, error)
 	Save(newWarehouse Warehouse) (Warehouse, error)
 	Update(updatedWarehouse Warehouse) (Warehouse, error)
-	GetById(id int) (Warehouse, error)
+	GetByID(id int) (Warehouse, error)
 	Delete(id int) error
 }

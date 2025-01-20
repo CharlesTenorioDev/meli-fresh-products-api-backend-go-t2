@@ -22,6 +22,7 @@ import (
 // - error: An error if the routes could not be set up.
 func NewWarehouseRoutes(mux *chi.Mux, service internal.WarehouseService) error {
 	warehouseHandler := handler.NewWarehouseHandler(service)
+
 	mux.Route("/api/v1/warehouses", func(router chi.Router) {
 		router.Get("/", warehouseHandler.GetAll())
 		router.Post("/", warehouseHandler.Post())
@@ -29,5 +30,6 @@ func NewWarehouseRoutes(mux *chi.Mux, service internal.WarehouseService) error {
 		router.Patch("/{id}", warehouseHandler.Update())
 		router.Delete("/{id}", warehouseHandler.Delete())
 	})
+
 	return nil
 }

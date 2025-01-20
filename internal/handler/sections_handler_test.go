@@ -35,7 +35,7 @@ package handler_test
 // 	return args.Get(0).(internal.Section), args.Error(1)
 // }
 
-// func (m *MockSectionService) GetById(id int) (internal.Section, error) {
+// func (m *MockSectionService) GetByID(id int) (internal.Section, error) {
 // 	args := m.Called(id)
 // 	return args.Get(0).(internal.Section), args.Error(1)
 // }
@@ -149,7 +149,7 @@ package handler_test
 // 			mux := chi.NewRouter()
 // 			routes.RegisterSectionRoutes(mux, service)
 
-// 			service.On("GetById", scenario.MockArgs).Return(scenario.MockReturn1, scenario.MockReturn2)
+// 			service.On("GetByID", scenario.MockArgs).Return(scenario.MockReturn1, scenario.MockReturn2)
 
 // 			req := httptest.NewRequest("GET", scenario.Path, nil)
 // 			res := httptest.NewRecorder()

@@ -58,7 +58,7 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 // Returns:
 //   - internal.Warehouse: the warehouse details.
 //   - error: an error if the warehouse is not found or if there is a database issue.
-func (r *WarehouseDB) GetById(id int) (internal.Warehouse, error) {
+func (r *WarehouseDB) GetByID(id int) (internal.Warehouse, error) {
 	row := r.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses WHERE id = ?", id)
 	if err := row.Err(); err != nil {
 		return internal.Warehouse{}, err
@@ -133,7 +133,7 @@ func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse,
 // - The updated warehouse data if the update is successful.
 // - An error if the warehouse does not exist or if there is an issue with the update operation.
 func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Warehouse, error) {
-	_, err := r.GetById(updatedWarehouse.ID)
+	_, err := r.GetByID(updatedWarehouse.ID)
 	if err != nil {
 		return internal.Warehouse{}, err
 	}
@@ -175,17 +175,21 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 // Returns:
 //   - error: an error object if any error occurs, otherwise nil.
 func (r *WarehouseDB) Delete(id int) error {
-	_, err := r.GetById(id)
+	_, err := r.GetByID(id)
 	if err != nil {
+
 		return err
 	}
 	statement, err := r.db.Prepare("DELETE FROM warehouses WHERE id = ?")
+
 	if err != nil {
+
 		return err
 	}
 	defer statement.Close()
 	_, err = statement.Exec(id)
 	if err != nil {
+
 		return err
 	}
 	return nil
