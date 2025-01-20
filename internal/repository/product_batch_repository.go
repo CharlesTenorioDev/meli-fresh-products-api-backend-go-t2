@@ -16,10 +16,10 @@ func NewProductBatchRepository(db *sql.DB) internal.ProductBatchRepository {
 	return &MySQLProductBatchRepository{db: db}
 }
 
-// Get all the sections and return in asc order
+// Save Get all the sections and return in asc order
 func (r *MySQLProductBatchRepository) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
 	result, err := r.db.Exec("INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
-		(*newBatch).BatchNumber, (*newBatch).CurrentQuantity, (*newBatch).CurrentTemperature, (*newBatch).DueDate, (*newBatch).InitialQuantity, (*newBatch).ManufacturingDate, (*newBatch).ManufacturingHour, (*newBatch).MinimumTemperature, (*newBatch).ProductId, (*newBatch).SectionId,
+		(*newBatch).BatchNumber, (*newBatch).CurrentQuantity, (*newBatch).CurrentTemperature, (*newBatch).DueDate, (*newBatch).InitialQuantity, (*newBatch).ManufacturingDate, (*newBatch).ManufacturingHour, (*newBatch).MinimumTemperature, (*newBatch).ProductID, (*newBatch).SectionID,
 	)
 	if err != nil {
 		var mySQLError *mysql.MySQLError

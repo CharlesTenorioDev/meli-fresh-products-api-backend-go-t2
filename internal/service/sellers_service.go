@@ -27,7 +27,7 @@ func (s *SellerService) GetAll() ([]internal.Seller, error) {
 }
 
 func (s *SellerService) GetByID(id int) (internal.Seller, error) {
-	seller, err := s.rp.GetById(id)
+	seller, err := s.rp.GetByID(id)
 
 	if err != nil {
 		return internal.Seller{}, err
@@ -47,7 +47,7 @@ func (s *SellerService) Create(newSeller *internal.Seller) error {
 		return sellerValidation
 	}
 
-	_, err := s.localityRp.GetByID(newSeller.LocalityId)
+	_, err := s.localityRp.GetByID(newSeller.LocalityID)
 
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
@@ -67,7 +67,7 @@ func (s *SellerService) Create(newSeller *internal.Seller) error {
 }
 
 func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) (internal.Seller, error) {
-	existingSeller, err := s.rp.GetById(id)
+	existingSeller, err := s.rp.GetByID(id)
 	if err != nil {
 		return internal.Seller{}, err
 	}
@@ -111,7 +111,7 @@ func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) 
 }
 
 func (s *SellerService) Delete(id int) error {
-	existingSeller, err := s.rp.GetById(id)
+	existingSeller, err := s.rp.GetByID(id)
 
 	if err != nil {
 		return err

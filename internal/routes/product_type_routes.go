@@ -7,14 +7,14 @@ import (
 )
 
 func NewProductTypeRoutes(mux *chi.Mux, service internal.ProductTypeService) error {
-	handler := handler.NewProductTypeHandler(service)
+	productTypeHandler := handler.NewProductTypeHandler(service)
 
 	mux.Route("/api/v1/product_types", func(router chi.Router) {
-		router.Get("/", handler.GetProductTypes)
-		router.Post("/", handler.CreateProductType)
-		router.Get("/{id}", handler.GetProductTypeByID)
-		router.Patch("/{id}", handler.UpdateProductType)
-		router.Delete("/{id}", handler.DeleteProductType)
+		router.Get("/", productTypeHandler.GetProductTypes)
+		router.Post("/", productTypeHandler.CreateProductType)
+		router.Get("/{id}", productTypeHandler.GetProductTypeByID)
+		router.Patch("/{id}", productTypeHandler.UpdateProductType)
+		router.Delete("/{id}", productTypeHandler.DeleteProductType)
 	})
 
 	return nil

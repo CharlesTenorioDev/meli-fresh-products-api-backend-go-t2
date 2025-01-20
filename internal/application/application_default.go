@@ -96,7 +96,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// if err != nil {
 	// return
 	// }
-	// sellerRepo := repository.NewSellerDbRepository(dbSellers)
+	// sellerRepo := repository.NewSellerDBRepository(dbSellers)
 	sellerRepo := repository.NewSellerMysql(a.db)
 	sellerService := service.NewSellerService(sellerRepo, localityRepo)
 

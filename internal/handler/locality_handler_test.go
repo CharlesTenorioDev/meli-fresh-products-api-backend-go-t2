@@ -24,12 +24,12 @@ func (m *MockLocalityService) Save(locality *internal.Locality, province *intern
 	args := m.Called(locality, province, country)
 	return args.Error(0)
 }
-func (m *MockLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
+func (m *MockLocalityService) GetSellersByLocalityID(localityId int) ([]internal.SellersByLocality, error) {
 	args := m.Called(localityId)
 	return args.Get(0).([]internal.SellersByLocality), args.Error(1)
 }
 
-func (m *MockLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+func (m *MockLocalityService) GetCarriesByLocalityID(localityId int) ([]internal.CarriesByLocality, error) {
 	args := m.Called(localityId)
 	return args.Get(0).([]internal.CarriesByLocality), args.Error(1)
 }
@@ -131,14 +131,14 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
 			service := new(MockLocalityService)
-			service.On("GetSellersByLocalityId", mock.Anything).Return(c.DataToReturn, c.ErrorToReturn)
+			service.On("GetSellersByLocalityID", mock.Anything).Return(c.DataToReturn, c.ErrorToReturn)
 			handler := handler.NewLocalityHandler(service)
 			request := &http.Request{
 				URL:    &url.URL{RawQuery: c.RawQuery},
 				Header: http.Header{"Content-Type": []string{"application/json"}},
 			}
 			response := httptest.NewRecorder()
-			handler.GetSellersByLocalityId()(response, request)
+			handler.GetSellersByLocalityID()(response, request)
 			require.Equal(t, c.ExpectedStatusCode, response.Result().StatusCode)
 		})
 	}

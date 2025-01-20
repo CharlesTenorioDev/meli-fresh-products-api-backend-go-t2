@@ -12,7 +12,7 @@ type testStructure struct {
 }
 
 func Test__GetBiggestId__WhenMapIsFilled(t *testing.T) {
-	biggest := GetBiggestId(map[int]testStructure{
+	biggest := GetBiggestID(map[int]testStructure{
 		1: {1, "Struct 1"},
 		2: {1, "Struct 2"},
 		3: {1, "Struct 3"},
@@ -21,6 +21,6 @@ func Test__GetBiggestId__WhenMapIsFilled(t *testing.T) {
 }
 
 func Test__GetBiggestId__WhenMapIsEmpty(t *testing.T) {
-	biggest := GetBiggestId(map[int]testStructure{})
+	biggest := GetBiggestID(map[int]testStructure{})
 	require.Equal(t, 1, biggest)
 }

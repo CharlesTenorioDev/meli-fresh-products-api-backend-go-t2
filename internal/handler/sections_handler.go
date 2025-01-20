@@ -30,12 +30,12 @@ type SectionHandler struct {
 	service internal.SectionService
 }
 
-// Get a new instance of SectionHandler
+// NewSectionHandler Get a new instance of SectionHandler
 func NewSectionHandler(service internal.SectionService) *SectionHandler {
 	return &SectionHandler{service}
 }
 
-// Get all the sections - 200
+// GetAll the sections - 200
 // An error not mapped - 500
 func (h *SectionHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +49,7 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-// Get the section by Id - 200
+// GetById the section by Id - 200
 // If the id is in the wrong format - 400
 // If the section doesn't exist - 404
 // An error not mapped - 500
@@ -77,7 +77,7 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 	}
 }
 
-// Save the section - 201
+// Post the section - 201
 // If payload is in the wrong format - 400
 // If a section already exists for section_number - 409
 // If the payload contains invalid or empty fields for mandatory data - 422

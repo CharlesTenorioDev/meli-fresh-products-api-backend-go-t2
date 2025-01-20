@@ -60,13 +60,13 @@ func TestIntegrationLocality_GetSellersByLocalityId(t *testing.T) {
 
 	repo := repository.NewMysqlLocalityRepository(db)
 	t.Run("Given an existing locality ID, return the sellers count for that ID", func(t *testing.T) {
-		report, err := repo.GetSellersByLocalityId(1)
+		report, err := repo.GetSellersByLocalityID(1)
 		require.NoError(t, err)
 		require.Len(t, report, 1)
 	})
 
 	t.Run("Given an 0 as locality ID, return the sellers count for all locations", func(t *testing.T) {
-		report, err := repo.GetSellersByLocalityId(0)
+		report, err := repo.GetSellersByLocalityID(0)
 		require.NoError(t, err)
 		require.Len(t, report, 2)
 	})

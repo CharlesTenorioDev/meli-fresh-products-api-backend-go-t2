@@ -64,11 +64,11 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 		return utils.ErrInvalidArguments
 	}
 	//MinimumTemperature não validada porque pode ser positiva, negativa ou zero
-	if newBatch.ProductId <= 0 {
+	if newBatch.ProductID <= 0 {
 		return utils.ErrInvalidArguments
 	}
 
-	if newBatch.SectionId <= 0 {
+	if newBatch.SectionID <= 0 {
 		return utils.ErrInvalidArguments
 	}
 
@@ -81,7 +81,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 		return utils.ErrConflict
 	}
 
-	sectionExists, err := s.sectionRepo.GetByID(newBatch.SectionId)
+	sectionExists, err := s.sectionRepo.GetByID(newBatch.SectionID)
 
 	if sectionExists == (internal.Section{}) {
 		return utils.ErrConflict
@@ -91,7 +91,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 		return err
 	}
 
-	productExists, err := s.productRepo.GetByID(newBatch.ProductId)
+	productExists, err := s.productRepo.GetByID(newBatch.ProductID)
 	if productExists == (internal.Product{}) {
 		return utils.ErrConflict
 	}

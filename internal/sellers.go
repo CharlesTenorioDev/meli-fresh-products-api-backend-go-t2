@@ -10,7 +10,7 @@ type SellerService interface {
 
 type SellerRepository interface {
 	GetAll() (s []Seller, err error)
-	GetById(id int) (Seller, error)
+	GetByID(id int) (Seller, error)
 	GetByCid(cid int) (Seller, error)
 	Create(*Seller) error
 	Update(*Seller) error
@@ -27,7 +27,7 @@ type Seller struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
-	LocalityId  int    `json:"locality_id"`
+	LocalityID  int    `json:"locality_id"`
 }
 
 type SellerRequest struct {
@@ -35,7 +35,7 @@ type SellerRequest struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
-	LocalityId  int    `json:"locality_id"`
+	LocalityID  int    `json:"locality_id"`
 }
 
 type SellerRequestPointer struct {

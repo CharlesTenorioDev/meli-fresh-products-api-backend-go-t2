@@ -58,11 +58,11 @@ func (s *ProductRecordsService) validateEmptyFields(newProduct internal.ProductR
 		return utils.ErrInvalidArguments
 	}
 
-	if newProduct.ProductId == 0 {
+	if newProduct.ProductID == 0 {
 		return utils.ErrInvalidArguments
 	}
 
-	if _, err := s.validationProduct.GetProductByID(newProduct.ProductId); err != nil {
+	if _, err := s.validationProduct.GetProductByID(newProduct.ProductID); err != nil {
 		return utils.ErrConflict
 	}
 

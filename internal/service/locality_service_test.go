@@ -22,12 +22,12 @@ func (m *MockLocalityRepository) GetByID(id int) (internal.Locality, error) {
 	args := m.Called(id)
 	return args.Get(0).(internal.Locality), args.Error(1)
 }
-func (m *MockLocalityRepository) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
+func (m *MockLocalityRepository) GetSellersByLocalityID(localityId int) ([]internal.SellersByLocality, error) {
 	args := m.Called(localityId)
 	return args.Get(0).([]internal.SellersByLocality), args.Error(1)
 }
 
-func (m *MockLocalityRepository) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+func (m *MockLocalityRepository) GetCarriesByLocalityID(localityId int) ([]internal.CarriesByLocality, error) {
 	args := m.Called(localityId)
 	return args.Get(0).([]internal.CarriesByLocality), args.Error(1)
 }
@@ -170,7 +170,7 @@ func TestUnitLocality_Save(t *testing.T) {
 
 func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 	sampleSellerByLocality := internal.SellersByLocality{
-		LocalityId:   1,
+		LocalityID:   1,
 		LocalityName: "A random locality",
 		SellersCount: 2,
 	}
@@ -179,10 +179,10 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 		pr := new(MockProvinceRepository)
 		cr := new(MockCountryRepository)
 		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
-		lr.On("GetSellersByLocalityId", mock.Anything).Return([]internal.SellersByLocality{sampleSellerByLocality}, nil)
+		lr.On("GetSellersByLocalityID", mock.Anything).Return([]internal.SellersByLocality{sampleSellerByLocality}, nil)
 		service := service.NewBasicLocalityService(lr, pr, cr)
 
-		report, err := service.GetSellersByLocalityId(0)
+		report, err := service.GetSellersByLocalityID(0)
 		require.NoError(t, err)
 		require.Len(t, report, 1)
 	})
@@ -193,7 +193,7 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
 		service := service.NewBasicLocalityService(lr, pr, cr)
 
-		report, err := service.GetSellersByLocalityId(99)
+		report, err := service.GetSellersByLocalityID(99)
 		require.ErrorIs(t, err, utils.ErrNotFound)
 		require.Len(t, report, 0)
 	})

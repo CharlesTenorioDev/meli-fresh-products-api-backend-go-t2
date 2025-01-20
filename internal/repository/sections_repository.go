@@ -12,12 +12,12 @@ type SectionMysqlRepository struct {
 	db *sql.DB
 }
 
-// Initialize a MemorySectionRepository and set the next id to 1
+// NewSectionMysql Initialize a MemorySectionRepository and set the next id to 1
 func NewSectionMysql(db *sql.DB) *SectionMysqlRepository {
 	return &SectionMysqlRepository{db}
 }
 
-// Get all the sections and return in asc order
+// GetAll the sections and return in asc order
 func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
 	var sections []internal.Section
 
@@ -70,7 +70,7 @@ func (r *SectionMysqlRepository) GetByID(id int) (internal.Section, error) {
 	return section, nil
 }
 
-// Finds the section by its sectionNumber
+// GetBySectionNumber Finds the section by its sectionNumber
 // If not found, pkg.Section{} is returned
 func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal.Section, error) {
 	var section internal.Section
@@ -93,7 +93,7 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 	return section, nil
 }
 
-// Generate a new ID and save the entity
+// Save Generate a new ID and save the entity
 // All validatinos should be made on service layer
 func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Section, error) {
 	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -172,7 +172,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionP
 	for rows.Next() {
 		var report internal.SectionProductsReport
 
-		err = rows.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+		err = rows.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
 		if err != nil {
 			return nil, err
 		}
@@ -187,7 +187,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionP
 
 	return reports, nil
 }
-func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]internal.SectionProductsReport, error) {
+func (r *SectionMysqlRepository) GetSectionProductsReportByID(id int) ([]internal.SectionProductsReport, error) {
 	var report internal.SectionProductsReport
 
 	var reports []internal.SectionProductsReport
@@ -201,7 +201,7 @@ func (r *SectionMysqlRepository) GetSectionProductsReportById(id int) ([]interna
 		"on s.id = p.section_id "+
 		"where s.id=? group by s.id", id)
 
-	err := row.Scan(&report.SectionId, &report.SectionNumber, &report.ProductsCount)
+	err := row.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
 	if err != nil && err == sql.ErrNoRows {
 		err = utils.ErrNotFound
 		return nil, err

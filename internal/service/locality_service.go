@@ -107,21 +107,21 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 	return nil
 }
 
-// Get the sellers quantity by there location
+// GetSellersByLocalityID the sellers quantity by there location
 // if id == 0, then all location are returned
-func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
+func (s *BasicLocalityService) GetSellersByLocalityID(localityID int) ([]internal.SellersByLocality, error) {
 	// Of id != 0, check if locality exists
-	if localityId != 0 {
-		_, err := s.localityRepo.GetByID(localityId)
+	if localityID != 0 {
+		_, err := s.localityRepo.GetByID(localityID)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
 	}
 
-	return s.localityRepo.GetSellersByLocalityId(localityId)
+	return s.localityRepo.GetSellersByLocalityID(localityID)
 }
 
-// GetCarriesByLocalityId retrieves a list of carriers associated with a given locality ID.
+// GetCarriesByLocalityID retrieves a list of carriers associated with a given locality ID.
 // If the provided locality ID is not zero, it first checks if the locality exists.
 // If the locality does not exist, it returns an error.
 // If the locality exists or the locality ID is zero, it returns the list of carriers.
@@ -132,14 +132,14 @@ func (s *BasicLocalityService) GetSellersByLocalityId(localityId int) ([]interna
 // Returns:
 //   - []internal.CarriesByLocality: A slice of carriers associated with the locality.
 //   - error: An error if the locality does not exist or if there is an issue retrieving the carriers.
-func (s *BasicLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+func (s *BasicLocalityService) GetCarriesByLocalityID(localityID int) ([]internal.CarriesByLocality, error) {
 	// Of id != 0, check if locality exists
-	if localityId != 0 {
-		_, err := s.localityRepo.GetByID(localityId)
+	if localityID != 0 {
+		_, err := s.localityRepo.GetByID(localityID)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}
 	}
 
-	return s.localityRepo.GetCarriesByLocalityId(localityId)
+	return s.localityRepo.GetCarriesByLocalityID(localityID)
 }

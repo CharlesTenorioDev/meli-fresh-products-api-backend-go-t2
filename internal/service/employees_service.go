@@ -24,7 +24,7 @@ func (s *EmployeeDefault) FindAll() (employees map[int]internal.Employee, err er
 	return
 }
 
-// FindById retrieves an employee by ID from the repository
+// FindByID retrieves an employee by ID from the repository
 func (s *EmployeeDefault) FindByID(id int) (employee internal.Employee, err error) {
 	employee, err = s.rp.FindByID(id)
 	return
@@ -35,30 +35,30 @@ func (s *EmployeeDefault) CreateEmployee(newEmployee internal.EmployeeAttributes
 	// validate required fields
 	err = s.validateFields(newEmployee)
 	if err != nil {
-		return
+		return employee, err
 	}
 
 	// check for duplicates
 	employees, err := s.rp.FindAll()
 	if err != nil {
-		return
+		return employee, err
 	}
 
 	err = s.validateDuplicates(employees, newEmployee)
 	if err != nil {
-		return
+		return employee, err
 	}
 
 	// verify if warehouse_id exists
-	err = s.warehouseExistsById(newEmployee.WarehouseID)
+	err = s.warehouseExistsByID(newEmployee.WarehouseID)
 	if err != nil {
-		return
+		return employee, err
 	}
 
 	// attempt to create the new employee
 	employee, err = s.rp.CreateEmployee(newEmployee)
 	if err != nil {
-		return
+		return employee, err
 	}
 
 	return employee, nil
@@ -74,7 +74,7 @@ func (s *EmployeeDefault) UpdateEmployee(inputEmployee internal.Employee) (emplo
 	}
 
 	// verify if warehouse_id exists
-	err = s.warehouseExistsById(inputEmployee.Attributes.WarehouseID)
+	err = s.warehouseExistsByID(inputEmployee.Attributes.WarehouseID)
 	if err != nil {
 		return
 	}
@@ -156,7 +156,7 @@ func mergeEmployeeFields(inputEmployee, internalEmployee internal.Employee) (upd
 	return updatedEmployee
 }
 
-func (s *EmployeeDefault) warehouseExistsById(id int) error {
+func (s *EmployeeDefault) warehouseExistsByID(id int) error {
 	possibleWarehouse, err := s.warehouseService.GetByID(id)
 	// When internal server error
 	if err != nil && err != utils.ErrNotFound {

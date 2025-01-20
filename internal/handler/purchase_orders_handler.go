@@ -40,7 +40,7 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 			}
 		}
 
-		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerId(buyerId)
+		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerID(buyerId)
 		if err != nil {
 			if err == utils.ErrBuyerDoesNotExists {
 				utils.HandleError(w, utils.ErrNotFound)
@@ -54,7 +54,7 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 
 		data := make(map[int]map[string]any)
 		for _, value := range PurchaseOrdersSummary {
-			data[value.BuyerId] = map[string]any{
+			data[value.BuyerID] = map[string]any{
 				"total_orders": value.TotalOrders,
 				"order_codes":  value.OrderCodes,
 			}

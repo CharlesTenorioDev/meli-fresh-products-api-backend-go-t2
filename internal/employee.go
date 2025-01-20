@@ -14,13 +14,13 @@ type EmployeeAttributes struct {
 	WarehouseID  int    `json:"warehouse_id"`
 }
 
-// EmployeeJson defines the structure of the employee data as it appears in a json file
-type EmployeeJson struct {
+// EmployeeJSON defines the structure of the employee data as it appears in a json file
+type EmployeeJSON struct {
 	ID           int    `json:"id"`
 	CardNumberId string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
-	WarehouseId  int    `json:"warehouse_id"`
+	WarehouseID  int    `json:"warehouse_id"`
 }
 
 // EmployeeRepository defines the interface for employee data persistence

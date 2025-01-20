@@ -14,15 +14,15 @@ func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error 
 		return errors.New("mux router is nil")
 	}
 
-	handler := handler.NewSectionHandler(service)
+	sectionHandler := handler.NewSectionHandler(service)
 
 	mux.Route("/api/v1/sections", func(router chi.Router) {
-		router.Get("/", handler.GetAll())
-		router.Get("/{id}", handler.GetById())
-		router.Get("/reportProducts", handler.GetSectionProductsReport())
-		router.Post("/", handler.Post())
-		router.Patch("/{id}", handler.Update())
-		router.Delete("/{id}", handler.Delete())
+		router.Get("/", sectionHandler.GetAll())
+		router.Get("/{id}", sectionHandler.GetById())
+		router.Get("/reportProducts", sectionHandler.GetSectionProductsReport())
+		router.Post("/", sectionHandler.Post())
+		router.Patch("/{id}", sectionHandler.Update())
+		router.Delete("/{id}", sectionHandler.Delete())
 	})
 
 	return nil

@@ -19,9 +19,9 @@ func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService i
 	return &PurchaseOrderDefault{rp: rp, buyerService: buyerService, productRecordService: productRecordService}
 }
 
-// FindAll retrieves all PurchaseOrders from the repository
-func (s *PurchaseOrderDefault) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
-	purchaseOrdersSummary, err := s.rp.FindAllByBuyerId(buyerId)
+// FindAllByBuyerID retrieves all PurchaseOrders from the repository
+func (s *PurchaseOrderDefault) FindAllByBuyerID(buyerID int) ([]internal.PurchaseOrderSummary, error) {
+	purchaseOrdersSummary, err := s.rp.FindAllByBuyerID(buyerID)
 	if err != nil {
 		if err == utils.ErrBuyerDoesNotExists {
 			return nil, utils.ErrBuyerDoesNotExists
@@ -50,13 +50,13 @@ func (s *PurchaseOrderDefault) CreatePurchaseOrder(newPurchaseOrder internal.Pur
 	}
 
 	// verify if buyer_id exists
-	err = s.buyerExistsById(newPurchaseOrder.BuyerId)
+	err = s.buyerExistsByID(newPurchaseOrder.BuyerID)
 	if err != nil {
 		return
 	}
 
 	// verify if product_record_id exists
-	err = s.productRecordExistsById(newPurchaseOrder.ProductRecordId)
+	err = s.productRecordExistsByID(newPurchaseOrder.ProductRecordID)
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func (s *PurchaseOrderDefault) CreatePurchaseOrder(newPurchaseOrder internal.Pur
 
 // validateFields checks if the required fields of a new purchaseOrder are not empty
 func (s *PurchaseOrderDefault) validateFields(newPurchaseOrder internal.PurchaseOrderAttributes) (err error) {
-	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.OrderDate == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerId == 0 || newPurchaseOrder.ProductRecordId == 0 {
+	if newPurchaseOrder.OrderNumber == "" || newPurchaseOrder.OrderDate == "" || newPurchaseOrder.TrackingCode == "" || newPurchaseOrder.BuyerID == 0 || newPurchaseOrder.ProductRecordID == 0 {
 		return utils.ErrEmptyArguments
 	}
 
@@ -85,7 +85,7 @@ func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders []internal.Purc
 	return nil
 }
 
-func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
+func (s *PurchaseOrderDefault) buyerExistsByID(id int) error {
 	possibleBuyer, err := s.buyerService.GetOne(id)
 	// When internal server error
 	if err != nil && err != utils.ErrNotFound {
@@ -99,8 +99,8 @@ func (s *PurchaseOrderDefault) buyerExistsById(id int) error {
 	return nil
 }
 
-func (s *PurchaseOrderDefault) productRecordExistsById(id int) error {
-	product, err := s.productRecordService.FindById(id)
+func (s *PurchaseOrderDefault) productRecordExistsByID(id int) error {
+	product, err := s.productRecordService.FindByID(id)
 
 	if err != nil {
 		if err == utils.ErrNotFound {

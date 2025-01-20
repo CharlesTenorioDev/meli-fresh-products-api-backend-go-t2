@@ -90,7 +90,7 @@ func (r *MySQLCarryRepository) GetAll() ([]internal.Carry, error) {
 	return carries, nil
 }
 
-// GetById retrieves a carrier record from the database by its ID.
+// GetByID retrieves a carrier record from the database by its ID.
 // It returns an internal.Carry object and an error if any occurs during the process.
 // If the carrier with the specified ID is not found, it returns a utils.ErrNotFound error.
 //
@@ -153,7 +153,7 @@ func (r *MySQLCarryRepository) Update(carry *internal.Carry) error {
 }
 
 // Delete removes a carrier record from the database by its ID.
-// It first checks if the carrier exists by calling GetById.
+// It first checks if the carrier exists by calling GetByID.
 // If the carrier does not exist or an error occurs during the check, it returns an error.
 // If the carrier exists, it prepares a DELETE SQL statement and executes it.
 // If any error occurs during the preparation or execution of the statement, it returns an error.

@@ -35,7 +35,7 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-func (h *SellerHandler) GetById() http.HandlerFunc {
+func (h *SellerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
@@ -71,7 +71,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			CompanyName: reqBody.CompanyName,
 			Address:     reqBody.Address,
 			Telephone:   reqBody.Telephone,
-			LocalityId:  reqBody.LocalityId,
+			LocalityID:  reqBody.LocalityID,
 		}
 
 		err := h.service.Create(&newSeller)
