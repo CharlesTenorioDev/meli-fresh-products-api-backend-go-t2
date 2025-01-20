@@ -15,18 +15,19 @@ import (
 // - DELETE /api/v1/warehouses/{id}: Deletes a warehouse by its ID.
 //
 // Parameters:
-// - mux: The router to which the routes will be added.
-// - service: The service layer that handles warehouse operations.
+// - mux: The HTTP request multiplexer from the chi package.
+// - service: The service layer that provides warehouse-related operations.
 //
 // Returns:
-// - error: An error if the routes could not be set up.
+// - An error if there is an issue setting up the routes, otherwise nil.
+
 func NewWarehouseRoutes(mux *chi.Mux, service internal.WarehouseService) error {
 	warehouseHandler := handler.NewWarehouseHandler(service)
 
 	mux.Route("/api/v1/warehouses", func(router chi.Router) {
 		router.Get("/", warehouseHandler.GetAll())
 		router.Post("/", warehouseHandler.Post())
-		router.Get("/{id}", warehouseHandler.GetById())
+		router.Get("/{id}", warehouseHandler.GetByID())
 		router.Patch("/{id}", warehouseHandler.Update())
 		router.Delete("/{id}", warehouseHandler.Delete())
 	})

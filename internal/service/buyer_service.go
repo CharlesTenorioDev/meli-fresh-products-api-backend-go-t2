@@ -72,6 +72,7 @@ func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*interna
 	}
 
 	var buyerFound internal.Buyer
+
 	for _, buyer := range buyers {
 		if buyer.ID == updatedBuyer.ID {
 			buyerFound = buyer
@@ -90,7 +91,6 @@ func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*interna
 	}
 
 	return service.repo.UpdateBuyer(updatedBuyer)
-
 }
 
 func (service *BuyerService) DeleteBuyer(id int) error {
@@ -106,6 +106,7 @@ func (service *BuyerService) DeleteBuyer(id int) error {
 			if err := service.repo.DeleteBuyer(id); err != nil {
 				return err
 			}
+
 			return nil
 		}
 	}
@@ -142,5 +143,6 @@ func getNextID(buyers []internal.Buyer) int {
 			maxID = int(buyer.ID)
 		}
 	}
+
 	return maxID + 1
 }

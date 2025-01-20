@@ -7,9 +7,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
+	_ "github.com/meli-fresh-products-api-backend-go-t2/docs"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // ConfigApplicationDefault is the configuration for NewApplicationDefault.
@@ -81,6 +83,9 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	router := chi.NewRouter()
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition"
+	))
 
 	localityRepo := repository.NewMysqlLocalityRepository(a.db)
 	provinceRepo := repository.NewMysqlProvinceRepository(a.db)

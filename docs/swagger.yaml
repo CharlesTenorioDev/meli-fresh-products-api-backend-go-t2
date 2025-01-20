@@ -1,0 +1,285 @@
+definitions:
+  handler.WarehouseHandler:
+    description: This handler provides endpoints to manage warehouse operations such
+      as creating, updating, and retrieving warehouse information.
+    type: object
+  handler.reqPostWarehouse:
+    properties:
+      address:
+        description: |-
+          The address of the warehouse
+          required: true
+          example: 1234 Warehouse St.
+        type: string
+      locality_id:
+        description: |-
+          The ID of the locality where the warehouse is located
+          required: true
+          example: 101
+        type: integer
+      minimum_capacity:
+        description: |-
+          The minimum capacity of the warehouse
+          required: true
+          example: 1000
+        type: integer
+      minimum_temperature:
+        description: |-
+          The minimum temperature that the warehouse can maintain
+          required: true
+          example: -5
+        type: integer
+      telephone:
+        description: |-
+          The telephone number of the warehouse
+          required: true
+          example: +1-800-555-5555
+        type: string
+      warehouse_code:
+        description: |-
+          The unique code of the warehouse
+          required: true
+          example: WH-001
+        type: string
+    type: object
+  internal.Warehouse:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      locality_id:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: integer
+      telephone:
+        type: string
+      warehouse_code:
+        type: string
+    type: object
+  internal.WarehousePointers:
+    properties:
+      address:
+        type: string
+      locality_id:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: integer
+      telephone:
+        type: string
+      warehouse_code:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a HTTP REST API server.
+  termsOfService: http://swagger.io/terms/
+  title: Meli Fresh Products API
+  version: 0.0.2.1
+paths:
+  /api/v1/warehouses:
+    post:
+      consumes:
+      - application/json
+      description: Create a new warehouse with the provided details
+      parameters:
+      - description: Warehouse details
+        in: body
+        name: warehouse
+        required: true
+        schema:
+          $ref: '#/definitions/handler.reqPostWarehouse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created warehouse
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Warehouse code conflict
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new warehouse
+      tags:
+      - warehouses
+  /warehouse-handler:
+    post:
+      consumes:
+      - application/json
+      description: This function initializes a new WarehouseHandler with the provided
+        WarehouseService.
+      parameters:
+      - description: Warehouse Service
+        in: body
+        name: service
+        required: true
+        schema: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.WarehouseHandler'
+      summary: Create a new WarehouseHandler
+      tags:
+      - Warehouse
+  /warehouses:
+    get:
+      description: Retrieve a list of all warehouses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of warehouses
+          schema:
+            items:
+              $ref: '#/definitions/internal.Warehouse'
+            type: array
+        "404":
+          description: No warehouses found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while retrieving warehouses
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all warehouses
+      tags:
+      - warehouses
+  /warehouses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a warehouse by its ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found with the given ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while deleting the warehouse
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a warehouse
+      tags:
+      - warehouses
+    get:
+      description: Get a warehouse by its ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found with ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while retrieving the warehouse
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get warehouse by ID
+      tags:
+      - warehouses
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing warehouse by ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Warehouse data
+        in: body
+        name: warehouse
+        required: true
+        schema:
+          $ref: '#/definitions/internal.WarehousePointers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid ID format or request body
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Warehouse not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Conflict error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a warehouse
+      tags:
+      - warehouses
+swagger: "2.0"
