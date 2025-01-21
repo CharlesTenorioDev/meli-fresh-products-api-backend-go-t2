@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type errorResponse struct {
+type ErrorResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
@@ -19,7 +19,7 @@ func Error(w http.ResponseWriter, statusCode int, message string) {
 		defaultStatusCode = statusCode
 	}
 
-	body := errorResponse{
+	body := ErrorResponse{
 		Status:  http.StatusText(defaultStatusCode),
 		Message: message,
 	}

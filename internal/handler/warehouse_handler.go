@@ -13,33 +13,63 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
+// reqPostWarehouse represents the request payload for creating a new warehouse.
+// swagger:model
 type reqPostWarehouse struct {
-	Code               string `json:"warehouse_code"`
-	Address            string `json:"address"`
-	Telephone          string `json:"telephone"`
-	LocalityID         int    `json:"locality_id"`
-	MinimumCapacity    int    `json:"minimum_capacity"`
-	MinimumTemperature int    `json:"minimum_temperature"`
+	// The unique code of the warehouse
+	// required: true
+	// example: WH-001
+	Code string `json:"warehouse_code"`
+
+	// The address of the warehouse
+	// required: true
+	// example: 1234 Warehouse St.
+	Address string `json:"address"`
+
+	// The telephone number of the warehouse
+	// required: true
+	// example: +1-800-555-5555
+	Telephone string `json:"telephone"`
+
+	// The ID of the locality where the warehouse is located
+	// required: true
+	// example: 101
+	LocalityID int `json:"locality_id"`
+
+	// The minimum capacity of the warehouse
+	// required: true
+	// example: 1000
+	MinimumCapacity int `json:"minimum_capacity"`
+
+	// The minimum temperature that the warehouse can maintain
+	// required: true
+	// example: -5
+	MinimumTemperature int `json:"minimum_temperature"`
 }
 
+// WarehouseHandler handles HTTP requests related to warehouse operations.
+//
+//	@Summary		Handles warehouse operations
+//	@Description	This handler provides endpoints to manage warehouse operations such as creating, updating, and retrieving warehouse information.
+//	@Tags			warehouse
 type WarehouseHandler struct {
 	service internal.WarehouseService
 }
 
-// NewWarehouseHandler creates a new instance of WarehouseHandler with the provided WarehouseService.
-// It returns a pointer to the created WarehouseHandler.
-//
-// Parameters:
-//   - service: an implementation of the WarehouseService interface.
-//
-// Returns:
-//   - A pointer to the newly created WarehouseHandler.
 func NewWarehouseHandler(service internal.WarehouseService) *WarehouseHandler {
 	return &WarehouseHandler{service}
 }
 
 // GetAll handles the HTTP request to retrieve all warehouses.
-// It returns a JSON response with the list of warehouses or an error message if no warehouses are found or an internal error occurs.
+//
+//	@Summary		Get all warehouses
+//	@Description	Retrieve a list of all warehouses
+//	@Tags			warehouses
+//	@Produce		json
+//	@Success		200	{array}		internal.Warehouse	"List of warehouses"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouses found"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while retrieving warehouses"
+//	@Router			/warehouses [get]
 func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		warehouses, err := h.service.GetAll()
@@ -59,6 +89,17 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 }
 
 // GetByID handles the HTTP request to retrieve a warehouse by its ID.
+//
+//	@Summary		Get warehouse by ID
+//	@Description	Get a warehouse by its ID
+//	@Tags			warehouses
+//	@Produce		json
+//	@Param			id	path		int	true	"Warehouse ID"
+//	@Success		200	{object}	internal.Warehouse
+//	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID format"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouse found with ID"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while retrieving the warehouse"
+//	@Router			/warehouses/{id} [get]
 func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -71,6 +112,7 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, utils.ErrNotFound) {
 				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
+
 				return
 			}
 
@@ -84,18 +126,20 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 }
 
 // Post handles the creation of a new warehouse.
-// @Summary Create a new warehouse
-// @Description Create a new warehouse with the provided details
-// @Tags warehouses
-// @Accept json
-// @Produce json
-// @Param warehouse body reqPostWarehouse true "Warehouse details"
-// @Success 201 {object} internal.Warehouse "Created warehouse"
-// @Failure 400 {object} utils.ErrorResponse "Invalid request format"
-// @Failure 409 {object} utils.ErrorResponse "Warehouse code conflict"
-// @Failure 422 {object} utils.ErrorResponse "Invalid arguments"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
-// @Router /warehouses [post]
+//
+//	@Summary		Create a new warehouse
+//	@Description	Create a new warehouse with the provided details
+//	@Tags			warehouses
+//	@Accept			json
+//	@Produce		json
+//	@Param			warehouse	body		reqPostWarehouse	true	"Warehouse details"
+//	@Success		201			{object}	internal.Warehouse	"Created warehouse"
+//	@Failure		404			{object}	utils.ErrorResponse	"No warehouse found"
+//	@Failure		400			{object}	utils.ErrorResponse	"Invalid request format"
+//	@Failure		409			{object}	utils.ErrorResponse	"Warehouse code conflict"
+//	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
+//	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
+//	@Router			/warehouses [post]
 func (h *WarehouseHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostWarehouse
@@ -135,15 +179,22 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 	}
 }
 
-// Update handles the HTTP request for updating a warehouse.
-// It extracts the warehouse ID from the URL parameters and decodes the request body into a WarehousePointers struct.
-// If the ID is invalid or the request body is improperly formatted, it returns a 400 Bad Request error.
-// If the update service returns specific errors, it handles them accordingly:
-// - 409 Conflict if there is a conflict error.
-// - 404 Not Found if the warehouse is not found.
-// - 422 Unprocessable Entity if there are invalid arguments.
-// For any other errors, it returns a 500 Internal Server Error.
-// On success, it returns the updated warehouse with a 200 OK status.
+// Update godoc
+//
+//	@Summary		Update a warehouse
+//	@Description	Update the details of an existing warehouse by ID
+//	@Tags			warehouses
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		int							true	"Warehouse ID"
+//	@Param			warehouse	body		internal.WarehousePointers	true	"Warehouse data"
+//	@Success		200			{object}	internal.Warehouse
+//	@Failure		400			{object}	utils.ErrorResponse	"Invalid ID format or request body"
+//	@Failure		404			{object}	utils.ErrorResponse	"Warehouse not found"
+//	@Failure		409			{object}	utils.ErrorResponse	"Conflict error"
+//	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
+//	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
+//	@Router			/warehouses/{id} [put]
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -153,7 +204,6 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 		}
 
 		var body internal.WarehousePointers
-
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
 			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
@@ -185,12 +235,19 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 	}
 }
 
-// Delete handles the HTTP request to delete a warehouse by its ID.
-// It extracts the ID from the URL parameters, validates it, and calls the service layer to delete the warehouse.
-// If the ID is invalid, it responds with a 400 Bad Request status.
-// If the warehouse is not found, it responds with a 404 Not Found status.
-// If an error occurs during deletion, it responds with a 500 Internal Server Error status.
-// On successful deletion, it responds with a 204 No Content status.
+// Delete handles the deletion of a warehouse by its ID.
+//
+//	@Summary		Delete a warehouse
+//	@Description	Deletes a warehouse by its ID
+//	@Tags			warehouses
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int					true	"Warehouse ID"
+//	@Success		204	{object}	nil					"No Content"
+//	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID format"
+//	@Failure		404	{object}	utils.ErrorResponse	"No warehouse found with the given ID"
+//	@Failure		500	{object}	utils.ErrorResponse	"An error occurred while deleting the warehouse"
+//	@Router			/warehouses/{id} [delete]
 func (h *WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
