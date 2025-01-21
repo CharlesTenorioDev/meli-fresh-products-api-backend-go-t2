@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/bootcamp-go/web/response"
 )
@@ -34,7 +35,7 @@ func EConflict(attribute, target string) error {
 
 // EDependencyNotFound When 422, when managing a resource, and an attribute that refers other entity
 // does not exist for that value
-func EDependencyNotFound(attribute, target string) error {
+func EDependencyNotFound(target, attribute string) error {
 	return errors.Join(ErrInvalidArguments, errors.New(target+" with '"+attribute+"' doesn't exist"))
 }
 
@@ -80,5 +81,6 @@ func HandleError(w http.ResponseWriter, err error) {
 		message = "internal server error"
 	}
 
+	message = strings.Replace(message, "\n", ": ", 1)
 	response.Error(w, status, message)
 }
