@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/employee"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/inbound_order"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
@@ -11,6 +12,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_batch"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_record"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_type"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/province"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/purchase_order"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/section"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/seller"
@@ -21,7 +23,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/meli-fresh-products-api-backend-go-t2/docs"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -97,10 +98,10 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	))
 
 	localityRepo := locality.NewMysqlLocalityRepository(a.db)
-	provinceRepo := locality.NewMysqlProvinceRepository(a.db)
-	countryRepo := locality.NewMysqlCountryRepository(a.db)
+	provinceRepo := province.NewMysqlProvinceRepository(a.db)
+	countryRepo := country.NewMysqlCountryRepository(a.db)
 	localityService := locality.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
-	err = routes.NewLocalityRoutes(router, localityService)
+	err = locality.NewLocalityRoutes(router, localityService)
 
 	if err != nil {
 		panic(err)
@@ -116,7 +117,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	sellerRepo := seller.NewSellerMysql(a.db)
 	sellerService := seller.NewSellerService(sellerRepo, localityRepo)
 
-	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
+	if err := seller.RegisterSellerRoutes(router, sellerService); err != nil {
 		panic(err)
 	}
 
@@ -124,14 +125,14 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productTypeRepo := product_type.NewProductTypeDB(a.db)
 
 	productTypeService := product_type.NewProductTypeService(productTypeRepo)
-	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
+	if err := product_type.NewProductTypeRoutes(router, productTypeService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - Product
 	productRepo := product.NewProductDB(a.db)
 	productService := product.NewProductService(productRepo, productTypeService)
-	err = routes.NewProductRoutes(router, productService)
+	err = product.NewProductRoutes(router, productService)
 
 	if err != nil {
 		panic(err)
@@ -141,7 +142,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productRecordsRepo := product_record.NewProductRecordDB(a.db)
 	productRecordsService := product_record.NewProductRecordService(productRecordsRepo, productService)
 
-	err = routes.NewProductRecordsRoutes(router, productRecordsService)
+	err = product_record.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
 		panic(err)
 	}
@@ -150,7 +151,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	warehouseRepo := warehouse.NewWarehouseRepository(a.db)
 	warehouseService := warehouse.NewWarehouseService(warehouseRepo, localityRepo)
 
-	err = routes.NewWarehouseRoutes(router, warehouseService)
+	err = warehouse.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
 		panic(err)
 	}
@@ -160,7 +161,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	sectionRepo := section.NewSectionMysql(a.db)
 	sectionService := section.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
 
-	err = routes.RegisterSectionRoutes(router, sectionService)
+	err = section.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
 		panic(err)
 	}
@@ -169,7 +170,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	employeesRepo := employee.NewEmployeeRepository(a.db)
 
 	employeesService := employee.NewEmployeeService(employeesRepo, warehouseService)
-	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
+	if err := employee.RegisterEmployeesRoutes(router, employeesService); err != nil {
 		panic(err)
 	}
 
@@ -177,7 +178,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	buyersRepo := buyer.NewBuyerDB(a.db)
 	buyersService := buyer.NewBuyer(buyersRepo)
 	// Create the routes and deps
-	if err = routes.BuyerRoutes(router, buyersService); err != nil {
+	if err = buyer.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
 
@@ -185,7 +186,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	purchaseOrdersRepo := purchase_order.NewPurchaseOrderDB(a.db)
 	purchaseOrdersService := purchase_order.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
 
-	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
+	err = purchase_order.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {
 		panic(err)
 	}
@@ -195,7 +196,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	//carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
 	carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
-	if err = routes.CarryRoutes(router, carryService); err != nil {
+	if err = carry.CarryRoutes(router, carryService); err != nil {
 		panic(err)
 	}
 
@@ -203,14 +204,14 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	productBatchRepo := product_batch.NewProductBatchRepository(a.db)
 	productBatchService := product_batch.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
 
-	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
+	if err = product_batch.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
 	}
 
 	inboundOrderRepo := inbound_order.NewInboundOrderRepository(a.db)
 	inboundOrderService := inbound_order.NewInboundOrderService(inboundOrderRepo)
 
-	if err := routes.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
+	if err := inbound_order.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
 		panic(err)
 	}
 

@@ -1,8 +1,8 @@
-package locality_test
+package country_test
 
 import (
 	"database/sql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
 	"testing"
 
 	"github.com/DATA-DOG/go-txdb"
@@ -28,7 +28,7 @@ func TestIntegrationCountry_GetByName(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	repo := locality.NewMysqlCountryRepository(db)
+	repo := country.NewMysqlCountryRepository(db)
 
 	t.Run("Given an existing name, return the country", func(t *testing.T) {
 		country, err := repo.GetByName("USA")
@@ -49,7 +49,7 @@ func TestIntegrationCountry_Save(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	repo := locality.NewMysqlCountryRepository(db)
+	repo := country.NewMysqlCountryRepository(db)
 
 	t.Run("Given a country with valid fields, save the country", func(t *testing.T) {
 		newCountry := internal.Country{

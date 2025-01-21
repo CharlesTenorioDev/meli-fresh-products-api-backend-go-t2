@@ -1,4 +1,4 @@
-package routes
+package inbound_order
 
 import (
 	"github.com/go-chi/chi/v5"

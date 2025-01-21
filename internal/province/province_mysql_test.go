@@ -1,8 +1,8 @@
-package locality_test
+package province_test
 
 import (
 	"database/sql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/province"
 	"testing"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -15,7 +15,7 @@ func TestIntegrationProvince_GetByName(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	repo := locality.NewMysqlProvinceRepository(db)
+	repo := province.NewMysqlProvinceRepository(db)
 
 	t.Run("Given an existing name, return the province", func(t *testing.T) {
 		province, err := repo.GetByName("Ontario")
@@ -37,7 +37,7 @@ func TestIntegrationProvince_Save(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	repo := locality.NewMysqlProvinceRepository(db)
+	repo := province.NewMysqlProvinceRepository(db)
 
 	t.Run("Given a province with valid fields, save the province", func(t *testing.T) {
 		newProvince := internal.Province{

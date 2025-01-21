@@ -1,4 +1,4 @@
-package locality
+package country
 
 import (
 	"database/sql"

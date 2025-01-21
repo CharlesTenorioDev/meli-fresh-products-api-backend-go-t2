@@ -1,4 +1,4 @@
-package routes
+package product_batch
 
 import (
 	"errors"

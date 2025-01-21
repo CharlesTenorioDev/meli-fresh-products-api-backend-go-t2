@@ -1,4 +1,4 @@
-package routes
+package product_record
 
 import (
 	"github.com/go-chi/chi/v5"
