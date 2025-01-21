@@ -1,4 +1,23 @@
 definitions:
+  handler.reqPostSection:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
   handler.reqPostWarehouse:
     properties:
       address:
@@ -37,6 +56,55 @@ definitions:
           required: true
           example: WH-001
         type: string
+    type: object
+  internal.Section:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      id:
+        type: integer
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  internal.SectionPointers:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  internal.SectionProductsReport:
+    properties:
+      products_count:
+        type: integer
+      section_id:
+        type: integer
+      section_number:
+        type: integer
     type: object
   internal.Seller:
     properties:
@@ -123,6 +191,199 @@ info:
   title: Meli Fresh Products API
   version: 0.0.2.1
 paths:
+  /api/v1/sections:
+    get:
+      description: Retrieve a list of all sections
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sections
+          schema:
+            items:
+              $ref: '#/definitions/internal.Section'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all sections
+      tags:
+      - sections
+    post:
+      consumes:
+      - application/json
+      description: Create a new section with the provided details
+      parameters:
+      - description: Section details
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/handler.reqPostSection'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Section conflict
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new section
+      tags:
+      - sections
+  /api/v1/sections/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a section by its ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a section
+      tags:
+      - sections
+    get:
+      consumes:
+      - application/json
+      description: Get a section by its ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get section by ID
+      tags:
+      - sections
+    put:
+      consumes:
+      - application/json
+      description: Update a section by ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Section data
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SectionPointers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid ID or request body
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Conflict error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a section
+      tags:
+      - sections
+  /api/v1/sections/products/report:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a report of products for a given section ID
+      parameters:
+      - description: Section ID
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.SectionProductsReport'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get section products report
+      tags:
+      - sections
   /api/v1/sellers/{id}:
     get:
       description: Retrieve a seller by its ID
