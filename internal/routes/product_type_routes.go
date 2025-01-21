@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
 )
 
 func NewProductTypeRoutes(mux *chi.Mux, service internal.ProductTypeService) error {

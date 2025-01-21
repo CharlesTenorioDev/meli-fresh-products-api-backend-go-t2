@@ -2,15 +2,26 @@ package application
 
 import (
 	"database/sql"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/employee"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/inbound_order"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_batch"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_record"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_type"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/purchase_order"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/section"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/seller"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/warehouse"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/meli-fresh-products-api-backend-go-t2/docs"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -85,10 +96,10 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition"
 	))
 
-	localityRepo := repository.NewMysqlLocalityRepository(a.db)
-	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
-	countryRepo := repository.NewMysqlCountryRepository(a.db)
-	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	localityRepo := locality.NewMysqlLocalityRepository(a.db)
+	provinceRepo := locality.NewMysqlProvinceRepository(a.db)
+	countryRepo := locality.NewMysqlCountryRepository(a.db)
+	localityService := locality.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
 	err = routes.NewLocalityRoutes(router, localityService)
 
 	if err != nil {
@@ -102,24 +113,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// return
 	// }
 	// sellerRepo := repository.NewSellerDBRepository(dbSellers)
-	sellerRepo := repository.NewSellerMysql(a.db)
-	sellerService := service.NewSellerService(sellerRepo, localityRepo)
+	sellerRepo := seller.NewSellerMysql(a.db)
+	sellerService := seller.NewSellerService(sellerRepo, localityRepo)
 
 	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - ProductType
-	productTypeRepo := repository.NewProductTypeDB(a.db)
+	productTypeRepo := product_type.NewProductTypeDB(a.db)
 
-	productTypeService := service.NewProductTypeService(productTypeRepo)
+	productTypeService := product_type.NewProductTypeService(productTypeRepo)
 	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - Product
-	productRepo := repository.NewProductDB(a.db)
-	productService := service.NewProductService(productRepo, productTypeService)
+	productRepo := product.NewProductDB(a.db)
+	productService := product.NewProductService(productRepo, productTypeService)
 	err = routes.NewProductRoutes(router, productService)
 
 	if err != nil {
@@ -127,8 +138,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	//Requisito 4 - Product Records
-	productRecordsRepo := repository.NewProductRecordDB(a.db)
-	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
+	productRecordsRepo := product_record.NewProductRecordDB(a.db)
+	productRecordsService := product_record.NewProductRecordService(productRecordsRepo, productService)
 
 	err = routes.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
@@ -136,8 +147,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 2 - Warehouses
-	warehouseRepo := repository.NewWarehouseRepository(a.db)
-	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
+	warehouseRepo := warehouse.NewWarehouseRepository(a.db)
+	warehouseService := warehouse.NewWarehouseService(warehouseRepo, localityRepo)
 
 	err = routes.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
@@ -146,8 +157,8 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Requisito 3 - Section
 
-	sectionRepo := repository.NewSectionMysql(a.db)
-	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
+	sectionRepo := section.NewSectionMysql(a.db)
+	sectionService := section.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
 
 	err = routes.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
@@ -155,24 +166,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 5 - Employees
-	employeesRepo := repository.NewEmployeeRepository(a.db)
+	employeesRepo := employee.NewEmployeeRepository(a.db)
 
-	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
+	employeesService := employee.NewEmployeeService(employeesRepo, warehouseService)
 	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDB(a.db)
-	buyersService := service.NewBuyer(buyersRepo)
+	buyersRepo := buyer.NewBuyerDB(a.db)
+	buyersService := buyer.NewBuyer(buyersRepo)
 	// Create the routes and deps
 	if err = routes.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 6 - Purchase Orders
-	purchaseOrdersRepo := repository.NewPurchaseOrderDB(a.db)
-	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
+	purchaseOrdersRepo := purchase_order.NewPurchaseOrderDB(a.db)
+	purchaseOrdersService := purchase_order.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
 
 	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {
@@ -180,23 +191,24 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Sprint2 Requisito 2 - Carry
-	carriesRepo := repository.NewMySQLCarryRepository(a.db)
+	carriesRepo := carry.NewMySQLCarryRepository(a.db)
 
-	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
+	//carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
+	carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
 	if err = routes.CarryRoutes(router, carryService); err != nil {
 		panic(err)
 	}
 
 	// Sprint2 Requisito 3 - Product Batch
-	productBatchRepo := repository.NewProductBatchRepository(a.db)
-	productBatchService := service.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+	productBatchRepo := product_batch.NewProductBatchRepository(a.db)
+	productBatchService := product_batch.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
 
 	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
 	}
 
-	inboundOrderRepo := repository.NewInboundOrderRepository(a.db)
-	inboundOrderService := service.NewInboundOrderService(inboundOrderRepo)
+	inboundOrderRepo := inbound_order.NewInboundOrderRepository(a.db)
+	inboundOrderService := inbound_order.NewInboundOrderService(inboundOrderRepo)
 
 	if err := routes.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
 		panic(err)

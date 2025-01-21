@@ -2,11 +2,11 @@ package routes
 
 import (
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
 )
 
 // CarryRoutes sets up the routes for carry-related operations on the provided mux router.

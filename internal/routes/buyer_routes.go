@@ -2,10 +2,10 @@ package routes
 
 import (
 	"errors"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/handler"
 )
 
 func BuyerRoutes(mux *chi.Mux, service internal.BuyerService) error {
