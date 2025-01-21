@@ -19,6 +19,25 @@ var (
 	ErrProductDoesNotExists   = errors.New("product's id doesn't exist")   // 409
 )
 
+func ENotFound(target string) error {
+	return errors.Join(ErrNotFound, errors.New(target+" doesn't exist"))
+}
+
+func EZeroValue(target string) error {
+	return errors.Join(ErrNotFound, errors.New(target+" cannot be empty/null"))
+}
+
+func EConflict(attribute, target string) error {
+	return errors.Join(ErrInvalidArguments, errors.New(target+" with attribute '"+attribute+"' alredy exists"))
+}
+
+func EDependencyNotFound(attribute, target string) error {
+	return errors.Join(ErrInvalidArguments, errors.New(target+" with '"+attribute+"' doesn't exist"))
+}
+func EBR(message string) error {
+	return errors.Join(ErrInvalidArguments, errors.New(message))
+}
+
 // HandleError centralizes error handling and response formatting
 func HandleError(w http.ResponseWriter, err error) {
 	var status int

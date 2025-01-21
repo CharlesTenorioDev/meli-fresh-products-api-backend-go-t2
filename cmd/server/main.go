@@ -17,7 +17,7 @@ func main() {
 
 	// - config
 	cfg := &application.ConfigApplicationDefault{
-		Db: &mysql.Config{
+		DB: &mysql.Config{
 			User:   os.Getenv("DB.USERNAME"),
 			Passwd: os.Getenv("DB.PASSWORD"),
 			Net:    "tcp",
