@@ -24,11 +24,11 @@ func ENotFound(target string) error {
 }
 
 func EZeroValue(target string) error {
-	return errors.Join(ErrNotFound, errors.New(target+" cannot be empty/null"))
+	return errors.Join(ErrInvalidArguments, errors.New(target+" cannot be empty/null"))
 }
 
 func EConflict(attribute, target string) error {
-	return errors.Join(ErrInvalidArguments, errors.New(target+" with attribute '"+attribute+"' alredy exists"))
+	return errors.Join(ErrConflict, errors.New(target+" with attribute '"+attribute+"' already exists"))
 }
 
 func EDependencyNotFound(attribute, target string) error {
