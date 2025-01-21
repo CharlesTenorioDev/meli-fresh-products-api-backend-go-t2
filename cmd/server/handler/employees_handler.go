@@ -87,23 +87,14 @@ func (h *EmployeeDefault) PostEmployees() http.HandlerFunc {
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newEmployee)
 		if err != nil {
-			utils.HandleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.EBadRequest("employee"))
 			return
 		}
 
 		// create the employee
 		employee, err := h.sv.CreateEmployee(newEmployee)
 		if err != nil {
-			if err == utils.ErrConflict {
-				utils.HandleError(w, utils.ErrConflict)
-			} else if err == utils.ErrEmptyArguments {
-				utils.HandleError(w, utils.ErrEmptyArguments)
-			} else if err == utils.ErrWarehouseDoesNotExists {
-				utils.HandleError(w, utils.ErrWarehouseDoesNotExists)
-			} else {
-				utils.HandleError(w, utils.ErrInvalidArguments)
-			}
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -138,11 +129,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		// update the employee
 		employee, err := h.sv.UpdateEmployee(inputEmployee)
 		if err != nil {
-			if err == utils.ErrNotFound {
-				utils.HandleError(w, utils.ErrNotFound)
-			} else {
-				utils.HandleError(w, utils.ErrWarehouseDoesNotExists)
-			}
+			utils.HandleError(w, err)
 
 			return
 		}
