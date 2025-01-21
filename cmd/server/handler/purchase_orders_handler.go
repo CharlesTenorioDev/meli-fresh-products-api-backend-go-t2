@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -42,12 +41,7 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 
 		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerID(buyerID)
 		if err != nil {
-			if err == utils.ErrBuyerDoesNotExists {
-				utils.HandleError(w, utils.ErrNotFound)
-				return
-			}
-
-			response.JSON(w, http.StatusInternalServerError, err)
+			utils.HandleError(w, err)
 
 			return
 		}
@@ -82,19 +76,7 @@ func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 		// create the PurchaseOrder
 		PurchaseOrder, err := h.sv.CreatePurchaseOrder(newPurchaseOrder)
 		if err != nil {
-			switch err {
-			case utils.ErrConflict:
-				utils.HandleError(w, utils.ErrConflict)
-			case utils.ErrEmptyArguments:
-				utils.HandleError(w, utils.ErrEmptyArguments)
-			case utils.ErrBuyerDoesNotExists:
-				utils.HandleError(w, utils.ErrBuyerDoesNotExists)
-			case utils.ErrProductDoesNotExists:
-				utils.HandleError(w, utils.ErrProductDoesNotExists)
-			default:
-				log.Fatalln("Error:", err.Error())
-				utils.HandleError(w, utils.ErrInvalidArguments)
-			}
+			utils.HandleError(w, err)
 
 			return
 		}

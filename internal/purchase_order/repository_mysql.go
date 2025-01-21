@@ -89,7 +89,7 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerID(buyerID int) ([]internal.P
 	}
 
 	if len(purchaseOrders) == 0 {
-		return nil, utils.ErrBuyerDoesNotExists
+		return nil, utils.ErrNotFound
 	}
 
 	return purchaseOrders, rows.Err()

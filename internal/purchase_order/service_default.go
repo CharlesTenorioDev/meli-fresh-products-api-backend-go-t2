@@ -1,6 +1,8 @@
 package purchase_order
 
 import (
+	"strconv"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -23,10 +25,6 @@ func NewPurchaseOrderService(rp internal.PurchaseOrderRepository, buyerService i
 func (s *PurchaseOrderDefault) FindAllByBuyerID(buyerID int) ([]internal.PurchaseOrderSummary, error) {
 	purchaseOrdersSummary, err := s.rp.FindAllByBuyerID(buyerID)
 	if err != nil {
-		if err == utils.ErrBuyerDoesNotExists {
-			return nil, utils.ErrBuyerDoesNotExists
-		}
-
 		return nil, err
 	}
 
@@ -92,8 +90,9 @@ func (s *PurchaseOrderDefault) buyerExistsByID(id int) error {
 		return err
 	}
 
+	idStr := strconv.Itoa(id)
 	if possibleBuyer == nil {
-		return utils.ErrBuyerDoesNotExists
+		return utils.EDependencyNotFound("buyer", "id: "+idStr)
 	}
 
 	return nil
@@ -102,16 +101,16 @@ func (s *PurchaseOrderDefault) buyerExistsByID(id int) error {
 func (s *PurchaseOrderDefault) productRecordExistsByID(id int) error {
 	product, err := s.productRecordService.FindByID(id)
 
+	idStr := strconv.Itoa(id)
 	if err != nil {
 		if err == utils.ErrNotFound {
-			return utils.ErrProductDoesNotExists
+			return utils.EDependencyNotFound("product", "id: "+idStr)
 		}
-
 		return err
 	}
 
 	if product.ID == 0 {
-		return utils.ErrProductDoesNotExists
+		return utils.EDependencyNotFound("product", "id: "+idStr)
 	}
 
 	return nil
