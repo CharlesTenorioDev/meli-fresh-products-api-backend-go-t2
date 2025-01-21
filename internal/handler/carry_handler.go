@@ -86,7 +86,7 @@ func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 	}
 }
 
-// GetCarryById handles the HTTP request to retrieve a carry by its ID.
+// GetCarryByID handles the HTTP request to retrieve a carry by its ID.
 // It extracts the ID from the URL parameters, validates it, and then
 // calls the service layer to fetch the carry. If the ID is invalid or
 // the carry is not found, it responds with the appropriate HTTP error
@@ -94,7 +94,7 @@ func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 // JSON format.
 //
 // Returns an http.HandlerFunc that can be used to handle the request.
-func (handler *CarryHandler) GetCarryById() http.HandlerFunc {
+func (handler *CarryHandler) GetCarryByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {

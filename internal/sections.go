@@ -24,7 +24,7 @@ type SectionPointers struct {
 }
 
 type SectionProductsReport struct {
-	SectionId     int `json:"section_id"`
+	SectionID     int `json:"section_id"`
 	SectionNumber int `json:"section_number"`
 	ProductsCount int `json:"products_count"`
 }
@@ -38,7 +38,7 @@ type (
 		GetBySectionNumber(int) (Section, error)
 		Delete(int) error
 		GetSectionProductsReport() ([]SectionProductsReport, error)
-		GetSectionProductsReportById(int) ([]SectionProductsReport, error)
+		GetSectionProductsReportByID(int) ([]SectionProductsReport, error)
 	}
 	SectionService interface {
 		GetAll() ([]Section, error)

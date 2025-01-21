@@ -86,7 +86,7 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 	}
 	defer statement.Close()
 
-	result, err := statement.Exec(newProductRecord.LastUpdateDate, newProductRecord.PurchasePrice, newProductRecord.SalePrice, newProductRecord.ProductId)
+	result, err := statement.Exec(newProductRecord.LastUpdateDate, newProductRecord.PurchasePrice, newProductRecord.SalePrice, newProductRecord.ProductID)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
@@ -112,7 +112,7 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 	return newProductRecord, nil
 }
 
-func (p *ProductRecordDB) FindById(productRecordID int) (internal.ProductRecords, error) {
+func (p *ProductRecordDB) FindByID(productRecordID int) (internal.ProductRecords, error) {
 	var row *sql.Row
 
 	var err error
@@ -123,7 +123,10 @@ func (p *ProductRecordDB) FindById(productRecordID int) (internal.ProductRecords
 
 	var pr internal.ProductRecords
 
-	row.Scan(&pr.ID)
+	err = row.Scan(&pr.ID)
+	if err != nil {
+		return internal.ProductRecords{}, err
+	}
 
 	err = row.Err()
 	if err != nil {

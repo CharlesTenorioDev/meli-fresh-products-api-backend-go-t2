@@ -38,7 +38,7 @@ var mockUpdatedSeller = internal.Seller{
 }
 
 func Test_GetAll_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -48,30 +48,30 @@ func Test_GetAll_Sellers_Success(t *testing.T) {
 }
 
 func Test_GetAll_Sellers_Not_Found(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{})
+	repo := NewSellerDBRepository(map[int]internal.Seller{})
 
 	sellers, _ := repo.GetAll()
 	require.Equal(t, 0, len(sellers))
 }
 
 func Test_GetById_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
-	sellers, _ := repo.GetById(1)
+	sellers, _ := repo.GetByID(1)
 	require.Equal(t, mockSellerDb, sellers)
 }
 
 func Test_GetById_Sellers_Not_Found(t *testing.T) {
-	repo := NewSellerDbRepository(nil)
+	repo := NewSellerDBRepository(nil)
 
-	sellers, _ := repo.GetById(1)
+	sellers, _ := repo.GetByID(1)
 	require.Empty(t, sellers)
 }
 
 func Test_GetByCid_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -80,14 +80,14 @@ func Test_GetByCid_Sellers_Success(t *testing.T) {
 }
 
 func Test_GetByCid_Sellers_Not_Found(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{})
+	repo := NewSellerDBRepository(map[int]internal.Seller{})
 
 	sellers, _ := repo.GetByCid(100)
 	require.Empty(t, sellers)
 }
 
 func Test_Create_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -95,7 +95,7 @@ func Test_Create_Sellers_Success(t *testing.T) {
 	require.Equal(t, mockCreatedSeller, createdSeller)
 }
 func Test_Update_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 
@@ -104,7 +104,7 @@ func Test_Update_Sellers_Success(t *testing.T) {
 }
 
 func Test_Delete_Sellers_Success(t *testing.T) {
-	repo := NewSellerDbRepository(map[int]internal.Seller{
+	repo := NewSellerDBRepository(map[int]internal.Seller{
 		1: mockSellerDb,
 	})
 

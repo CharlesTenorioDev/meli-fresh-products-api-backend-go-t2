@@ -175,7 +175,7 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 				return internal.Warehouse{}, err
 			}
 		}
-		
+
 		return internal.Warehouse{}, err
 	}
 
@@ -191,14 +191,14 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 //
 // Returns:
 //   - error: an error object if any error occurs, otherwise nil.
-func (r *WarehouseDB) Delete(id int) error {
-	_, err := r.GetByID(id)
+func (r *WarehouseDB) Delete(warehouseID int) error {
+	_, err := r.GetByID(warehouseID)
 
 	if err != nil {
 		return err
 	}
 
-	statement, err := r.db.Prepare("DELETE FROM warehouses WHERE id = ?")
+	statement, err := r.db.Prepare("DELETE FROM warehouses WHERE warehouseID = ?")
 
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func (r *WarehouseDB) Delete(id int) error {
 
 	defer statement.Close()
 
-	_, err = statement.Exec(id)
+	_, err = statement.Exec(warehouseID)
 
 	if err != nil {
 		return err

@@ -84,7 +84,7 @@ func (r *MysqlLocalityRepository) GetByID(id int) (internal.Locality, error) {
 	return locality, nil
 }
 
-// GetSellersByLocalityId retrieves a list of sellers by locality ID.
+// GetSellersByLocalityID retrieves a list of sellers by locality ID.
 // If the localityId is 0, it retrieves the count of sellers for all localities.
 // Otherwise, it retrieves the count of sellers for the specified locality ID.
 //
@@ -94,12 +94,12 @@ func (r *MysqlLocalityRepository) GetByID(id int) (internal.Locality, error) {
 // Returns:
 //   - []internal.SellersByLocality: a slice of SellersByLocality containing the locality ID, locality name, and sellers count.
 //   - error: an error if the query fails or if there is an issue scanning the rows.
-func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
+func (r *MysqlLocalityRepository) GetSellersByLocalityID(localityID int) ([]internal.SellersByLocality, error) {
 	report := []internal.SellersByLocality{}
 
 	var rows *sql.Rows
 
-	if localityId == 0 {
+	if localityID == 0 {
 		var err error
 
 		rows, err = r.db.Query(`SELECT l.id, l.locality_name, COUNT(s.id) AS 'sellers_count' 
@@ -123,7 +123,7 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 
 		defer stmt.Close()
 
-		rows, err = stmt.Query(localityId)
+		rows, err = stmt.Query(localityID)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
@@ -134,7 +134,7 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 	for rows.Next() {
 		var row internal.SellersByLocality
 
-		err := rows.Scan(&row.LocalityId, &row.LocalityName, &row.SellersCount)
+		err := rows.Scan(&row.LocalityID, &row.LocalityName, &row.SellersCount)
 		if err != nil {
 			return []internal.SellersByLocality{}, err
 		}
@@ -145,7 +145,7 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 	return report, nil
 }
 
-// GetCarriesByLocalityId retrieves the number of carriers associated with a given locality ID.
+// GetCarriesByLocalityID retrieves the number of carriers associated with a given locality ID.
 // If the locality ID is 0, it retrieves the carrier count for all localities.
 //
 // Parameters:
@@ -154,12 +154,12 @@ func (r *MysqlLocalityRepository) GetSellersByLocalityId(localityId int) ([]inte
 // Returns:
 //   - []internal.CarriesByLocality: A slice of CarriesByLocality structs containing the locality ID, locality name, and carrier count.
 //   - error: An error object if an error occurred during the query execution.
-func (r *MysqlLocalityRepository) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
+func (r *MysqlLocalityRepository) GetCarriesByLocalityID(localityID int) ([]internal.CarriesByLocality, error) {
 	report := []internal.CarriesByLocality{}
 
 	var rows *sql.Rows
 
-	if localityId == 0 {
+	if localityID == 0 {
 		var err error
 
 		rows, err = r.db.Query(`SELECT l.id, l.locality_name, COUNT(c.id) AS 'carries_count' 
@@ -179,7 +179,7 @@ func (r *MysqlLocalityRepository) GetCarriesByLocalityId(localityId int) ([]inte
 			return []internal.CarriesByLocality{}, err
 		}
 
-		rows, err = stmt.Query(localityId)
+		rows, err = stmt.Query(localityID)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}
@@ -188,7 +188,7 @@ func (r *MysqlLocalityRepository) GetCarriesByLocalityId(localityId int) ([]inte
 	for rows.Next() {
 		var row internal.CarriesByLocality
 
-		err := rows.Scan(&row.LocalityId, &row.LocalityName, &row.CarriesCount)
+		err := rows.Scan(&row.LocalityID, &row.LocalityName, &row.CarriesCount)
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}

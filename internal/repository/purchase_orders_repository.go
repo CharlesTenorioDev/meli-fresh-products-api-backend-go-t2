@@ -11,7 +11,7 @@ type PurchaseOrderRepository struct {
 	db *sql.DB
 }
 
-func NewPurchaseOrderDb(db *sql.DB) *PurchaseOrderRepository {
+func NewPurchaseOrderDB(db *sql.DB) *PurchaseOrderRepository {
 	return &PurchaseOrderRepository{db}
 }
 
@@ -33,7 +33,7 @@ func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error)
 	for rows.Next() {
 		var po internal.PurchaseOrder
 
-		err := rows.Scan(&po.ID, &po.Attributes.OrderNumber, &po.Attributes.TrackingCode, &po.Attributes.OrderDate, &po.Attributes.BuyerId)
+		err := rows.Scan(&po.ID, &po.Attributes.OrderNumber, &po.Attributes.TrackingCode, &po.Attributes.OrderDate, &po.Attributes.BuyerID)
 		if err != nil {
 			return nil, err
 		}
@@ -44,22 +44,22 @@ func (repo *PurchaseOrderRepository) FindAll() ([]internal.PurchaseOrder, error)
 	return purchaseOrders, rows.Err()
 }
 
-// FindAllByBuyerId retrieves all purchase orders by buyer id
-func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.PurchaseOrderSummary, error) {
+// FindAllByBuyerID retrieves all purchase orders by buyer id
+func (repo *PurchaseOrderRepository) FindAllByBuyerID(buyerID int) ([]internal.PurchaseOrderSummary, error) {
 	var query string
 
 	var rows *sql.Rows
 
 	var err error
 
-	if buyerId != 0 {
+	if buyerID != 0 {
 		query = `
 			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes
 			FROM purchase_orders po
 			INNER JOIN buyers b ON po.buyer_id = b.id
 			WHERE po.buyer_id = ?
 			GROUP BY po.buyer_id`
-		rows, err = repo.db.Query(query, buyerId)
+		rows, err = repo.db.Query(query, buyerID)
 	} else {
 		query = `
 			SELECT po.buyer_id, COUNT(po.id) AS total_orders, GROUP_CONCAT(po.order_number ORDER BY po.order_date) AS order_codes
@@ -80,7 +80,7 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.P
 	for rows.Next() {
 		var summary internal.PurchaseOrderSummary
 
-		err := rows.Scan(&summary.BuyerId, &summary.TotalOrders, &summary.OrderCodes)
+		err := rows.Scan(&summary.BuyerID, &summary.TotalOrders, &summary.OrderCodes)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func (repo *PurchaseOrderRepository) FindAllByBuyerId(buyerId int) ([]internal.P
 func (repo *PurchaseOrderRepository) CreatePurchaseOrder(newOrder internal.PurchaseOrderAttributes) (internal.PurchaseOrder, error) {
 	query := "INSERT INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES (?, ?, ?, ?, ?)"
 
-	result, err := repo.db.Exec(query, newOrder.OrderNumber, newOrder.OrderDate, newOrder.TrackingCode, newOrder.BuyerId, newOrder.ProductRecordId)
+	result, err := repo.db.Exec(query, newOrder.OrderNumber, newOrder.OrderDate, newOrder.TrackingCode, newOrder.BuyerID, newOrder.ProductRecordID)
 	if err != nil {
 		return internal.PurchaseOrder{}, err
 	}

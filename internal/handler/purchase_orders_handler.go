@@ -18,7 +18,7 @@ type PurchaseOrderDefault struct {
 	sv internal.PurchaseOrderService
 }
 
-// NewPurchaseOrderHandler creates a new instance of PurchaseOrderDefault
+// NewPurchaseOrdersHandler creates a new instance of PurchaseOrderDefault
 func NewPurchaseOrdersHandler(sv internal.PurchaseOrderService) *PurchaseOrderDefault {
 	return &PurchaseOrderDefault{sv: sv}
 }
@@ -26,21 +26,21 @@ func NewPurchaseOrdersHandler(sv internal.PurchaseOrderService) *PurchaseOrderDe
 func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		queryParams := r.URL.Query()
-		buyerIdParam := queryParams.Get("id")
+		buyerIDParam := queryParams.Get("id")
 
-		var buyerId int
+		var buyerID int
 
-		if buyerIdParam != "" {
+		if buyerIDParam != "" {
 			var err error
 
-			buyerId, err = strconv.Atoi(buyerIdParam)
+			buyerID, err = strconv.Atoi(buyerIDParam)
 			if err != nil {
 				utils.HandleError(w, utils.ErrInvalidFormat)
 				return
 			}
 		}
 
-		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerId(buyerId)
+		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerID(buyerID)
 		if err != nil {
 			if err == utils.ErrBuyerDoesNotExists {
 				utils.HandleError(w, utils.ErrNotFound)
@@ -54,7 +54,7 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 
 		data := make(map[int]map[string]any)
 		for _, value := range PurchaseOrdersSummary {
-			data[value.BuyerId] = map[string]any{
+			data[value.BuyerID] = map[string]any{
 				"total_orders": value.TotalOrders,
 				"order_codes":  value.OrderCodes,
 			}

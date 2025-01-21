@@ -8,18 +8,18 @@ import (
 
 // RegisterEmployeesRoutes is used to record the routes associated to the employee entity
 func RegisterEmployeesRoutes(mux *chi.Mux, service internal.EmployeeService) error {
-	handler := handler.NewEmployeeHandler(service)
+	employeeHandler := handler.NewEmployeeHandler(service)
 
 	mux.Route("/api/v1/employees", func(router chi.Router) {
 		// Get
-		router.Get("/", handler.GetAllEmployees())
-		router.Get("/{id}", handler.GetEmployeesById())
+		router.Get("/", employeeHandler.GetAllEmployees())
+		router.Get("/{id}", employeeHandler.GetEmployeesByID())
 		// Post
-		router.Post("/", handler.PostEmployees())
+		router.Post("/", employeeHandler.PostEmployees())
 		// Patch
-		router.Patch("/{id}", handler.PatchEmployees())
+		router.Patch("/{id}", employeeHandler.PatchEmployees())
 		// Delete
-		router.Delete("/{id}", handler.DeleteEmployees())
+		router.Delete("/{id}", employeeHandler.DeleteEmployees())
 	})
 
 	return nil

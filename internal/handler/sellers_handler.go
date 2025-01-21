@@ -111,7 +111,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			CompanyName: reqBody.CompanyName,
 			Address:     reqBody.Address,
 			Telephone:   reqBody.Telephone,
-			LocalityId:  reqBody.LocalityId,
+			LocalityID:  reqBody.LocalityID,
 		}
 
 		err := h.service.Create(&newSeller)

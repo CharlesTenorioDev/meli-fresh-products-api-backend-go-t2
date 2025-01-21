@@ -19,7 +19,7 @@ var (
 	ErrProductDoesNotExists   = errors.New("product's id doesn't exist")   // 409
 )
 
-// handleError centralizes error handling and response formatting
+// HandleError centralizes error handling and response formatting
 func HandleError(w http.ResponseWriter, err error) {
 	var status int
 

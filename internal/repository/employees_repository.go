@@ -43,7 +43,7 @@ func (r *EmployeeRepository) FindAll() (map[int]internal.Employee, error) {
 	return employees, nil
 }
 
-// FindById retrieves an employee by their ID
+// FindByID retrieves an employee by their ID
 func (r *EmployeeRepository) FindByID(id int) (internal.Employee, error) {
 	var employee internal.Employee
 	employee.Attributes = internal.EmployeeAttributes{}

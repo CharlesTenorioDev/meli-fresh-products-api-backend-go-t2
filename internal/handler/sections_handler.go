@@ -30,7 +30,7 @@ type SectionHandler struct {
 	service internal.SectionService
 }
 
-// Get a new instance of SectionHandler
+// NewSectionHandler Get a new instance of SectionHandler
 func NewSectionHandler(service internal.SectionService) *SectionHandler {
 	return &SectionHandler{service}
 }

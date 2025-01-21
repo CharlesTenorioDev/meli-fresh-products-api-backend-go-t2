@@ -267,7 +267,7 @@ func (s *BasicSectionService) GetSectionProductsReport(id int) ([]internal.Secti
 			return nil, utils.ErrNotFound
 		}
 
-		report, err = s.repo.GetSectionProductsReportById(id)
+		report, err = s.repo.GetSectionProductsReportByID(id)
 
 		if err != nil {
 			return nil, err

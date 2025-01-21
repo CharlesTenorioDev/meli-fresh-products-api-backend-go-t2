@@ -12,7 +12,7 @@ type BuyerRepo struct {
 	db *sql.DB
 }
 
-func NewBuyerDb(db *sql.DB) *BuyerRepo {
+func NewBuyerDB(db *sql.DB) *BuyerRepo {
 	return &BuyerRepo{db}
 }
 
@@ -73,7 +73,7 @@ func (repo *BuyerRepo) CreateBuyer(newBuyer internal.Buyer) (*internal.Buyer, er
 		return nil, err
 	}
 
-	newBuyer.ID = int64(insertedID)
+	newBuyer.ID = insertedID
 
 	return &newBuyer, nil
 }

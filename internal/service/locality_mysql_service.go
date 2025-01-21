@@ -20,10 +20,10 @@ func (s *MysqlLocalityService) GetByID(id int) (internal.Locality, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *MysqlLocalityService) GetSellersByLocalityId(localityId int) ([]internal.SellersByLocality, error) {
-	return s.Repo.GetSellersByLocalityId(localityId)
+func (s *MysqlLocalityService) GetSellersByLocalityID(localityID int) ([]internal.SellersByLocality, error) {
+	return s.Repo.GetSellersByLocalityID(localityID)
 }
 
-func (s *MysqlLocalityService) GetCarriesByLocalityId(localityId int) ([]internal.CarriesByLocality, error) {
-	return s.Repo.GetCarriesByLocalityId(localityId)
+func (s *MysqlLocalityService) GetCarriesByLocalityID(localityID int) ([]internal.CarriesByLocality, error) {
+	return s.Repo.GetCarriesByLocalityID(localityID)
 }
