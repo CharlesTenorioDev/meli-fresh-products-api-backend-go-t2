@@ -1,6 +1,8 @@
 package employee
 
 import (
+	"strconv"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -163,8 +165,9 @@ func (s *EmployeeDefault) warehouseExistsByID(id int) error {
 		return err
 	}
 
+	idStr := strconv.Itoa(id)
 	if possibleWarehouse == (internal.Warehouse{}) {
-		return utils.ErrWarehouseDoesNotExists
+		return utils.EDependencyNotFound("warehouse", "id: "+idStr)
 	}
 
 	return nil
