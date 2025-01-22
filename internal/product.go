@@ -39,5 +39,5 @@ type ProductTypeValidation interface {
 	GetProductTypeByID(id int) (productType ProductType, err error)
 }
 type SellerValidation interface {
-	GetSellerByID(id int) (seller Seller, err error)
+	GetByID(id int) (Seller, error)
 }

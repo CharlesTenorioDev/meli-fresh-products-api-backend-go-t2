@@ -3,21 +3,22 @@ package product
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type ProductDB struct {
+type MySQLProductRepository struct {
 	db *sql.DB
 }
 
-func NewProductDB(db *sql.DB) *ProductDB {
-	return &ProductDB{db: db}
+func NewProductDB(db *sql.DB) *MySQLProductRepository {
+	return &MySQLProductRepository{db: db}
 }
 
 // GetAll returns all products
-func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
+func (p *MySQLProductRepository) GetAll() (listProducts []internal.Product, err error) {
 	rows, err := p.db.Query("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products")
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func (p *ProductDB) GetAll() (listProducts []internal.Product, err error) {
 }
 
 // GetByID returns a product by id
-func (p *ProductDB) GetByID(id int) (product internal.Product, err error) {
+func (p *MySQLProductRepository) GetByID(id int) (product internal.Product, err error) {
 	row := p.db.QueryRow("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM products WHERE id = ?", id)
 	if err := row.Err(); err != nil {
 		return internal.Product{}, err
@@ -64,7 +65,7 @@ func (p *ProductDB) GetByID(id int) (product internal.Product, err error) {
 }
 
 // Create a product
-func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product internal.Product, err error) {
+func (p *MySQLProductRepository) Create(newproduct internal.ProductAttributes) (product internal.Product, err error) {
 	statement, err := p.db.Prepare("INSERT INTO products (description, expiration_rate, freezing_rate, height, `length`, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return internal.Product{}, err
@@ -101,7 +102,7 @@ func (p *ProductDB) Create(newproduct internal.ProductAttributes) (product inter
 }
 
 // Update a product
-func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Product, err error) {
+func (p *MySQLProductRepository) Update(inputProduct internal.Product) (product internal.Product, err error) {
 	_, err = p.GetByID(inputProduct.ID)
 	if err != nil {
 		return internal.Product{}, err
@@ -135,7 +136,7 @@ func (p *ProductDB) Update(inputProduct internal.Product) (product internal.Prod
 }
 
 // Delete a product
-func (p *ProductDB) Delete(id int) error {
+func (p *MySQLProductRepository) Delete(id int) error {
 	_, err := p.GetByID(id)
 	if err != nil {
 		return err

@@ -2,6 +2,9 @@ package application
 
 import (
 	"database/sql"
+	"log"
+	"net/http"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
@@ -17,8 +20,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/section"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/seller"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/warehouse"
-	"log"
-	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
@@ -131,7 +132,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Requisito 4 - Product
 	productRepo := product.NewProductDB(a.db)
-	productService := product.NewProductService(productRepo, productTypeService)
+	productService := product.NewProductService(productRepo, productTypeService, sellerService)
 	err = product.NewProductRoutes(router, productService)
 
 	if err != nil {

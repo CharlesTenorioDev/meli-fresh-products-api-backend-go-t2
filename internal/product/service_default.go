@@ -5,27 +5,29 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type ProductService struct {
+type BasicProductService struct {
 	repo                  internal.ProductRepository
 	validationProductType internal.ProductTypeValidation
+	validationSeller      internal.SellerValidation
 }
 
-func NewProductService(repo internal.ProductRepository, validationProductType internal.ProductTypeValidation) *ProductService {
-	return &ProductService{
+func NewProductService(repo internal.ProductRepository, validationProductType internal.ProductTypeValidation, validationSeller internal.SellerValidation) *BasicProductService {
+	return &BasicProductService{
 		repo:                  repo,
 		validationProductType: validationProductType,
+		validationSeller:      validationSeller,
 	}
 }
 
-func (s *ProductService) GetProducts() (listProducts []internal.Product, err error) {
+func (s *BasicProductService) GetProducts() (listProducts []internal.Product, err error) {
 	return s.repo.GetAll()
 }
 
-func (s *ProductService) GetProductByID(id int) (product internal.Product, err error) {
+func (s *BasicProductService) GetProductByID(id int) (product internal.Product, err error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *ProductService) CreateProduct(newProduct internal.ProductAttributes) (product internal.Product, err error) {
+func (s *BasicProductService) CreateProduct(newProduct internal.ProductAttributes) (product internal.Product, err error) {
 	err = s.validateEmptyFields(newProduct)
 
 	if err != nil {
@@ -42,7 +44,7 @@ func (s *ProductService) CreateProduct(newProduct internal.ProductAttributes) (p
 	return s.repo.Create(newProduct)
 }
 
-func (s *ProductService) UpdateProduct(inputProduct internal.Product) (product internal.Product, err error) {
+func (s *BasicProductService) UpdateProduct(inputProduct internal.Product) (product internal.Product, err error) {
 	internalProduct, err := s.repo.GetByID(inputProduct.ID)
 
 	if err != nil {
@@ -54,59 +56,61 @@ func (s *ProductService) UpdateProduct(inputProduct internal.Product) (product i
 	return s.repo.Update(preparedProduct)
 }
 
-func (s *ProductService) DeleteProduct(id int) (err error) {
+func (s *BasicProductService) DeleteProduct(id int) (err error) {
 	return s.repo.Delete(id)
 }
 
-func (s *ProductService) validateEmptyFields(newProduct internal.ProductAttributes) error {
+func (s *BasicProductService) validateEmptyFields(newProduct internal.ProductAttributes) error {
+
 	if newProduct.ProductCode == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("ProductCode")
 	}
 
 	if newProduct.Description == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Description")
 	}
 
 	if newProduct.Width == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Width")
+
 	}
 
 	if newProduct.Height == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Height")
 	}
 
 	if newProduct.Length == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Length")
 	}
 
 	if newProduct.NetWeight == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("NetWeight")
 	}
 
 	if newProduct.ExpirationRate == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("ExpirationRate")
 	}
 
 	if newProduct.RecommendedFreezingTemperature == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("RecommendedFreezingTemperature")
 	}
 
 	if newProduct.FreezingRate == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("FreezingRate")
 	}
 
 	if _, err := s.validationProductType.GetProductTypeByID(newProduct.ProductType); err != nil {
-		return utils.ErrInvalidArguments
+		return utils.EConflict("Product", "ProductType")
 	}
 
-	if newProduct.SellerID == 0 {
-		return utils.ErrInvalidArguments
+	if _, err := s.validationSeller.GetByID(newProduct.SellerID); err != nil {
+		return utils.EConflict("Product", "Seller")
 	}
 
 	return nil
 }
 
-func (s *ProductService) validateDuplicates(listProducts []internal.Product, newProduct internal.ProductAttributes) error {
+func (s *BasicProductService) validateDuplicates(listProducts []internal.Product, newProduct internal.ProductAttributes) error {
 	for _, product := range listProducts {
 		if product.ProductCode == newProduct.ProductCode {
 			return utils.ErrConflict
