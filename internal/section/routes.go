@@ -20,7 +20,7 @@ func RegisterSectionRoutes(mux *chi.Mux, service internal.SectionService) error 
 		router.Get("/", sectionHandler.GetAll())
 		router.Get("/{id}", sectionHandler.GetById())
 		router.Get("/reportProducts", sectionHandler.GetSectionProductsReport())
-		router.Post("/", sectionHandler.Post())
+		router.Post("/", sectionHandler.CreateSection())
 		router.Patch("/{id}", sectionHandler.Update())
 		router.Delete("/{id}", sectionHandler.Delete())
 	})
