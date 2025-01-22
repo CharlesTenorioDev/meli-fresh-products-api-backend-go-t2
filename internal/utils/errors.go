@@ -29,7 +29,7 @@ func EZeroValue(target string) error {
 }
 
 // EConflict When 409, when trying to manage a resource, and some attribute already exist
-func EConflict(attribute, target string) error {
+func EConflict(target, attribute string) error {
 	return errors.Join(ErrConflict, errors.New(target+" with attribute '"+attribute+"' already exists"))
 }
 
