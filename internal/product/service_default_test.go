@@ -1,7 +1,6 @@
 package product
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -338,8 +337,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("ProductCode"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : Description",
@@ -369,8 +369,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("Description"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : Width",
@@ -400,8 +401,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("Width"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : height",
@@ -431,8 +433,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("Height"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : Length",
@@ -462,8 +465,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("Length"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : NetWeight",
@@ -493,8 +497,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("NetWeight"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : ExopirationRate",
@@ -524,8 +529,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("ExpirationRate"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : RecommendedFreezingTemperature",
@@ -555,8 +561,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("RecommendedFreezingTemperature"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : FreezingRate",
@@ -586,10 +593,10 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EZeroValue("FreezingRate"),
 		},
-
 		{
 			name: "CreateProduct Error - Invalid Product Type",
 			fields: fields{
@@ -618,10 +625,10 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       1,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EConflict("Product", "ProductType"),
 		},
-
 		{
 			name: "CreateProduct Error - Invalid Seller",
 			fields: fields{
@@ -650,8 +657,9 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 					SellerID:                       0,
 				},
 			},
-			want:    internal.Product{},
-			wantErr: true,
+			want:        internal.Product{},
+			wantErr:     true,
+			expectedErr: utils.EConflict("Product", "Seller"),
 		},
 	}
 
@@ -669,9 +677,17 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 				(tt.fields.repo.(*mockProductRepository)).On("Create", tt.args.newProduct).Return(tt.want, nil)
 			}
 			// Mock the GetProductTypeByID method
-			(tt.fields.validationProductType.(*mockProductTypeValidation)).On("GetProductTypeByID", tt.args.newProduct.ProductType).Return(internal.ProductType{}, nil)
+			if tt.name == "CreateProduct Error - Invalid Product Type" {
+				(tt.fields.validationProductType.(*mockProductTypeValidation)).On("GetProductTypeByID", tt.args.newProduct.ProductType).Return(internal.ProductType{}, utils.ErrConflict)
+			} else {
+				(tt.fields.validationProductType.(*mockProductTypeValidation)).On("GetProductTypeByID", tt.args.newProduct.ProductType).Return(internal.ProductType{}, nil)
+			}
 			// Mock the GetByID method
-			(tt.fields.validationSeller.(*mockSellerValidation)).On("GetByID", tt.args.newProduct.SellerID).Return(internal.Seller{}, nil)
+			if tt.name == "CreateProduct Error - Invalid Seller" {
+				(tt.fields.validationSeller.(*mockSellerValidation)).On("GetByID", tt.args.newProduct.SellerID).Return(internal.Seller{}, utils.ErrConflict)
+			} else {
+				(tt.fields.validationSeller.(*mockSellerValidation)).On("GetByID", tt.args.newProduct.SellerID).Return(internal.Seller{}, nil)
+			}
 			// Mock the GetALL method
 			(tt.fields.repo.(*mockProductRepository)).On("GetAll").Return([]internal.Product{
 				{
@@ -693,13 +709,8 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 			}, nil)
 
 			got, err := s.CreateProduct(tt.args.newProduct)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("BasicProductService.CreateProduct() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("BasicProductService.CreateProduct() = %v, want %v", got, tt.want)
-			}
+			require.Equal(t, tt.expectedErr, err)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -737,7 +748,7 @@ func TestUnitProduct_UpdateProduct(t *testing.T) {
 				inputProduct: internal.Product{
 					ID: 1,
 					ProductAttributes: internal.ProductAttributes{
-						ProductCode:                    "1234",
+						ProductCode:                    "",
 						Description:                    "Product 2",
 						Width:                          1.0,
 						Height:                         1.0,
@@ -756,6 +767,55 @@ func TestUnitProduct_UpdateProduct(t *testing.T) {
 				ProductAttributes: internal.ProductAttributes{
 					ProductCode:                    "package product",
 					Description:                    "package product",
+					Width:                          1.0,
+					Height:                         1.0,
+					Length:                         1.0,
+					NetWeight:                      1.0,
+					ExpirationRate:                 1.0,
+					RecommendedFreezingTemperature: 1.0,
+					FreezingRate:                   1.0,
+					ProductType:                    1,
+					SellerID:                       1,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "UpdateProduct Ok - Empty Fields",
+			fields: fields{
+				repo: &mockProductRepository{
+					mock.Mock{},
+				},
+				validationProductType: &mockProductTypeValidation{
+					mock.Mock{},
+				},
+				validationSeller: &mockSellerValidation{
+					mock.Mock{},
+				},
+			},
+			args: args{
+				inputProduct: internal.Product{
+					ID: 1,
+					ProductAttributes: internal.ProductAttributes{
+						ProductCode:                    "1234",
+						Description:                    "",
+						Width:                          0,
+						Height:                         0,
+						Length:                         0,
+						NetWeight:                      0,
+						ExpirationRate:                 0,
+						RecommendedFreezingTemperature: 0,
+						FreezingRate:                   0,
+						ProductType:                    0,
+						SellerID:                       0,
+					},
+				},
+			},
+			want: internal.Product{
+				ID: 1,
+				ProductAttributes: internal.ProductAttributes{
+					ProductCode:                    "1234",
+					Description:                    "Product 1",
 					Width:                          1.0,
 					Height:                         1.0,
 					Length:                         1.0,
@@ -841,13 +901,72 @@ func TestUnitProduct_UpdateProduct(t *testing.T) {
 			}, nil)
 
 			got, err := s.UpdateProduct(tt.args.inputProduct)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("BasicProductServiceUpdateProduct() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestUnitProduct_DeleteProduct(t *testing.T) {
+	type fields struct {
+		repo                  internal.ProductRepository
+		validationProductType internal.ProductTypeValidation
+		validationSeller      internal.SellerValidation
+	}
+	type args struct {
+		id int
+	}
+	test := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantErr     bool
+		expectedErr error
+	}{
+		{
+			name: "DeleteProduct OK",
+			fields: fields{
+				repo: &mockProductRepository{
+					mock.Mock{},
+				},
+			},
+			args: args{
+				id: 1,
+			},
+			wantErr:     false,
+			expectedErr: nil,
+		},
+		{
+			name: "DeleteProduct Error - Product Not Found",
+			fields: fields{
+				repo: &mockProductRepository{
+					mock.Mock{},
+				},
+			},
+			args: args{
+				id: 99,
+			},
+			wantErr:     true,
+			expectedErr: utils.ENotFound("Product"),
+		},
+	}
+
+	for _, tt := range test {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &BasicProductService{
+				repo:                  tt.fields.repo,
+				validationProductType: tt.fields.validationProductType,
+				validationSeller:      tt.fields.validationSeller,
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("BasicProductService.UpdateProduct() = %v, want %v", got, tt.want)
+			// Mock the Delete method
+			if tt.wantErr {
+				(tt.fields.repo.(*mockProductRepository)).On("Delete", tt.args.id).Return(utils.ErrNotFound)
+			} else {
+				(tt.fields.repo.(*mockProductRepository)).On("Delete", tt.args.id).Return(nil)
 			}
+
+			err := s.DeleteProduct(tt.args.id)
+			require.Equal(t, tt.expectedErr, err)
 		})
 	}
 }

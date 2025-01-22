@@ -57,11 +57,15 @@ func (s *BasicProductService) UpdateProduct(inputProduct internal.Product) (prod
 }
 
 func (s *BasicProductService) DeleteProduct(id int) (err error) {
-	return s.repo.Delete(id)
+	err = s.repo.Delete(id)
+	if err != nil {
+		return utils.ENotFound("Product")
+	}
+
+	return err
 }
 
 func (s *BasicProductService) validateEmptyFields(newProduct internal.ProductAttributes) error {
-
 	if newProduct.ProductCode == "" {
 		return utils.EZeroValue("ProductCode")
 	}
@@ -72,7 +76,6 @@ func (s *BasicProductService) validateEmptyFields(newProduct internal.ProductAtt
 
 	if newProduct.Width == 0 {
 		return utils.EZeroValue("Width")
-
 	}
 
 	if newProduct.Height == 0 {
