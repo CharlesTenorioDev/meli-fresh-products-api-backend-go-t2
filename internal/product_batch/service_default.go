@@ -5,7 +5,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type MySQLProductBatchService struct {
+type DefaultProductBatchService struct {
 	batchRepo   internal.ProductBatchRepository
 	productRepo internal.ProductRepository
 	sectionRepo internal.SectionRepository
@@ -13,14 +13,14 @@ type MySQLProductBatchService struct {
 
 func NewProductBatchesService(batch internal.ProductBatchRepository,
 	product internal.ProductRepository, section internal.SectionRepository) internal.ProductBatchService {
-	return &MySQLProductBatchService{
+	return &DefaultProductBatchService{
 		batchRepo:   batch,
 		productRepo: product,
 		sectionRepo: section,
 	}
 }
 
-func (s *MySQLProductBatchService) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
+func (s *DefaultProductBatchService) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
 	batchValidation := s.verify(newBatch)
 
 	if batchValidation != nil {
@@ -35,7 +35,7 @@ func (s *MySQLProductBatchService) Save(newBatch *internal.ProductBatchRequest) 
 	return createdBatch, nil
 }
 
-func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest) error {
+func (s *DefaultProductBatchService) verify(newBatch *internal.ProductBatchRequest) error {
 	if newBatch.BatchNumber <= 0 {
 		return utils.ErrInvalidArguments
 	}

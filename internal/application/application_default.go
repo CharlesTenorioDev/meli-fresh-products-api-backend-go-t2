@@ -114,7 +114,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// return
 	// }
 	// sellerRepo := repository.NewSellerDBRepository(dbSellers)
-	sellerRepo := seller.NewSellerMysql(a.db)
+	sellerRepo := seller.NewSellerRepository(a.db)
 	sellerService := seller.NewSellerService(sellerRepo, localityRepo)
 
 	if err := seller.RegisterSellerRoutes(router, sellerService); err != nil {
