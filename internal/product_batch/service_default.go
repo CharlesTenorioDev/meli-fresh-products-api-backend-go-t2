@@ -11,7 +11,7 @@ type DefaultProductBatchService struct {
 	sectionRepo internal.SectionRepository
 }
 
-func NewProductBatchesService(batch internal.ProductBatchRepository,
+func NewProductBatchService(batch internal.ProductBatchRepository,
 	product internal.ProductRepository, section internal.SectionRepository) internal.ProductBatchService {
 	return &DefaultProductBatchService{
 		batchRepo:   batch,

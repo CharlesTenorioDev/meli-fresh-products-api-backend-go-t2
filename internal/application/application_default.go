@@ -202,7 +202,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Sprint2 Requisito 3 - Product Batch
 	productBatchRepo := product_batch.NewProductBatchRepository(a.db)
-	productBatchService := product_batch.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+	productBatchService := product_batch.NewProductBatchService(productBatchRepo, productRepo, sectionRepo)
 
 	if err = product_batch.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
