@@ -160,13 +160,13 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		var reqBody internal.SellerRequestPointer
+		var reqBody internal.Seller
 
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
 		}
 
-		seller, err := h.service.Update(id, reqBody)
+		seller, err := h.service.Update(id, &reqBody)
 		if err != nil {
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
