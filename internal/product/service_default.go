@@ -20,11 +20,21 @@ func NewProductService(repo internal.ProductRepository, validationProductType in
 }
 
 func (s *BasicProductService) GetProducts() (listProducts []internal.Product, err error) {
-	return s.repo.GetAll()
+	listProducts, err = s.repo.GetAll()
+	if err != nil {
+		return nil, utils.ENotFound("Product")
+	}
+
+	return listProducts, err
 }
 
 func (s *BasicProductService) GetProductByID(id int) (product internal.Product, err error) {
-	return s.repo.GetByID(id)
+	product, err = s.repo.GetByID(id)
+	if err != nil {
+		return internal.Product{}, utils.ENotFound("Product")
+	}
+
+	return product, err
 }
 
 func (s *BasicProductService) CreateProduct(newProduct internal.ProductAttributes) (product internal.Product, err error) {
@@ -38,7 +48,7 @@ func (s *BasicProductService) CreateProduct(newProduct internal.ProductAttribute
 	err = s.validateDuplicates(listProducts, newProduct)
 
 	if err != nil {
-		return internal.Product{}, err
+		return internal.Product{}, utils.EConflict("Product", "ProductCode")
 	}
 
 	return s.repo.Create(newProduct)
