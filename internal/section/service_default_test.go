@@ -2,8 +2,9 @@ package section
 
 import (
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"testing"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
@@ -84,15 +85,21 @@ var (
 		WarehouseID:        1,
 		ProductTypeID:      1,
 	}
-	sectionNumber2      = 2
-	currentTemperature2 = 2
-	minimumTemperature  = 2
-	currentCapacity     = 2
-	minimumCapacity     = 2
-	maximumCapacity     = 2
-	warehouseID2        = 2
-	productTypeID2      = 2
-	mockWarehouse       = internal.Warehouse{
+	mockSection2 = internal.Section{
+		ID:                 2,
+		SectionNumber:      2,
+		CurrentTemperature: 2,
+		MinimumTemperature: 2,
+		CurrentCapacity:    2,
+		MinimumCapacity:    2,
+		MaximumCapacity:    2,
+		WarehouseID:        2,
+		ProductTypeID:      2,
+	}
+	zero          = 0
+	one           = 1
+	two           = 2
+	mockWarehouse = internal.Warehouse{
 		ID:                 1,
 		Address:            "Monroe 860",
 		Telephone:          "00900009999",
@@ -376,6 +383,44 @@ func TestUnitSection_Update(t *testing.T) {
 			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				repo.On("GetByID", mock.Anything).Return(internal.Section{}, utils.ENotFound("section"))
 				return internal.Section{}, utils.ENotFound("section")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN SectionNumber <= 0, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{SectionNumber: &zero},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EZeroValue("section_number")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN SectionNumber already exists, RETURNS utils.ErrConflict",
+			DataID: 1,
+			Data:   internal.SectionPointers{SectionNumber: &two},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				repo.On("GetBySectionNumber", mock.Anything).Return(mockSection2, nil)
+				return internal.Section{}, utils.EConflict("section", "id: 2")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN ProductTypeID <= 0, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{ProductTypeID: &zero},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EZeroValue("product_type_id")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN ProductTypeID already exists, RETURNS utils.ErrConflict",
+			DataID: 1,
+			Data:   internal.SectionPointers{ProductTypeID: &two},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				repo.On("GetBySectionNumber", mock.Anything).Return(mockSection2, nil)
+				return internal.Section{}, utils.EConflict("section", "id: 2")
 			},
 		},
 		//{

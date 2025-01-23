@@ -2,8 +2,9 @@ package section
 
 import (
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -12,14 +13,14 @@ const (
 	MinCelsiusTemperature = -273.15
 )
 
-type BasicSectionService struct {
+type DefaultSectionService struct {
 	repo               internal.SectionRepository
 	warehouseService   internal.SectionWarehouseValidation
 	productTypeService internal.SectionProductTypeValidation
 }
 
 func NewBasicSectionService(repo internal.SectionRepository, warehouseService internal.SectionWarehouseValidation, productTypeService internal.SectionProductTypeValidation) internal.SectionService {
-	return &BasicSectionService{
+	return &DefaultSectionService{
 		repo:               repo,
 		warehouseService:   warehouseService,
 		productTypeService: productTypeService,
@@ -27,12 +28,12 @@ func NewBasicSectionService(repo internal.SectionRepository, warehouseService in
 }
 
 // GetAll Returns all the sections
-func (s BasicSectionService) GetAll() ([]internal.Section, error) {
+func (s DefaultSectionService) GetAll() ([]internal.Section, error) {
 	return s.repo.GetAll()
 }
 
 // GetByID Get the section by id, if sections does not exist, utils.ErrNotFound is returned
-func (s BasicSectionService) GetByID(id int) (internal.Section, error) {
+func (s DefaultSectionService) GetByID(id int) (internal.Section, error) {
 	// Check if section exists
 	possibleSection, err := s.repo.GetByID(id)
 
@@ -48,7 +49,7 @@ func (s BasicSectionService) GetByID(id int) (internal.Section, error) {
 	return possibleSection, nil
 }
 
-func (s *BasicSectionService) warehouseExistsByID(id int) error {
+func (s *DefaultSectionService) warehouseExistsByID(id int) error {
 	possibleWarehouse, err := s.warehouseService.GetByID(id)
 	// When internal server error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
@@ -62,7 +63,7 @@ func (s *BasicSectionService) warehouseExistsByID(id int) error {
 	return nil
 }
 
-func (s *BasicSectionService) productTypeExistsByID(id int) error {
+func (s *DefaultSectionService) productTypeExistsByID(id int) error {
 	possibleProductType, err := s.productTypeService.GetProductTypeByID(id)
 	// When internal server error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
@@ -76,7 +77,7 @@ func (s *BasicSectionService) productTypeExistsByID(id int) error {
 	return nil
 }
 
-func (s *BasicSectionService) sectionExistsBySectionNumber(sectionNumber int) error {
+func (s *DefaultSectionService) sectionExistsBySectionNumber(sectionNumber int) error {
 	possibleSection, err := s.repo.GetBySectionNumber(sectionNumber)
 	if possibleSection != (internal.Section{}) {
 		return utils.EConflict("section", "id: "+strconv.Itoa(sectionNumber))
@@ -89,7 +90,7 @@ func (s *BasicSectionService) sectionExistsBySectionNumber(sectionNumber int) er
 	return nil
 }
 
-func (s *BasicSectionService) validateLogicRules(section internal.Section) error {
+func (s *DefaultSectionService) validateLogicRules(section internal.Section) error {
 	if section.MinimumCapacity > section.MaximumCapacity {
 		return utils.EBR("minimum_capacity cannot be greater than maximum_capacity")
 	}
@@ -106,7 +107,7 @@ func (s *BasicSectionService) validateLogicRules(section internal.Section) error
 }
 
 // Save a section, check the relations, zero value when applicable, and basic logic
-func (s *BasicSectionService) Save(newSection internal.Section) (internal.Section, error) {
+func (s *DefaultSectionService) Save(newSection internal.Section) (internal.Section, error) {
 	// Zero value validation
 	if newSection.SectionNumber <= 0 {
 		return internal.Section{}, utils.EZeroValue("section_number")
@@ -145,7 +146,7 @@ func (s *BasicSectionService) Save(newSection internal.Section) (internal.Sectio
 	return newSection, nil
 }
 
-func (s *BasicSectionService) Update(id int, sectionToUpdate internal.SectionPointers) (internal.Section, error) {
+func (s *DefaultSectionService) Update(id int, sectionToUpdate internal.SectionPointers) (internal.Section, error) {
 	section, err := s.repo.GetByID(id)
 
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
@@ -160,8 +161,8 @@ func (s *BasicSectionService) Update(id int, sectionToUpdate internal.SectionPoi
 	// Check which field will be updated
 	if sectionToUpdate.SectionNumber != nil && *sectionToUpdate.SectionNumber != section.SectionNumber {
 		section.SectionNumber = *sectionToUpdate.SectionNumber
-		if section.SectionNumber == 0 {
-			return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("section_number cannot be empty/null"))
+		if section.SectionNumber <= 0 {
+			return internal.Section{}, utils.EZeroValue("section_number")
 		}
 
 		if err := s.sectionExistsBySectionNumber(section.SectionNumber); err != nil {
@@ -192,7 +193,7 @@ func (s *BasicSectionService) Update(id int, sectionToUpdate internal.SectionPoi
 	if sectionToUpdate.ProductTypeID != nil {
 		section.ProductTypeID = *sectionToUpdate.ProductTypeID
 		if section.ProductTypeID == 0 {
-			return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("product_type_id cannot be empty/null"))
+			return internal.Section{}, utils.EZeroValue("product_type_id")
 		}
 
 		if err := s.productTypeExistsByID(section.ProductTypeID); err != nil {
@@ -225,7 +226,7 @@ func (s *BasicSectionService) Update(id int, sectionToUpdate internal.SectionPoi
 	return section, nil
 }
 
-func (s *BasicSectionService) Delete(id int) error {
+func (s *DefaultSectionService) Delete(id int) error {
 	possibleSection, err := s.repo.GetByID(id)
 
 	if err != nil {
@@ -245,7 +246,7 @@ func (s *BasicSectionService) Delete(id int) error {
 	return nil
 }
 
-func (s *BasicSectionService) GetSectionProductsReport(id int) ([]internal.SectionProductsReport, error) {
+func (s *DefaultSectionService) GetSectionProductsReport(id int) ([]internal.SectionProductsReport, error) {
 	var report []internal.SectionProductsReport
 
 	var err error
