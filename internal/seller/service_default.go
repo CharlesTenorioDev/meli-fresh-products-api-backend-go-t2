@@ -66,7 +66,7 @@ func (s *DefaultSellerService) Create(newSeller *internal.Seller) error {
 	return nil
 }
 
-func (s *DefaultSellerService) Update(id int, newSeller internal.SellerRequestPointer) (internal.Seller, error) {
+func (s *DefaultSellerService) Update(id int, newSeller *internal.Seller) (internal.Seller, error) {
 	existingSeller, err := s.rp.GetByID(id)
 	if err != nil {
 		return internal.Seller{}, err
@@ -76,7 +76,7 @@ func (s *DefaultSellerService) Update(id int, newSeller internal.SellerRequestPo
 		return internal.Seller{}, utils.ErrNotFound
 	}
 
-	existingCid, err := s.rp.GetByCid(*newSeller.Cid)
+	existingCid, err := s.rp.GetByCid(newSeller.Cid)
 
 	if err != nil {
 		return internal.Seller{}, err
@@ -86,20 +86,20 @@ func (s *DefaultSellerService) Update(id int, newSeller internal.SellerRequestPo
 		return internal.Seller{}, utils.ErrConflict
 	}
 
-	if *newSeller.Cid != 0 {
-		existingSeller.Cid = *newSeller.Cid
+	if newSeller.Cid != 0 {
+		existingSeller.Cid = newSeller.Cid
 	}
 
-	if newSeller.CompanyName != nil {
-		existingSeller.CompanyName = *newSeller.CompanyName
+	if len(newSeller.CompanyName) != 0 {
+		existingSeller.CompanyName = newSeller.CompanyName
 	}
 
-	if newSeller.Address != nil {
-		existingSeller.Address = *newSeller.Address
+	if len(newSeller.Address) != 0 {
+		existingSeller.Address = newSeller.Address
 	}
 
-	if newSeller.Telephone != nil {
-		existingSeller.Telephone = *newSeller.Telephone
+	if len(newSeller.Telephone) != 0 {
+		existingSeller.Telephone = newSeller.Telephone
 	}
 
 	err = s.rp.Update(&existingSeller)
