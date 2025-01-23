@@ -970,3 +970,17 @@ func TestUnitProduct_DeleteProduct(t *testing.T) {
 		})
 	}
 }
+
+func TestNewProductService(t *testing.T) {
+	repo := new(mockProductRepository)
+	productTypeValidation := new(mockProductTypeValidation)
+	sellerValidation := new(mockSellerValidation)
+
+	service := NewProductService(repo, productTypeValidation, sellerValidation)
+	expectedService := &BasicProductService{
+		repo:                  repo,
+		validationProductType: productTypeValidation,
+		validationSeller:      sellerValidation,
+	}
+	require.Equal(t, expectedService, service)
+}
