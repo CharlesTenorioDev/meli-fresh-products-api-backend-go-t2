@@ -255,7 +255,7 @@ func TestUnitSection_Post(t *testing.T) {
 		{
 			Name:               "POST-CREATE-409",
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
-			ExpectedBody:       `{"message":"entity already exists: id: 1 with attribute 'section' already exists", "status":"Conflict"}`,
+			ExpectedBody:       `{"message":"entity already exists: section with attribute 'id: 1' already exists", "status":"Conflict"}`,
 			ExpectedStatusCode: 409,
 			MockData:           internal.Section{},
 			MockError:          utils.EConflict("section", "id: 1"),
