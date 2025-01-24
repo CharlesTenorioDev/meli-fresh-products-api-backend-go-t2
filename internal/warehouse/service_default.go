@@ -9,10 +9,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-const (
-	NOT_FOUND = "Warehouse not found"
-)
-
 type BasicWarehouseService struct {
 	repo             internal.WarehouseRepository
 	validateLocality internal.LocalityValidation
@@ -39,7 +35,7 @@ func NewBasicWarehouseService(repo internal.WarehouseRepository, validateLocalit
 func (s *BasicWarehouseService) GetAll() ([]internal.Warehouse, error) {
 	warehouses, err := s.repo.GetAll()
 	if err != nil {
-		return nil, utils.ENotFound(NOT_FOUND)
+		return nil, utils.ENotFound("Warehouse")
 	}
 
 	return warehouses, nil
@@ -58,7 +54,7 @@ func (s *BasicWarehouseService) GetByID(id int) (internal.Warehouse, error) {
 	warehouse, err := s.repo.GetByID(id)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			return internal.Warehouse{}, utils.ENotFound(NOT_FOUND)
+			return internal.Warehouse{}, utils.ENotFound("Warehouse")
 		}
 
 		return internal.Warehouse{}, err
@@ -203,7 +199,7 @@ func (s *BasicWarehouseService) Delete(id int) error {
 	_, err := s.repo.GetByID(id)
 
 	if err != nil {
-		return utils.ENotFound(NOT_FOUND)
+		return utils.ENotFound("Warehouse")
 	}
 
 	if err := s.repo.Delete(id); err != nil {
