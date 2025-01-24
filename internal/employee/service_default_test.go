@@ -1,7 +1,6 @@
 package employee
 
 import (
-	"log"
 	"testing"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -64,14 +63,32 @@ var (
 			CardNumberID: "67890",
 			FirstName:    "Rowan",
 			LastName:     "Withethorn",
-			WarehouseID:  2,
+			WarehouseID:  1,
 		},
 	}
 	mockEmployeeAttr = internal.EmployeeAttributes{
-		CardNumberID: "12345",
-		FirstName:    "Aelin",
-		LastName:     "Galanthynius",
+		CardNumberID: "67890",
+		FirstName:    "Rowan",
+		LastName:     "Withethorn",
 		WarehouseID:  1,
+	}
+	mockInputEmployee = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "12345",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
+		},
+	}
+	mockInputEmployeeInvalidID = internal.Employee{
+		ID: 99,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "12345",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
+		},
 	}
 	mockWarehouse = internal.Warehouse{
 		ID:                 1,
@@ -84,59 +101,6 @@ var (
 )
 
 func TestEmployeeService_FindAll(t *testing.T) {
-	// t.Run("FindAll - Success", func(t *testing.T) {
-	// 	mockRepo := new(mockEmployeeRepository)
-	// 	mockWV := new(mockWarehouseValidation)
-
-	// 	employees := map[int]internal.Employee{
-	// 		1: {
-	// 			ID: 1,
-	// 			Attributes: internal.EmployeeAttributes{
-	// 				CardNumberID: "12345",
-	// 				FirstName:    "Aelin",
-	// 				LastName:     "Galanthynius",
-	// 				WarehouseID:  1,
-	// 			},
-	// 		},
-	// 		2: {
-	// 			ID: 2,
-	// 			Attributes: internal.EmployeeAttributes{
-	// 				CardNumberID: "67890",
-	// 				FirstName:    "Rowan",
-	// 				LastName:     "Withethorn",
-	// 				WarehouseID:  2,
-	// 			},
-	// 		},
-	// 	}
-
-	// 	mockRepo.On("FindAll").Return(employees, nil)
-
-	// 	service := NewEmployeeService(mockRepo, mockWV)
-
-	// 	result, err := service.FindAll()
-
-	// 	assert.NoError(t, err)
-	// 	assert.Equal(t, employees, result)
-
-	// 	mockRepo.AssertExpectations(t)
-	// })
-
-	// t.Run("FindAll - Error", func(t *testing.T) {
-	// 	mockRepo := new(mockEmployeeRepository)
-	// 	mockWV := new(mockWarehouseValidation)
-
-	// 	mockRepo.On("FindAll").Return(nil, assert.AnError)
-
-	// 	service := NewEmployeeService(mockRepo, mockWV)
-
-	// 	result, err := service.FindAll()
-
-	// 	assert.Error(t, err)
-	// 	assert.Nil(t, result)
-
-	// 	mockRepo.AssertExpectations(t)
-	// })
-
 	t.Run("FindAll - Success", func(t *testing.T) {
 		mockRepo := new(mockEmployeeRepository)
 		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee, mockEmployee2}, nil)
@@ -152,9 +116,6 @@ func TestEmployeeService_FindAll(t *testing.T) {
 		mockRepo.On("FindAll").Return(map[int]internal.Employee{}, assert.AnError)
 		service := NewEmployeeService(mockRepo, nil)
 		result, err := service.FindAll()
-
-		log.Println("ERRO: ", err)
-		log.Println("RESULT:", result)
 
 		assert.Equal(t, map[int]internal.Employee{}, result)
 		assert.Error(t, err)
@@ -182,13 +143,104 @@ func TestEmployeeService_FindById(t *testing.T) {
 		assert.Equal(t, utils.ErrNotFound, err)
 	})
 
-	t.Run("FindByID - Another Error", func(t *testing.T) {
+	t.Run("FindByID - Internal Error", func(t *testing.T) {
 		mockRepo := new(mockEmployeeRepository)
-		mockRepo.On("FindByID", 99).Return(internal.Employee{}, assert.AnError)
+		mockRepo.On("FindByID", 1).Return(internal.Employee{}, assert.AnError)
 		service := NewEmployeeService(mockRepo, nil)
-		result, err := service.FindByID(99)
+		result, err := service.FindByID(1)
 
 		assert.Equal(t, internal.Employee{}, result)
 		assert.NotNil(t, err)
+	})
+}
+
+func TestEmployeeService_Delete(t *testing.T) {
+	t.Run("Delete - Valid ID", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockRepo.On("FindByID", 1).Return(mockEmployee, nil)
+		mockRepo.On("DeleteEmployee", 1).Return(nil)
+		service := NewEmployeeService(mockRepo, nil)
+		err := service.DeleteEmployee(1)
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("Delete - Invalid ID", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockRepo.On("FindByID", 99).Return(internal.Employee{}, assert.AnError)
+		mockRepo.On("DeleteEmployee", 99).Return(utils.ErrNotFound)
+		service := NewEmployeeService(mockRepo, nil)
+		err := service.DeleteEmployee(99)
+
+		assert.Equal(t, utils.ErrNotFound, err)
+	})
+
+	t.Run("Delete - Internal Error", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockRepo.On("FindByID", 99).Return(internal.Employee{}, assert.AnError)
+		mockRepo.On("DeleteEmployee", 99).Return(assert.AnError)
+		service := NewEmployeeService(mockRepo, nil)
+		err := service.DeleteEmployee(99)
+
+		assert.NotNil(t, err)
+	})
+}
+
+func TestEmployeeService_Update(t *testing.T) {
+	t.Run("Update - Valid ID", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindByID", 1).Return(mockEmployee, nil)
+		mockRepo.On("UpdateEmployee", mockInputEmployee).Return(mockInputEmployee, nil)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.UpdateEmployee(mockInputEmployee)
+
+		assert.Equal(t, mockInputEmployee, result)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Update - Invalid ID", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindByID", 99).Return(internal.Employee{}, utils.ErrNotFound)
+		mockRepo.On("UpdateEmployee", mockInputEmployeeInvalidID).Return(internal.Employee{}, utils.ErrNotFound)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.UpdateEmployee(mockInputEmployeeInvalidID)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.NotNil(t, err)
+		assert.Equal(t, utils.ErrNotFound, err)
+	})
+}
+
+func TestEmployeeService_Create(t *testing.T) {
+	t.Run("Create - Success", func(t *testing.T) {
+		// ERRO
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee}, nil)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(mockEmployee2, nil)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.CreateEmployee(mockEmployeeAttr)
+
+		assert.Equal(t, mockEmployee2, result)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Create - Conflict CardNumberID", func(t *testing.T) {
+		// ERRO
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee}, nil)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(mockEmployee2, nil)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.CreateEmployee(mockEmployeeAttr)
+
+		assert.Equal(t, mockEmployee2, result)
+		assert.Nil(t, err)
 	})
 }
