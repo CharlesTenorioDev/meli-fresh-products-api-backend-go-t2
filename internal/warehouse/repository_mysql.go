@@ -13,7 +13,7 @@ type MySQLWarehouseRepository struct {
 	db *sql.DB
 }
 
-func NewWarehouseRepository(db *sql.DB) *MySQLWarehouseRepository {
+func NewWarehouseDB(db *sql.DB) *MySQLWarehouseRepository {
 	return &MySQLWarehouseRepository{db: db}
 }
 

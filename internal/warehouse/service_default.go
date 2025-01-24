@@ -11,10 +11,10 @@ import (
 
 type BasicWarehouseService struct {
 	repo             internal.WarehouseRepository
-	validateLocality internal.LocalityValidation
+	validateLocality internal.WarehouseLocalityValidation
 }
 
-// NewBasicWarehouseService creates a new instance of BasicWarehouseService with the provided WarehouseRepository.
+// NewWarehouseService creates a new instance of BasicWarehouseService with the provided WarehouseRepository.
 // It returns a pointer to the created BasicWarehouseService.
 //
 // Parameters:
@@ -22,7 +22,7 @@ type BasicWarehouseService struct {
 //
 // Returns:
 //   - A pointer to the newly created BasicWarehouseService.
-func NewBasicWarehouseService(repo internal.WarehouseRepository, validateLocality internal.LocalityValidation) *BasicWarehouseService {
+func NewWarehouseService(repo internal.WarehouseRepository, validateLocality internal.WarehouseLocalityValidation) *BasicWarehouseService {
 	return &BasicWarehouseService{
 		repo:             repo,
 		validateLocality: validateLocality,
@@ -82,7 +82,7 @@ func (s *BasicWarehouseService) Save(newWarehouse internal.Warehouse) (internal.
 	}
 
 	if err := s.existingWarehouseCode(newWarehouse, false); err != nil {
-		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code already exists")
+		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code")
 	}
 
 	createdWarehouse, err := s.repo.Save(newWarehouse)
@@ -171,7 +171,7 @@ func (s *BasicWarehouseService) Update(id int, updatedWarehouse internal.Warehou
 	}
 
 	if err := s.existingWarehouseCode(warehouse, true); err != nil {
-		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code already exists")
+		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code")
 	}
 
 	warehouse, err = s.repo.Update(warehouse)
