@@ -149,7 +149,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Requisito 2 - Warehouses
 	warehouseRepo := warehouse.NewWarehouseRepository(a.db)
-	warehouseService := warehouse.NewWarehouseService(warehouseRepo, localityRepo)
+	warehouseService := warehouse.NewBasicWarehouseService(warehouseRepo, localityRepo)
 
 	err = warehouse.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {

@@ -9,21 +9,25 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type WarehouseService struct {
+const (
+	NOT_FOUND = "Warehouse not found"
+)
+
+type BasicWarehouseService struct {
 	repo             internal.WarehouseRepository
 	validateLocality internal.LocalityValidation
 }
 
-// NewWarehouseService creates a new instance of WarehouseService with the provided WarehouseRepository.
-// It returns a pointer to the created WarehouseService.
+// NewBasicWarehouseService creates a new instance of BasicWarehouseService with the provided WarehouseRepository.
+// It returns a pointer to the created BasicWarehouseService.
 //
 // Parameters:
 //   - repo: an implementation of the WarehouseRepository interface.
 //
 // Returns:
-//   - A pointer to the newly created WarehouseService.
-func NewWarehouseService(repo internal.WarehouseRepository, validateLocality internal.LocalityValidation) *WarehouseService {
-	return &WarehouseService{
+//   - A pointer to the newly created BasicWarehouseService.
+func NewBasicWarehouseService(repo internal.WarehouseRepository, validateLocality internal.LocalityValidation) *BasicWarehouseService {
+	return &BasicWarehouseService{
 		repo:             repo,
 		validateLocality: validateLocality,
 	}
@@ -32,14 +36,10 @@ func NewWarehouseService(repo internal.WarehouseRepository, validateLocality int
 // GetAll retrieves all warehouses from the repository.
 // It returns a slice of Warehouse and an error if any occurred during the retrieval process.
 // If no warehouses are found, it returns an ErrNotFound error.
-func (s *WarehouseService) GetAll() ([]internal.Warehouse, error) {
+func (s *BasicWarehouseService) GetAll() ([]internal.Warehouse, error) {
 	warehouses, err := s.repo.GetAll()
 	if err != nil {
-		return nil, err
-	}
-
-	if len(warehouses) == 0 {
-		return nil, utils.ErrNotFound
+		return nil, utils.ENotFound(NOT_FOUND)
 	}
 
 	return warehouses, nil
@@ -54,11 +54,11 @@ func (s *WarehouseService) GetAll() ([]internal.Warehouse, error) {
 // Returns:
 //   - internal.Warehouse: the warehouse with the specified ID.
 //   - error: an error if the warehouse is not found or if any other error occurs.
-func (s *WarehouseService) GetByID(id int) (internal.Warehouse, error) {
+func (s *BasicWarehouseService) GetByID(id int) (internal.Warehouse, error) {
 	warehouse, err := s.repo.GetByID(id)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			return internal.Warehouse{}, utils.ErrNotFound
+			return internal.Warehouse{}, utils.ENotFound(NOT_FOUND)
 		}
 
 		return internal.Warehouse{}, err
@@ -80,13 +80,13 @@ func (s *WarehouseService) GetByID(id int) (internal.Warehouse, error) {
 //
 //	internal.Warehouse - the saved warehouse data.
 //	error - any error encountered during the validation or saving process.
-func (s *WarehouseService) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
+func (s *BasicWarehouseService) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	if err := s.validateWarehouse(newWarehouse); err != nil {
 		return internal.Warehouse{}, err
 	}
 
 	if err := s.existingWarehouseCode(newWarehouse, false); err != nil {
-		return internal.Warehouse{}, err
+		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code already exists")
 	}
 
 	createdWarehouse, err := s.repo.Save(newWarehouse)
@@ -108,7 +108,7 @@ func (s *WarehouseService) Save(newWarehouse internal.Warehouse) (internal.Wareh
 //
 // Returns:
 //   - error: utils.ErrConflict if a conflict is found, otherwise nil.
-func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse, isUpdate bool) error {
+func (s *BasicWarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse, isUpdate bool) error {
 	existing, _ := s.repo.GetAll()
 	for _, w := range existing {
 		if !isUpdate {
@@ -136,10 +136,10 @@ func (s *WarehouseService) existingWarehouseCode(newWarehouse internal.Warehouse
 // Returns:
 //   - internal.Warehouse: The updated warehouse.
 //   - error: An error if the update process fails, or nil if successful.
-func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePointers) (internal.Warehouse, error) {
+func (s *BasicWarehouseService) Update(id int, updatedWarehouse internal.WarehousePointers) (internal.Warehouse, error) {
 	warehouse, err := s.repo.GetByID(id)
 	if err != nil {
-		return internal.Warehouse{}, err
+		return internal.Warehouse{}, utils.ErrNotFound
 	}
 
 	if warehouse == (internal.Warehouse{}) {
@@ -175,7 +175,7 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 	}
 
 	if err := s.existingWarehouseCode(warehouse, true); err != nil {
-		return internal.Warehouse{}, err
+		return internal.Warehouse{}, utils.EConflict("Warehouse", "Warehouse code already exists")
 	}
 
 	warehouse, err = s.repo.Update(warehouse)
@@ -199,11 +199,11 @@ func (s *WarehouseService) Update(id int, updatedWarehouse internal.WarehousePoi
 //
 // Returns:
 //   - error: an error if the warehouse does not exist or if there is an issue during deletion, otherwise nil.
-func (s *WarehouseService) Delete(id int) error {
+func (s *BasicWarehouseService) Delete(id int) error {
 	_, err := s.repo.GetByID(id)
 
 	if err != nil {
-		return err
+		return utils.ENotFound(NOT_FOUND)
 	}
 
 	if err := s.repo.Delete(id); err != nil {
@@ -216,36 +216,35 @@ func (s *WarehouseService) Delete(id int) error {
 // validateWarehouse validates the given warehouse object.
 // It checks if the WarehouseCode, Address, and Telephone fields are not empty.
 // If any of these fields are empty, it returns an ErrInvalidArguments error.
-// TODO: Add more validations to localities.
 //
 // Parameters:
 //   - warehouse: the warehouse object to be validated.
 //
 // Returns:
 //   - error: an error if any validation fails, otherwise nil.
-func (s *WarehouseService) validateWarehouse(warehouse internal.Warehouse) error {
+func (s *BasicWarehouseService) validateWarehouse(warehouse internal.Warehouse) error {
 	if warehouse.WarehouseCode == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Warehouse code is empty")
 	}
 
 	if warehouse.Address == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Warehouse address is empty")
 	}
 
 	if warehouse.Telephone == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Warehouse telephone is empty")
 	}
 
 	if warehouse.MinimumCapacity < 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Warehouse minimum capacity is negative")
 	}
 
 	if warehouse.MinimumTemperature < -273 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Warehouse minimum temperature is invalid")
 	}
 
 	if _, err := s.validateLocality.GetByID(warehouse.LocalityID); err != nil {
-		return err
+		return utils.EConflict("Warehouse", "Locality")
 	}
 
 	return nil
