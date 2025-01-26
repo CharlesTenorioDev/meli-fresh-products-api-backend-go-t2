@@ -161,7 +161,7 @@ func TestUnitProductBatch_Save_BatchNumberAlreadyExists(t *testing.T) {
 
 	_, err := service.Save(&newBatch)
 
-	require.Error(t, err, "entity already exists")
+	require.Equal(t, utils.EConflict("batch number", "Product batch"), err)
 
 }
 
@@ -190,7 +190,7 @@ func TestUnitProductBatch_Save_SectionIdDoesNotExist(t *testing.T) {
 
 	_, err := service.Save(&newBatch)
 
-	require.Error(t, err, "invalid arguments")
+	require.Equal(t, utils.ENotFound("Section ID"), err)
 
 }
 
@@ -220,7 +220,7 @@ func TestUnitProductBatch_Save_ProductIdDoesNotExist(t *testing.T) {
 
 	_, err := service.Save(&newBatch)
 
-	require.Error(t, err, "invalid arguments")
+	require.Equal(t, utils.ENotFound("Product ID"), err)
 
 }
 
@@ -246,8 +246,7 @@ func TestUnitProductBatch_Save_InvalidOrEmptyArguments(t *testing.T) {
 
 	_, err := service.Save(&newBatch)
 
-	require.Error(t, err, utils.ErrInvalidArguments)
-
+	require.Equal(t, utils.EZeroValue("Due date"), err)
 }
 
 func TestUnitProductBatch_InternalServerError(t *testing.T) {
