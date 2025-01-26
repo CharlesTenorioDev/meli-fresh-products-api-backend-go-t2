@@ -206,7 +206,29 @@ func TestUnitSeller_Create_CidAlreadyExists(t *testing.T) {
 	require.Equal(t, utils.EConflict("Cid", "Seller"), result)
 }
 
-func TestUnitSeller_Create_EmptyOrInvalidArguments(t *testing.T) {
+func TestUnitSeller_Create_EmptyOrInvalidCid(t *testing.T) {
+	newSeller := internal.Seller{
+		ID:          1,
+		Cid:         -1,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, nil)
+
+	service := NewSellerService(msr, mlr)
+
+	result := service.Create(&newSeller)
+
+	require.Equal(t, result, utils.EZeroValue("Cid"))
+}
+
+func TestUnitSeller_Create_EmptyOrInvalidCompany(t *testing.T) {
 	newSeller := internal.Seller{
 		ID:          1,
 		Cid:         55,
@@ -219,13 +241,13 @@ func TestUnitSeller_Create_EmptyOrInvalidArguments(t *testing.T) {
 	msr := new(MockSellerRepository)
 	mlr := new(MockLocalityRepository)
 
-	msr.On("GetByCid", mock.Anything).Return(internal.Seller{Cid: 0}, nil)
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, utils.ErrNotFound)
 
 	service := NewSellerService(msr, mlr)
 
 	result := service.Create(&newSeller)
 
-	require.ErrorIs(t, result, utils.ErrInvalidArguments)
+	require.Equal(t, result, utils.EZeroValue("Company name"))
 }
 
 func TestUnitSeller_Create_LocalityDoesNotExist(t *testing.T) {
