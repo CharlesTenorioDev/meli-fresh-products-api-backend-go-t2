@@ -177,7 +177,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// Requisito 6 - Buyers
 	buyersRepo := buyer.NewBuyerDB(a.db)
 	buyersService := buyer.NewBuyer(buyersRepo)
-	// Create the routes and deps
+	// CreateInboundOrder the routes and deps
 	if err = buyer.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
@@ -208,7 +208,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		panic(err)
 	}
 
-	inboundOrderRepo := inbound_order.NewInboundOrderRepository(a.db)
+	inboundOrderRepo := inbound_order.NewMySqlInboundOrderRepository(a.db)
 	inboundOrderService := inbound_order.NewInboundOrderService(inboundOrderRepo)
 
 	if err := inbound_order.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {

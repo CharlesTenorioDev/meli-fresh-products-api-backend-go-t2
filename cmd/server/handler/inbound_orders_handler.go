@@ -2,7 +2,8 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,28 +29,32 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 
 		// Decodifica o JSON
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid JSON format")
+			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
 			return
 		}
 
 		newOrder := request.Data
 
-		// Valida os campos obrigatórios
-		if newOrder.OrderDate == "" || newOrder.OrderNumber == "" || newOrder.EmployeeID == 0 || newOrder.ProductBatchID == 0 || newOrder.WarehouseID == 0 {
-			utils.Error(w, http.StatusUnprocessableEntity, "Missing required fields")
-			return
-		}
-
 		// Cria a ordem usando o serviço
-		order, err := h.service.CreateOrder(newOrder)
+		order, err := h.service.CreateInboundOrder(newOrder)
 		if err != nil {
-			fmt.Println(err.Error())
-
-			if err == utils.ErrConflict {
-				utils.Error(w, http.StatusConflict, "Order number already exists or employee ID is invalid")
-			} else {
-				utils.Error(w, http.StatusInternalServerError, "Failed to create order")
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
 			}
+
+			if errors.Is(err, utils.ErrNotFound) {
+				log.Println(newOrder)
+				utils.Error(w, http.StatusNotFound, err.Error())
+				return
+			}
+
+			if errors.Is(err, utils.ErrInvalidArguments) {
+				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+				return
+			}
+
+			utils.Error(w, http.StatusInternalServerError, "Failed to create order")
 
 			return
 		}
@@ -65,10 +70,10 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 	}
 }
 
-// GetInboundOrdersReport sHandle GET /api/v1/employees/reportInboundOrders
+// GenerateInboundOrdersReport sHandle GET /api/v1/employees/reportInboundOrders
 //
 //	handles the generation of the report.
-func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
+func (h *InboundOrderHandler) GenerateInboundOrdersReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idsParam := r.URL.Query().Get("id")
 
@@ -79,7 +84,7 @@ func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 			for _, idStr := range idsStrings {
 				id, err := strconv.Atoi(strings.TrimSpace(idStr))
 				if err != nil {
-					utils.Error(w, http.StatusBadRequest, "Invalid 'id' parameter format")
+					utils.HandleError(w, utils.ErrInvalidFormat)
 					return
 				}
 
@@ -89,11 +94,22 @@ func (h *InboundOrderHandler) GetInboundOrdersReport() http.HandlerFunc {
 
 		report, err := h.service.GenerateInboundOrdersReport(ids)
 		if err != nil {
-			if err == utils.ErrNotFound {
-				utils.Error(w, http.StatusNotFound, "No data found for the given employee(s)")
-			} else {
-				utils.Error(w, http.StatusInternalServerError, "Failed to generate report")
+			if errors.Is(err, utils.ErrConflict) {
+				utils.Error(w, http.StatusConflict, err.Error())
+				return
 			}
+
+			if errors.Is(err, utils.ErrNotFound) {
+				utils.Error(w, http.StatusNotFound, err.Error())
+				return
+			}
+
+			if errors.Is(err, utils.ErrInvalidArguments) {
+				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
+				return
+			}
+
+			utils.Error(w, http.StatusInternalServerError, "Failed to create order")
 
 			return
 		}

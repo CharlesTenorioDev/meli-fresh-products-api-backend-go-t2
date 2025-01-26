@@ -2,20 +2,19 @@ package inbound_order
 
 import (
 	"database/sql"
-
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type InboundOrderRepository struct {
+type MysqlInboundOrderRepository struct {
 	db *sql.DB
 }
 
-func NewInboundOrderRepository(db *sql.DB) *InboundOrderRepository {
-	return &InboundOrderRepository{db: db}
+func NewMySqlInboundOrderRepository(db *sql.DB) internal.InboundOrderRepository {
+	return &MysqlInboundOrderRepository{db: db}
 }
 
-func (r *InboundOrderRepository) FindByID(id int) (internal.InboundOrder, error) {
+func (r *MysqlInboundOrderRepository) FindByID(id int) (internal.InboundOrder, error) {
 	var order internal.InboundOrder
 	order.Attributes = internal.InboundOrderAttributes{}
 
@@ -34,7 +33,7 @@ func (r *InboundOrderRepository) FindByID(id int) (internal.InboundOrder, error)
 	return order, nil
 }
 
-func (r *InboundOrderRepository) Create(newOrder internal.InboundOrderAttributes) (internal.InboundOrder, error) {
+func (r *MysqlInboundOrderRepository) CreateInboundOrder(newOrder internal.InboundOrderAttributes) (internal.InboundOrder, error) {
 	result, err := r.db.Exec("INSERT INTO inbound_orders (order_date, order_number, employee_id, product_batch_id, warehouse_id) VALUES (?, ?, ?, ?, ?)", newOrder.OrderDate, newOrder.OrderNumber, newOrder.EmployeeID, newOrder.ProductBatchID, newOrder.WarehouseID)
 	if err != nil {
 		return internal.InboundOrder{}, err
@@ -45,7 +44,7 @@ func (r *InboundOrderRepository) Create(newOrder internal.InboundOrderAttributes
 	return r.FindByID(int(id))
 }
 
-func (r *InboundOrderRepository) FindByOrderNumber(orderNumber string) (internal.InboundOrder, error) {
+func (r *MysqlInboundOrderRepository) FindByOrderNumber(orderNumber string) (internal.InboundOrder, error) {
 	var order internal.InboundOrder
 	order.Attributes = internal.InboundOrderAttributes{}
 
@@ -57,7 +56,7 @@ func (r *InboundOrderRepository) FindByOrderNumber(orderNumber string) (internal
 	return order, err
 }
 
-func (r *InboundOrderRepository) GenerateReportForEmployee(employeeID int) (internal.EmployeeInboundOrdersReport, error) {
+func (r *MysqlInboundOrderRepository) GenerateByIDInboundOrdersReport(employeeID int) (internal.EmployeeInboundOrdersReport, error) {
 	var report internal.EmployeeInboundOrdersReport
 	err := r.db.QueryRow(`
 		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
@@ -78,7 +77,7 @@ func (r *InboundOrderRepository) GenerateReportForEmployee(employeeID int) (inte
 	return report, nil
 }
 
-func (r *InboundOrderRepository) GenerateReport() ([]internal.EmployeeInboundOrdersReport, error) {
+func (r *MysqlInboundOrderRepository) GenerateInboundOrdersReport() ([]internal.EmployeeInboundOrdersReport, error) {
 	report := []internal.EmployeeInboundOrdersReport{}
 	rows, err := r.db.Query(`
 		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
