@@ -186,7 +186,7 @@ func TestUnitSeller_Create_InternalServerError(t *testing.T) {
 	require.Equal(t, http.StatusInternalServerError, response.StatusCode)
 
 	responseBody, _ := io.ReadAll(response.Body)
-	expectedResponseBody := `{"status":"Internal Server Error","message":"Some error occurs"}`
+	expectedResponseBody := `{"status":"Internal Server Error","message":"internal server error"}`
 	require.Equal(t, expectedResponseBody, string(responseBody))
 
 }
