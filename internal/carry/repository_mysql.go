@@ -47,7 +47,7 @@ func (r *MySQLCarryRepository) Save(carry *internal.Carry) error {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
 			if mysqlErr.Number == 1062 {
-				return utils.ErrConflict
+				return utils.EConflict("Carry", "CID")
 			}
 		}
 
@@ -70,7 +70,7 @@ func (r *MySQLCarryRepository) Save(carry *internal.Carry) error {
 func (r *MySQLCarryRepository) GetAll() ([]internal.Carry, error) {
 	rows, err := r.db.Query("SELECT id, cid, company_name, address, telephone, locality_id FROM carriers;")
 	if err != nil {
-		return []internal.Carry{}, err
+		return []internal.Carry{}, utils.ENotFound("Carry")
 	}
 	defer rows.Close()
 
@@ -114,7 +114,7 @@ func (r *MySQLCarryRepository) GetByID(id int) (internal.Carry, error) {
 	if err !=
 		nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return internal.Carry{}, utils.ErrNotFound
+			return internal.Carry{}, utils.ENotFound("Carry")
 		}
 
 		return internal.Carry{}, err

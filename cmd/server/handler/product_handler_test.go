@@ -49,18 +49,18 @@ func TestProductHandler_GetProducts(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
-		Body               string
+		ExpectedBody       string
 		ExpectedStatusCode int
 	}{
 		{
 			TestName:           "GetProducts_OK",
-			Body:               `{"data":[{"id":1,"product_code":"123","description":"product1","width":1000,"height":10,"length":10,"net_weight":10,"expiration_rate":10,"recommended_freezing_temperature":10,"freezing_rate":10,"product_type":1,"seller_id":1}]}`,
+			ExpectedBody:       `{"data":[{"id":1,"product_code":"123","description":"product1","width":1000,"height":10,"length":10,"net_weight":10,"expiration_rate":10,"recommended_freezing_temperature":10,"freezing_rate":10,"product_type":1,"seller_id":1}]}`,
 			ExpectedStatusCode: http.StatusOK,
 			ErrorToReturn:      nil,
 		},
 		{
 			TestName:           "GetProducts_InternalServerError",
-			Body:               `{"status":"Not Found","message":"entity not found: Product doesn't exist"}`,
+			ExpectedBody:       `{"status":"Not Found","message":"entity not found: Product doesn't exist"}`,
 			ExpectedStatusCode: http.StatusNotFound,
 			ErrorToReturn:      utils.ENotFound("Product"),
 		},
@@ -91,14 +91,14 @@ func TestProductHandler_GetProducts(t *testing.T) {
 			handler := handler.NewProductHandler(service)
 
 			request := &http.Request{
-				Body:   io.NopCloser(strings.NewReader(c.Body)),
+				Body:   io.NopCloser(strings.NewReader(c.ExpectedBody)),
 				Header: http.Header{"Content-Type": []string{"application/json"}},
 			}
 			response := httptest.NewRecorder()
 			handler.GetProducts(response, request)
 			require.Equal(t, c.ExpectedStatusCode, response.Result().StatusCode)
 			require.Equal(t, "application/json", response.Header().Get("Content-Type"))
-			require.JSONEq(t, c.Body, response.Body.String())
+			require.JSONEq(t, c.ExpectedBody, response.Body.String())
 
 		})
 	}
