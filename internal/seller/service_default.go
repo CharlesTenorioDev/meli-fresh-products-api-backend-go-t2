@@ -34,7 +34,7 @@ func (s *DefaultSellerService) GetByID(id int) (internal.Seller, error) {
 	}
 
 	if seller == (internal.Seller{}) {
-		return internal.Seller{}, utils.ErrNotFound
+		return internal.Seller{}, utils.ENotFound("Seller")
 	}
 
 	return seller, nil
@@ -51,7 +51,7 @@ func (s *DefaultSellerService) Create(newSeller *internal.Seller) error {
 
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			return errors.Join(utils.ErrInvalidArguments, errors.New("invalid locality_id"))
+			return utils.EDependencyNotFound("Seller", "locality ID")
 		}
 
 		return err
@@ -73,7 +73,7 @@ func (s *DefaultSellerService) Update(id int, newSeller *internal.Seller) (inter
 	}
 
 	if existingSeller == (internal.Seller{}) {
-		return internal.Seller{}, utils.ErrNotFound
+		return internal.Seller{}, utils.ENotFound("Seller")
 	}
 
 	existingCid, err := s.rp.GetByCid(newSeller.Cid)
@@ -83,7 +83,7 @@ func (s *DefaultSellerService) Update(id int, newSeller *internal.Seller) (inter
 	}
 
 	if existingCid.Cid != 0 && existingCid.ID != id {
-		return internal.Seller{}, utils.ErrConflict
+		return internal.Seller{}, utils.EConflict("Cid", "Seller")
 	}
 
 	if newSeller.Cid != 0 {
@@ -118,7 +118,7 @@ func (s *DefaultSellerService) Delete(id int) error {
 	}
 
 	if existingSeller == (internal.Seller{}) {
-		return utils.ErrNotFound
+		return utils.ENotFound("Seller")
 	}
 
 	err = s.rp.Delete(id)
@@ -132,7 +132,7 @@ func (s *DefaultSellerService) Delete(id int) error {
 
 func (s *DefaultSellerService) verify(newSeller internal.Seller) error {
 	if newSeller.Cid <= 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Cid")
 	}
 
 	existingCid, err := s.rp.GetByCid(newSeller.Cid)
@@ -141,19 +141,19 @@ func (s *DefaultSellerService) verify(newSeller internal.Seller) error {
 	}
 
 	if existingCid.Cid != 0 {
-		return utils.ErrConflict
+		return utils.EConflict("Cid", "Seller")
 	}
 
 	if len(newSeller.CompanyName) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Company name")
 	}
 
 	if len(newSeller.Telephone) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Telephone")
 	}
 
 	if len(newSeller.Address) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Address")
 	}
 
 	return nil

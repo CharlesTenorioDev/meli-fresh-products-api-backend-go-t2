@@ -138,7 +138,7 @@ func TestUnitSeller_GetByID_NotFound(t *testing.T) {
 
 	result, err := service.GetByID(1)
 
-	require.ErrorIs(t, err, utils.ErrNotFound)
+	require.Equal(t, utils.ENotFound("Seller"), err)
 	require.Equal(t, result, internal.Seller{})
 }
 
@@ -203,7 +203,7 @@ func TestUnitSeller_Create_CidAlreadyExists(t *testing.T) {
 
 	result := service.Create(&newSeller)
 
-	require.ErrorIs(t, result, utils.ErrConflict)
+	require.Equal(t, utils.EConflict("Cid", "Seller"), result)
 }
 
 func TestUnitSeller_Create_EmptyOrInvalidArguments(t *testing.T) {
@@ -241,7 +241,7 @@ func TestUnitSeller_Create_LocalityDoesNotExist(t *testing.T) {
 	msr := new(MockSellerRepository)
 	mlr := new(MockLocalityRepository)
 
-	errGetLocality := errors.Join(utils.ErrInvalidArguments, errors.New("invalid locality_id"))
+	errGetLocality := utils.EDependencyNotFound("Seller", "locality ID")
 
 	msr.On("GetByCid", mock.Anything).Return(internal.Seller{Cid: 0}, nil)
 	mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, errGetLocality)
@@ -323,7 +323,7 @@ func TestUnitSeller_Update_SellerNotFound(t *testing.T) {
 
 	result, err := service.Update(1, &updatedSeller)
 
-	require.Error(t, err, utils.ErrNotFound)
+	require.Equal(t, utils.ENotFound("Seller"), err)
 	require.Equal(t, result, internal.Seller{})
 }
 
@@ -347,7 +347,7 @@ func TestUnitSeller_Update_CidAlreadyInUseByOtherSeller(t *testing.T) {
 
 	result, err := service.Update(1, &updatedSeller)
 
-	require.Error(t, err, utils.ErrConflict)
+	require.Equal(t, err, utils.EConflict("Cid", "Seller"))
 	require.Equal(t, result, internal.Seller{})
 }
 
@@ -405,7 +405,7 @@ func TestUnitSeller_Delete_SellerNotFound(t *testing.T) {
 
 	err := service.Delete(1)
 
-	require.ErrorIs(t, err, utils.ErrNotFound)
+	require.Equal(t, utils.ENotFound("Seller"), err)
 }
 
 func TestUnitSeller_Delete_InternalServerError(t *testing.T) {
