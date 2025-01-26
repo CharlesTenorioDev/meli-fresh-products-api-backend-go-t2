@@ -23,7 +23,7 @@ func (m *MockProductBatchService) Save(newBatch *internal.ProductBatchRequest) (
 	return args.Get(0).(internal.ProductBatch), args.Error(1)
 }
 
-func TestUnitSeller_Create_Success(t *testing.T) {
+func TestUnitProductBatch_Create_Success(t *testing.T) {
 	productBatch := internal.ProductBatch{
 		ID: 1,
 		ProductBatchRequest: internal.ProductBatchRequest{
@@ -59,7 +59,7 @@ func TestUnitSeller_Create_Success(t *testing.T) {
 
 }
 
-func TestUnitSeller_Create_BadRequest(t *testing.T) {
+func TestUnitProductBatch_Create_BadRequest(t *testing.T) {
 
 	service := new(MockProductBatchService)
 
@@ -80,7 +80,7 @@ func TestUnitSeller_Create_BadRequest(t *testing.T) {
 
 }
 
-func TestUnitSeller_Create_Conflict(t *testing.T) {
+func TestUnitProductBatch_Create_Conflict(t *testing.T) {
 	productBatch := internal.ProductBatch{
 		ID: 1,
 		ProductBatchRequest: internal.ProductBatchRequest{
@@ -117,7 +117,7 @@ func TestUnitSeller_Create_Conflict(t *testing.T) {
 
 }
 
-func TestUnitSeller_Create_InvalidOrEmptyAguments(t *testing.T) {
+func TestUnitProductBatch_Create_InvalidOrEmptyAguments(t *testing.T) {
 	productBatch := internal.ProductBatch{
 		ID: 1,
 		ProductBatchRequest: internal.ProductBatchRequest{
@@ -154,7 +154,7 @@ func TestUnitSeller_Create_InvalidOrEmptyAguments(t *testing.T) {
 
 }
 
-func TestUnitSeller_Create_InternalServerError(t *testing.T) {
+func TestUnitProductBatch_Create_InternalServerError(t *testing.T) {
 	productBatch := internal.ProductBatch{
 		ID: 1,
 		ProductBatchRequest: internal.ProductBatchRequest{
