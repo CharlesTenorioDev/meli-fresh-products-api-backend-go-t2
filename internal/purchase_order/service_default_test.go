@@ -32,8 +32,8 @@ type mockPurchaseOrderBuyerValidation struct {
 	mock.Mock
 }
 
-func (m *mockPurchaseOrderBuyerValidation) GetOne(int) (*internal.Buyer, error) {
-	args := m.Called()
+func (m *mockPurchaseOrderBuyerValidation) GetOne(id int) (*internal.Buyer, error) {
+	args := m.Called(id)
 	return args.Get(0).(*internal.Buyer), args.Error(1)
 }
 
@@ -42,7 +42,7 @@ type mockPurchaseOrderProductRecordValidation struct {
 }
 
 func (m *mockPurchaseOrderProductRecordValidation) FindByID(productRecordID int) (internal.ProductRecords, error) {
-	args := m.Called()
+	args := m.Called(productRecordID)
 	return args.Get(0).(internal.ProductRecords), args.Error(1)
 }
 
@@ -67,6 +67,15 @@ var (
 			OrderNumber:     "order#101",
 			OrderDate:       "2021-04-04",
 			TrackingCode:    "abscf1234",
+			BuyerID:         1,
+			ProductRecordID: 1,
+		}}
+	mockPurchaseOrder2 = internal.PurchaseOrder{
+		ID: 2,
+		Attributes: internal.PurchaseOrderAttributes{
+			OrderNumber:     "order#10101",
+			OrderDate:       "2021-04-04",
+			TrackingCode:    "xyz123456",
 			BuyerID:         1,
 			ProductRecordID: 1,
 		}}
@@ -124,16 +133,15 @@ func TestPurchaseOrdersService_FindAll(t *testing.T) {
 }
 
 func TestPurchaseOrdersService_Create(t *testing.T) {
-	mockRepo := new(mockPurchaseOrderRepository)
-	mockBV := new(mockPurchaseOrderBuyerValidation)
-	mockPRV := new(mockPurchaseOrderProductRecordValidation)
-	service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
-
 	t.Run("Create - Success", func(t *testing.T) {
-		// ERRO
-		mockBV.On("GetOne", 1).Return(mockBuyer, nil)
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 1).Return(&mockBuyer, nil)
 		mockPRV.On("FindByID", 1).Return(mockProductRecord, nil)
-		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder}, nil)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder2}, nil)
 		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(mockPurchaseOrder, nil)
 
 		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder)
@@ -143,28 +151,36 @@ func TestPurchaseOrdersService_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Conflict", func(t *testing.T) {
-		// ERRO
-		mockBV.On("GetOne", 1).Return(mockBuyer, nil)
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 1).Return(&mockBuyer, nil)
 		mockPRV.On("FindByID", 1).Return(mockProductRecord, nil)
 		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{}, utils.ErrConflict)
-		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return([]internal.PurchaseOrder{}, utils.ErrConflict)
+		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(internal.PurchaseOrder{}, utils.ErrConflict)
 
 		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder)
 
-		assert.Equal(t, []internal.PurchaseOrder{}, result)
+		assert.Equal(t, internal.PurchaseOrder{}, result)
 		assert.Equal(t, utils.ErrConflict, err)
 	})
 
 	t.Run("Create - Empty Arguments", func(t *testing.T) {
-		// ERRO
-		mockBV.On("GetOne", 1).Return(mockBuyer, nil)
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 1).Return(&mockBuyer, nil)
 		mockPRV.On("FindByID", 1).Return(mockProductRecord, nil)
-		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder}, nil)
-		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(mockPurchaseOrder, nil)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder2}, nil)
+		mockRepo.On("CreatePurchaseOrder", internal.PurchaseOrderAttributes{}).Return(internal.PurchaseOrder{}, nil)
 
-		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder)
+		result, err := service.CreatePurchaseOrder(internal.PurchaseOrderAttributes{})
 
-		assert.Equal(t, mockPurchaseOrder, result)
-		assert.Nil(t, err)
+		assert.Equal(t, internal.PurchaseOrder{}, result)
+		assert.Equal(t, utils.ErrEmptyArguments, err)
 	})
 }
