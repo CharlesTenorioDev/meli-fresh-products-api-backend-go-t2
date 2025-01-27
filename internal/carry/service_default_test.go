@@ -48,7 +48,7 @@ func (m *MockLocalityValidation) GetByID(id int) (internal.Locality, error) {
 	return args.Get(0).(internal.Locality), args.Error(1)
 }
 
-func TestMySQLCarryService_GetAll(t *testing.T) {
+func TestUnitMySQLCarryService_GetAll(t *testing.T) {
 	tests := []struct {
 		name        string
 		mockRepo    func() (*MockCarryRepository, *MockLocalityValidation)
@@ -109,7 +109,7 @@ func TestMySQLCarryService_GetAll(t *testing.T) {
 	}
 }
 
-func TestMySQLCarryService_GetByID(t *testing.T) {
+func TestUnitMySQLCarryService_GetByID(t *testing.T) {
 	tests := []struct {
 		name        string
 		id          int
@@ -169,7 +169,7 @@ func TestMySQLCarryService_GetByID(t *testing.T) {
 	}
 }
 
-func TestMySQLCarryService_Save(t *testing.T) {
+func TestUnitMySQLCarryService_Save(t *testing.T) {
 	tests := []struct {
 		name         string
 		carry        *internal.Carry
@@ -341,6 +341,181 @@ func TestMySQLCarryService_Save(t *testing.T) {
 			tt.Assert(t, repo, localityValidation)
 			require.Equal(t, tt.expectedErr, err)
 			require.Equal(t, tt.expectedBody, gotCarry)
+		})
+	}
+}
+
+func TestUnitMySQLCarryService_Update(t *testing.T) {
+	tests := []struct {
+		name         string
+		carry        *internal.Carry
+		mockRepo     func() (*MockCarryRepository, *MockLocalityValidation)
+		expectedBody internal.Carry
+		wantErr      bool
+		expectedErr  error
+		Assert       func(*testing.T, *MockCarryRepository, *MockLocalityValidation)
+	}{
+		{
+			name: "Update carry",
+			carry: &internal.Carry{
+				ID:          1,
+				CID:         1,
+				CompanyName: "Company 1",
+				Address:     "Address 1",
+				Telephone:   "123456789",
+				LocalityID:  1,
+			},
+			mockRepo: func() (*MockCarryRepository, *MockLocalityValidation) {
+				repo := new(MockCarryRepository)
+				repo.On("GetByID", 1).Return(internal.Carry{
+					ID:          1,
+					CID:         1,
+					CompanyName: "Company unaltered",
+					Address:     "Address unaltered",
+					Telephone:   "123456789",
+					LocalityID:  1,
+				}, nil)
+				repo.On("Update", &internal.Carry{
+					ID:          1,
+					CID:         1,
+					CompanyName: "Company 1",
+					Address:     "Address 1",
+					Telephone:   "123456789",
+					LocalityID:  1,
+				}).Return(nil)
+				localityValidation := new(MockLocalityValidation)
+				localityValidation.On("GetByID", 1).Return(internal.Locality{}, nil)
+				return repo, localityValidation
+			},
+			wantErr:     false,
+			expectedErr: nil,
+			expectedBody: internal.Carry{
+				ID:          1,
+				CID:         1,
+				CompanyName: "Company 1",
+				Address:     "Address 1",
+				Telephone:   "123456789",
+				LocalityID:  1,
+			},
+			Assert: func(t *testing.T, repo *MockCarryRepository, localityValidation *MockLocalityValidation) {
+				repo.AssertNumberOfCalls(t, "GetByID", 1)
+				repo.AssertNumberOfCalls(t, "Update", 1)
+				localityValidation.AssertNumberOfCalls(t, "GetByID", 1)
+			},
+		},
+		{
+			name: "Update carry - OK Attributes comes with Zero value",
+			carry: &internal.Carry{
+				ID:         0,
+				LocalityID: 2,
+			},
+			mockRepo: func() (*MockCarryRepository, *MockLocalityValidation) {
+				repo := new(MockCarryRepository)
+				repo.On("GetByID", 0).Return(internal.Carry{
+					ID:          0,
+					CID:         1,
+					CompanyName: "Company unaltered",
+					Address:     "Address unaltered",
+					Telephone:   "123456789",
+					LocalityID:  2,
+				}, nil)
+				repo.On("Update", &internal.Carry{
+					ID:          0,
+					CID:         1,
+					CompanyName: "Company unaltered",
+					Address:     "Address unaltered",
+					Telephone:   "123456789",
+					LocalityID:  2,
+				}).Return(nil)
+				localityValidation := new(MockLocalityValidation)
+				localityValidation.On("GetByID", 2).Return(internal.Locality{}, nil)
+				return repo, localityValidation
+			},
+			wantErr:     false,
+			expectedErr: nil,
+			expectedBody: internal.Carry{
+				ID:          0,
+				CID:         1,
+				CompanyName: "Company unaltered",
+				Address:     "Address unaltered",
+				Telephone:   "123456789",
+				LocalityID:  2,
+			},
+			Assert: func(t *testing.T, repo *MockCarryRepository, localityValidation *MockLocalityValidation) {
+				repo.AssertNumberOfCalls(t, "GetByID", 1)
+				repo.AssertNumberOfCalls(t, "Update", 1)
+				localityValidation.AssertNumberOfCalls(t, "GetByID", 1)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo, localityValidation := tt.mockRepo()
+			s := carry.NewMySQLCarryService(repo, localityValidation)
+			err := s.Update(tt.carry)
+			gotCarry := internal.Carry{}
+			if err == nil {
+				gotCarry.ID = tt.carry.ID
+				gotCarry.CID = tt.carry.CID
+				gotCarry.CompanyName = tt.carry.CompanyName
+				gotCarry.Address = tt.carry.Address
+				gotCarry.Telephone = tt.carry.Telephone
+				gotCarry.LocalityID = tt.carry.LocalityID
+			}
+			tt.Assert(t, repo, localityValidation)
+			require.Equal(t, tt.expectedErr, err)
+			require.Equal(t, tt.expectedBody, gotCarry)
+		})
+	}
+}
+
+func TestUnitMySQLCarryService_Delete(t *testing.T) {
+	tests := []struct {
+		name        string
+		id          int
+		mockRepo    func() (*MockCarryRepository, *MockLocalityValidation)
+		wantErr     bool
+		expectedErr error
+		Assert      func(*testing.T, *MockCarryRepository, *MockLocalityValidation)
+	}{
+		{
+			name: "Delete carry",
+			id:   1,
+			mockRepo: func() (*MockCarryRepository, *MockLocalityValidation) {
+				repo := new(MockCarryRepository)
+				repo.On("Delete", 1).Return(nil)
+				localityValidation := new(MockLocalityValidation)
+				return repo, localityValidation
+			},
+			wantErr:     false,
+			expectedErr: nil,
+			Assert: func(t *testing.T, repo *MockCarryRepository, localityValidation *MockLocalityValidation) {
+				repo.AssertNumberOfCalls(t, "Delete", 1)
+			},
+		},
+		{
+			name: "Delete carry - Error",
+			id:   1,
+			mockRepo: func() (*MockCarryRepository, *MockLocalityValidation) {
+				repo := new(MockCarryRepository)
+				repo.On("Delete", 1).Return(utils.ENotFound("Carry"))
+				localityValidation := new(MockLocalityValidation)
+				return repo, localityValidation
+			},
+			wantErr:     true,
+			expectedErr: utils.ENotFound("Carry"),
+			Assert: func(t *testing.T, repo *MockCarryRepository, localityValidation *MockLocalityValidation) {
+				repo.AssertNumberOfCalls(t, "Delete", 1)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo, localityValidation := tt.mockRepo()
+			s := carry.NewMySQLCarryService(repo, localityValidation)
+			err := s.Delete(tt.id)
+			tt.Assert(t, repo, localityValidation)
+			require.Equal(t, tt.expectedErr, err)
 		})
 	}
 }

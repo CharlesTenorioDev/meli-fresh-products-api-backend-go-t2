@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -42,28 +41,12 @@ func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&carry)
 		if err != nil {
-			http.Error(w, "Failed to decode carry: "+err.Error(), http.StatusBadRequest)
+			utils.HandleError(w, err)
 			return
 		}
 
 		if err := handler.service.Save(carry); err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, "CID already exists: "+utils.ErrConflict.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, "Invalid carry: "+utils.ErrInvalidArguments.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusConflict, "Locality: "+err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Failed to save carry: "+err.Error())
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -78,7 +61,7 @@ func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		carries, err := handler.service.GetAll()
 		if err != nil {
-			utils.Error(w, http.StatusNotFound, "Failed to get all carries")
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -98,13 +81,13 @@ func (handler *CarryHandler) GetCarryByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID")
+			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 			return
 		}
 
 		carry, err := handler.service.GetByID(id)
 		if err != nil {
-			utils.Error(w, http.StatusNotFound, "Failed to get carry")
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -122,7 +105,7 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID")
+			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 			return
 		}
 
@@ -130,25 +113,14 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 
 		err = json.NewDecoder(r.Body).Decode(carry)
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Failed to decode carry: "+err.Error())
+			utils.HandleError(w, err)
 			return
 		}
 
 		carry.ID = id
 
 		if err := handler.service.Update(carry); err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Failed to update carry: "+err.Error())
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -166,18 +138,12 @@ func (handler *CarryHandler) DeleteCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID")
+			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 			return
 		}
 
 		if err := handler.service.Delete(id); err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, "Carry not found")
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Failed to delete carry")
-
+			utils.HandleError(w, err)
 			return
 		}
 

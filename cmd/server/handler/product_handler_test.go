@@ -45,7 +45,7 @@ func (m *mockProductService) DeleteProduct(id int) error {
 	return args.Error(0)
 }
 
-func TestProductHandler_GetProducts(t *testing.T) {
+func TestUnitProductHandler_GetProducts(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
@@ -104,7 +104,7 @@ func TestProductHandler_GetProducts(t *testing.T) {
 	}
 }
 
-func TestProductHandler_GetProductByID(t *testing.T) {
+func TestUnitProductHandler_GetProductByID(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
@@ -190,7 +190,7 @@ func TestProductHandler_GetProductByID(t *testing.T) {
 	}
 }
 
-func TestProductHandler_CreateProduct(t *testing.T) {
+func TestUnitProductHandler_CreateProduct(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
@@ -275,7 +275,7 @@ func TestProductHandler_CreateProduct(t *testing.T) {
 	}
 }
 
-func TestProductHandler_UpdateProduct(t *testing.T) {
+func TestUnitProductHandler_UpdateProduct(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
@@ -356,7 +356,7 @@ func TestProductHandler_UpdateProduct(t *testing.T) {
 	}
 }
 
-func TestProductHandler_DeleteProduct(t *testing.T) {
+func TestUnitProductHandler_DeleteProduct(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error
