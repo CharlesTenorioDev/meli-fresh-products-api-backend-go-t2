@@ -49,10 +49,10 @@ func Test__Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	Error(w, 500, "Some error occurs")
 
-	var resultBody errorResponse
+	var resultBody ErrorResponse
 	json.NewDecoder(w.Result().Body).Decode(&resultBody)
 
 	require.Equal(t, w.Result().StatusCode, 500)
-	require.Equal(t, resultBody, errorResponse{"Internal Server Error", "Some error occurs"})
+	require.Equal(t, resultBody, ErrorResponse{"Internal Server Error", "Some error occurs"})
 	require.Equal(t, w.Result().Header.Get("Content-Type"), "application/json")
 }

@@ -27,16 +27,20 @@ type SellerJSON struct {
 func (l *SellerJSONFile) Load() (v map[int]Seller, err error) {
 	// open file
 	file, err := os.Open(l.path)
+
 	if err != nil {
-		return
+		return v, err
 	}
+
 	defer file.Close()
 
 	// decode file
 	var sellersJSON []SellerJSON
+
 	err = json.NewDecoder(file).Decode(&sellersJSON)
+
 	if err != nil {
-		return
+		return v, err
 	}
 
 	// serialize vehicles
@@ -51,5 +55,5 @@ func (l *SellerJSONFile) Load() (v map[int]Seller, err error) {
 		}
 	}
 
-	return
+	return v, err
 }

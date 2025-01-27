@@ -5,17 +5,32 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/employee"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/inbound_order"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_batch"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_record"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/product_type"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/province"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/purchase_order"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/section"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/seller"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/warehouse"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/repository"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/routes"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/service"
+	_ "github.com/meli-fresh-products-api-backend-go-t2/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // ConfigApplicationDefault is the configuration for NewApplicationDefault.
 type ConfigApplicationDefault struct {
-	// Db is the database configuration.
-	Db *mysql.Config
+	// DB is the database configuration.
+	DB *mysql.Config
 	// Addr is the server address.
 	Addr string
 }
@@ -24,28 +39,30 @@ type ConfigApplicationDefault struct {
 func NewApplicationDefault(config *ConfigApplicationDefault) *ApplicationDefault {
 	// default values
 	defaultCfg := &ConfigApplicationDefault{
-		Db:   nil,
+		DB:   nil,
 		Addr: ":8080",
 	}
+
 	if config != nil {
-		if config.Db != nil {
-			defaultCfg.Db = config.Db
+		if config.DB != nil {
+			defaultCfg.DB = config.DB
 		}
+
 		if config.Addr != "" {
 			defaultCfg.Addr = config.Addr
 		}
 	}
 
 	return &ApplicationDefault{
-		cfgDb:   defaultCfg.Db,
+		cfgDB:   defaultCfg.DB,
 		cfgAddr: defaultCfg.Addr,
 	}
 }
 
 // ApplicationDefault is an implementation of the Application interface.
 type ApplicationDefault struct {
-	// cfgDb is the database configuration.
-	cfgDb *mysql.Config
+	// cfgDB is the database configuration.
+	cfgDB *mysql.Config
 	// cfgAddr is the server address.
 	cfgAddr string
 	// db is the database connection.
@@ -66,21 +83,27 @@ func (a *ApplicationDefault) TearDown() {
 // configuring the router, and registering various routes and services.
 func (a *ApplicationDefault) SetUp() (err error) {
 	// connect to db
-	a.db, err = sql.Open("mysql", a.cfgDb.FormatDSN())
+	a.db, err = sql.Open("mysql", a.cfgDB.FormatDSN())
+
 	if err != nil {
 		log.Fatalf("error opening db: %s", err.Error())
 	}
+
 	if err = a.db.Ping(); err != nil {
 		log.Fatalf("error pinging db: %s", err.Error())
 	}
 
 	router := chi.NewRouter()
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition"
+	))
 
-	localityRepo := repository.NewMysqlLocalityRepository(a.db)
-	provinceRepo := repository.NewMysqlProvinceRepository(a.db)
-	countryRepo := repository.NewMysqlCountryRepository(a.db)
-	localityService := service.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
-	err = routes.NewLocalityRoutes(router, localityService)
+	localityRepo := locality.NewMysqlLocalityRepository(a.db)
+	provinceRepo := province.NewMysqlProvinceRepository(a.db)
+	countryRepo := country.NewMysqlCountryRepository(a.db)
+	localityService := locality.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	err = locality.NewLocalityRoutes(router, localityService)
+
 	if err != nil {
 		panic(err)
 	}
@@ -91,94 +114,108 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// if err != nil {
 	// return
 	// }
-	// sellerRepo := repository.NewSellerDbRepository(dbSellers)
-	sellerRepo := repository.NewSellerMysql(a.db)
-	sellerService := service.NewSellerService(sellerRepo, localityRepo)
-	if err := routes.RegisterSellerRoutes(router, sellerService); err != nil {
+	// sellerRepo := repository.NewSellerDBRepository(dbSellers)
+	sellerRepo := seller.NewSellerRepository(a.db)
+	sellerService := seller.NewSellerService(sellerRepo, localityRepo)
+
+	if err := seller.RegisterSellerRoutes(router, sellerService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - ProductType
-	productTypeRepo := repository.NewProductTypeDB(a.db)
-	productTypeService := service.NewProductTypeService(productTypeRepo)
-	if err := routes.NewProductTypeRoutes(router, productTypeService); err != nil {
+	productTypeRepo := product_type.NewProductTypeDB(a.db)
+
+	productTypeService := product_type.NewProductTypeService(productTypeRepo)
+	if err := product_type.NewProductTypeRoutes(router, productTypeService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 4 - Product
-	productRepo := repository.NewProductDB(a.db)
-	productService := service.NewProductService(productRepo, productTypeService)
-	err = routes.NewProductRoutes(router, productService)
+	productRepo := product.NewProductDB(a.db)
+	productService := product.NewProductService(productRepo, productTypeService, sellerService)
+	err = product.NewProductRoutes(router, productService)
+
 	if err != nil {
 		panic(err)
 	}
 
 	//Requisito 4 - Product Records
-	productRecordsRepo := repository.NewProductRecordDB(a.db)
-	productRecordsService := service.NewProductRecordService(productRecordsRepo, productService)
-	err = routes.NewProductRecordsRoutes(router, productRecordsService)
+	productRecordsRepo := product_record.NewProductRecordDB(a.db)
+	productRecordsService := product_record.NewProductRecordService(productRecordsRepo, productService)
+
+	err = product_record.NewProductRecordsRoutes(router, productRecordsService)
 	if err != nil {
 		panic(err)
 	}
 
 	// Requisito 2 - Warehouses
-	warehouseRepo := repository.NewWarehouseRepository(a.db)
-	warehouseService := service.NewWarehouseService(warehouseRepo, localityRepo)
-	err = routes.NewWarehouseRoutes(router, warehouseService)
+	warehouseRepo := warehouse.NewWarehouseDB(a.db)
+	warehouseService := warehouse.NewWarehouseService(warehouseRepo, localityRepo)
+
+	err = warehouse.NewWarehouseRoutes(router, warehouseService)
 	if err != nil {
 		panic(err)
 	}
 
 	// Requisito 3 - Section
 
-	sectionRepo := repository.NewSectionMysql(a.db)
-	sectionService := service.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
-	err = routes.RegisterSectionRoutes(router, sectionService)
+	sectionRepo := section.NewSectionMysql(a.db)
+	sectionService := section.NewBasicSectionService(sectionRepo, warehouseService, productTypeService)
+
+	err = section.RegisterSectionRoutes(router, sectionService)
 	if err != nil {
 		panic(err)
 	}
 
 	// Requisito 5 - Employees
-	employeesRepo := repository.NewEmployeeRepository(a.db)
-	employeesService := service.NewEmployeeService(employeesRepo, warehouseService)
-	if err := routes.RegisterEmployeesRoutes(router, employeesService); err != nil {
+	employeesRepo := employee.NewEmployeeRepository(a.db)
+
+	employeesService := employee.NewEmployeeService(employeesRepo, warehouseService)
+	if err := employee.RegisterEmployeesRoutes(router, employeesService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 6 - Buyers
-	buyersRepo := repository.NewBuyerDb(a.db)
-	buyersService := service.NewBuyer(buyersRepo)
-	// Create the routes and deps
-	if err = routes.BuyerRoutes(router, buyersService); err != nil {
+	buyersRepo := buyer.NewBuyerDB(a.db)
+	buyersService := buyer.NewBuyer(buyersRepo)
+	// CreateInboundOrder the routes and deps
+	if err = buyer.BuyerRoutes(router, buyersService); err != nil {
 		panic(err)
 	}
 
 	// Requisito 6 - Purchase Orders
-	purchaseOrdersRepo := repository.NewPurchaseOrderDb(a.db)
-	purchaseOrdersService := service.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
-	err = routes.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
+	purchaseOrdersRepo := purchase_order.NewPurchaseOrderDB(a.db)
+	purchaseOrdersService := purchase_order.NewPurchaseOrderService(purchaseOrdersRepo, buyersService, productRecordsRepo)
+
+	err = purchase_order.RegisterPurchaseOrdersRoutes(router, purchaseOrdersService)
 	if err != nil {
 		panic(err)
 	}
 
 	// Sprint2 Requisito 2 - Carry
-	carriesRepo := repository.NewMySQLCarryRepository(a.db)
-	carryService := service.NewMySQLCarryService(carriesRepo, localityRepo)
-	if err = routes.CarryRoutes(router, carryService); err != nil {
+	carriesRepo := carry.NewMySQLCarryRepository(a.db)
+
+	//carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
+	carryService := carry.NewMySQLCarryService(carriesRepo, localityRepo)
+	if err = carry.CarryRoutes(router, carryService); err != nil {
 		panic(err)
 	}
 
 	// Sprint2 Requisito 3 - Product Batch
-	productBatchRepo := repository.NewProductBatchRepository(a.db)
-	productBatchService := service.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
-	if err = routes.ProductBatchRoutes(router, productBatchService); err != nil {
+	productBatchRepo := product_batch.NewProductBatchRepository(a.db)
+	productBatchService := product_batch.NewProductBatchService(productBatchRepo, productRepo, sectionRepo)
+
+	if err = product_batch.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
 	}
-	inboundOrderRepo := repository.NewInboundOrderRepository(a.db)
-	inboundOrderService := service.NewInboundOrderService(inboundOrderRepo)
-	if err := routes.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
+
+	inboundOrderRepo := inbound_order.NewMySqlInboundOrderRepository(a.db)
+	inboundOrderService := inbound_order.NewInboundOrderService(inboundOrderRepo)
+
+	if err := inbound_order.RegisterInboundOrderRoutes(router, inboundOrderService); err != nil {
 		panic(err)
 	}
+
 	a.router = router
 
 	return nil
@@ -190,5 +227,6 @@ func (a *ApplicationDefault) Run() (err error) {
 	log.Printf("starting server at %s\n", a.cfgAddr)
 
 	err = http.ListenAndServe(a.cfgAddr, a.router)
+
 	return
 }

@@ -13,19 +13,6 @@ type InboundOrderAttributes struct {
 	WarehouseID    int    `json:"warehouse_id"`
 }
 
-type InboundOrderService interface {
-	CreateOrder(newOrder InboundOrderAttributes) (InboundOrder, error)
-	GenerateInboundOrdersReport(ids []int) ([]EmployeeInboundOrdersReport, error)
-}
-
-type InboundOrderRepository interface {
-	Create(newOrder InboundOrderAttributes) (InboundOrder, error)
-	FindByID(id int) (InboundOrder, error)
-	FindByOrderNumber(orderNumber string) (InboundOrder, error)
-	GenerateReportForEmployee(employeeID int) (EmployeeInboundOrdersReport, error)
-	GenerateReport() ([]EmployeeInboundOrdersReport, error)
-}
-
 type EmployeeInboundOrdersReport struct {
 	ID                 int    `json:"id"`
 	CardNumberID       string `json:"id_card_number"`
@@ -33,4 +20,17 @@ type EmployeeInboundOrdersReport struct {
 	LastName           string `json:"last_name"`
 	WarehouseID        int    `json:"warehouse_id"`
 	InboundOrdersCount int    `json:"inbound_orders_count"`
+}
+
+type InboundOrderService interface {
+	CreateInboundOrder(newOrder InboundOrderAttributes) (InboundOrder, error)
+	GenerateInboundOrdersReport(ids []int) ([]EmployeeInboundOrdersReport, error)
+}
+
+type InboundOrderRepository interface {
+	CreateInboundOrder(newOrder InboundOrderAttributes) (InboundOrder, error)
+	GenerateInboundOrdersReport() ([]EmployeeInboundOrdersReport, error)
+	GenerateByIDInboundOrdersReport(employeeID int) (EmployeeInboundOrdersReport, error)
+	FindByID(id int) (InboundOrder, error)
+	FindByOrderNumber(orderNumber string) (InboundOrder, error)
 }
