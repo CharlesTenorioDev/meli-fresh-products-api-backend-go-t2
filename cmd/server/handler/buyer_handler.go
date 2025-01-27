@@ -3,10 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -71,11 +72,6 @@ func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 				return
 			}
 
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
 			utils.Error(w, http.StatusInternalServerError, "500")
 
 			return
@@ -110,11 +106,6 @@ func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 		buyer, err := handler.service.UpdateBuyer(&updatedBuyer)
 
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
 			if errors.Is(err, utils.ErrConflict) {
 				utils.Error(w, http.StatusConflict, err.Error())
 				return
