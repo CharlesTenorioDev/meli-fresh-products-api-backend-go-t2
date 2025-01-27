@@ -61,6 +61,13 @@ var (
 		BuyerID:         1,
 		ProductRecordID: 1,
 	}
+	mockInvalidNewPurchaseOrder = internal.PurchaseOrderAttributes{
+		OrderNumber:     "order#101",
+		OrderDate:       "2021-04-04",
+		TrackingCode:    "abscf1234",
+		BuyerID:         1,
+		ProductRecordID: 99,
+	}
 	mockPurchaseOrder = internal.PurchaseOrder{
 		ID: 1,
 		Attributes: internal.PurchaseOrderAttributes{
@@ -182,5 +189,22 @@ func TestPurchaseOrdersService_Create(t *testing.T) {
 
 		assert.Equal(t, internal.PurchaseOrder{}, result)
 		assert.Equal(t, utils.ErrEmptyArguments, err)
+	})
+
+	t.Run("Create - Product Record Invalid", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 1).Return(&mockBuyer, nil)
+		mockPRV.On("FindByID", 99).Return(internal.ProductRecords{}, utils.ErrNotFound)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder2}, nil)
+		mockRepo.On("CreatePurchaseOrder", mockInvalidNewPurchaseOrder).Return(internal.PurchaseOrder{}, utils.ErrNotFound)
+
+		result, err := service.CreatePurchaseOrder(mockInvalidNewPurchaseOrder)
+
+		assert.Equal(t, internal.PurchaseOrder{}, result)
+		assert.Equal(t, utils.EDependencyNotFound("product", "id: "+"99"), err)
 	})
 }
