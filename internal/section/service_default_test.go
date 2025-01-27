@@ -99,6 +99,10 @@ var (
 	zero          = 0
 	one           = 1
 	two           = 2
+	twof          = float64(2)
+	three         = 3
+	threef        = float64(3)
+	mThreeHundred = float64(-300)
 	mockWarehouse = internal.Warehouse{
 		ID:                 1,
 		Address:            "Monroe 860",
@@ -106,6 +110,22 @@ var (
 		WarehouseCode:      "DHM",
 		MinimumCapacity:    10,
 		MinimumTemperature: 10,
+	}
+	mockProduct = internal.Product{
+		ID: 0,
+		ProductAttributes: internal.ProductAttributes{
+			ProductCode:                    "AB0029",
+			Description:                    "A mock product",
+			Width:                          10,
+			Height:                         20,
+			Length:                         10,
+			NetWeight:                      20,
+			ExpirationRate:                 2,
+			RecommendedFreezingTemperature: -2,
+			FreezingRate:                   2,
+			ProductType:                    1,
+			SellerID:                       1,
+		},
 	}
 	mockProductType = internal.ProductType{
 		ID:          1,
@@ -359,7 +379,33 @@ func TestUnitSection_Save(t *testing.T) {
 	}
 }
 
-func TestUnitSection_Update(t *testing.T) {
+func TestUnitSection_Update_Valid(t *testing.T) {
+	repo := new(MockSectionRepository)
+	warehouseService := new(MockSectionWarehouseService)
+	productTypeService := new(MockSectionProductTypeService)
+
+	repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+	repo.On("Update", mock.Anything).Return(nil)
+
+	service := NewBasicSectionService(repo, warehouseService, productTypeService)
+	savedSection, err := service.Update(1, internal.SectionPointers{
+		CurrentCapacity:    &two,
+		MaximumCapacity:    &three,
+		MinimumCapacity:    &one,
+		CurrentTemperature: &threef,
+		MinimumTemperature: &twof,
+	})
+	require.Equal(t, savedSection.CurrentCapacity, 2)
+	require.Equal(t, savedSection.MaximumCapacity, 3)
+	require.Equal(t, savedSection.MinimumCapacity, 1)
+	require.Equal(t, savedSection.CurrentTemperature, 3.0)
+	require.Equal(t, savedSection.MinimumTemperature, 2.0)
+
+	require.NoError(t, err)
+
+}
+
+func TestUnitSection_Update_NonValid(t *testing.T) {
 	internalError := errors.New("internal error")
 	cases := []struct {
 		Name   string
@@ -414,136 +460,93 @@ func TestUnitSection_Update(t *testing.T) {
 			},
 		},
 		{
-			Name:   "GIVEN a non valid section, WHEN ProductTypeID already exists, RETURNS utils.ErrConflict",
+			Name:   "GIVEN a non valid section, WHEN calling GetProductTypeByID, RETURNS internal error",
 			DataID: 1,
 			Data:   internal.SectionPointers{ProductTypeID: &two},
 			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
 				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
-				repo.On("GetBySectionNumber", mock.Anything).Return(mockSection2, nil)
-				return internal.Section{}, utils.EConflict("section", "id: 2")
+				productTypeService.On("GetProductTypeByID", mock.Anything).Return(internal.ProductType{}, internalError)
+				return internal.Section{}, internalError
 			},
 		},
-		//{
-		//	Name:   "GIVEN a non valid section, WHEN calling GetByID, RETURNS utils.ErrNotFound",
-		//	DataID: 1,
-		//	Data: internal.SectionPointers{
-		//		SectionNumber: &sectionNumber2,
-		//	},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		repo.On("GetByID", mock.Anything).Return(internal.Section{}, utils.ENotFound("section"))
-		//		return internal.Section{}, utils.ENotFound("section")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN zero value product_type_id, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		return internal.Section{}, utils.EZeroValue("product_type_id")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN warehouse does not exist, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(internal.Warehouse{}, utils.ErrNotFound)
-		//		return internal.Section{}, utils.EDependencyNotFound("warehouse", "id: 1")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN fail to call warehouseService.GetByID, RETURNS internal error",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(internal.Warehouse{}, internalError)
-		//		return internal.Section{}, internalError
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN product_type does not exist, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(internal.ProductType{}, utils.ErrNotFound)
-		//		return internal.Section{}, utils.EDependencyNotFound("product_type", "id: 1")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN fail to call productTypeService.GetProductTypeByID, RETURNS internal error",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(internal.ProductType{}, internalError)
-		//		return internal.Section{}, internalError
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN minimum_capacity is greater than maximum_capacity, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 5, MaximumCapacity: 4},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, utils.EBR("minimum_capacity cannot be greater than maximum_capacity")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN minimum_temperature is less than -273.15 Celsius, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: -300},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, utils.EBR("minimum_temperature cannot be less than -273.15 Celsius")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN current_temperature is less than -273.15 Celsius, RETURNS error utils.ErrInvalidArguments",
-		//	Data: internal.Section{SectionNumber: 1, WarehouseID: 1, ProductTypeID: 1, MinimumCapacity: 3, MaximumCapacity: 4, MinimumTemperature: 0, CurrentTemperature: -300},
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, utils.EBR("current_temperature cannot be less than -273.15 Celsius")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN section_number already exists, RETURNS error utils.ErrConflict",
-		//	Data: mockSection,
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{ID: 2}, nil)
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, utils.EConflict("section", "id: 1")
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a non valid section, WHEN fail to call repo.GetBySectionNumber, RETURNS internal error",
-		//	Data: mockSection,
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, internalError)
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, internalError
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a valid section, WHEN no error occurs, SAVE successfully",
-		//	Data: mockSection,
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		repo.On("Save", mock.Anything).Return(nil)
-		//		repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, nil)
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return mockSection, nil
-		//	},
-		//},
-		//{
-		//	Name: "GIVEN a valid section, WHEN calling repo.Save, RETURNS internal error",
-		//	Data: mockSection,
-		//	Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
-		//		repo.On("Save", mock.Anything).Return(internalError)
-		//		repo.On("GetBySectionNumber", mock.Anything).Return(internal.Section{}, nil)
-		//		warehouseService.On("GetByID", mock.Anything).Return(mockWarehouse, nil)
-		//		productTypeService.On("GetProductTypeByID", mock.Anything).Return(mockProductType, nil)
-		//		return internal.Section{}, internalError
-		//	},
-		//},
+		{
+			Name:   "GIVEN a non valid section, WHEN ProductTypeID does not exists, RETURNS utils.ErrConflict",
+			DataID: 1,
+			Data:   internal.SectionPointers{ProductTypeID: &two},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				productTypeService.On("GetProductTypeByID", mock.Anything).Return(internal.ProductType{}, nil)
+				return internal.Section{}, utils.EDependencyNotFound("product_type", "id: 2")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN WarehouseID <= 0, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{WarehouseID: &zero},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EZeroValue("warehouse_id")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN calling warehouseService.GetByID, RETURNS internal error",
+			DataID: 1,
+			Data:   internal.SectionPointers{WarehouseID: &two},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				warehouseService.On("GetByID", mock.Anything).Return(internal.Warehouse{}, internalError)
+				return internal.Section{}, internalError
+			},
+		},
+
+		{
+			Name:   "GIVEN a non valid section with MaximumCapacity < MinimumCapacity, WHEN calling validateLogicRules, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{MaximumCapacity: &two, MinimumCapacity: &three},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EBR("minimum_capacity cannot be greater than maximum_capacity")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section with CurrentTemperature < -273.15, WHEN calling validateLogicRules, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{CurrentTemperature: &mThreeHundred},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EBR("current_temperature cannot be less than -273.15 Celsius")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section with MinimumTemperature < -273.15, WHEN calling validateLogicRules, RETURNS utils.ErrInvalidArguments",
+			DataID: 1,
+			Data:   internal.SectionPointers{MinimumTemperature: &mThreeHundred},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				return internal.Section{}, utils.EBR("minimum_temperature cannot be less than -273.15 Celsius")
+			},
+		},
+		{
+			Name:   "GIVEN a non valid section, WHEN ProductTypeID does not exists, RETURNS utils.ErrConflict",
+			DataID: 1,
+			Data:   internal.SectionPointers{WarehouseID: &two},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				warehouseService.On("GetByID", mock.Anything).Return(internal.Warehouse{}, utils.EDependencyNotFound("warehouse", "id: 2"))
+				return internal.Section{}, utils.EDependencyNotFound("warehouse", "id: 2")
+			},
+		},
+		{
+			Name:   "GIVEN a valid section, WHEN calling repo.Update, RETURNS internal error",
+			DataID: 1,
+			Data:   internal.SectionPointers{},
+			Mock: func(repo *MockSectionRepository, warehouseService *MockSectionWarehouseService, productTypeService *MockSectionProductTypeService) (internal.Section, error) {
+				repo.On("GetByID", mock.Anything).Return(mockSection, nil)
+				repo.On("Update", mock.Anything).Return(internalError)
+				warehouseService.On("GetByID", mock.Anything).Return(internal.Warehouse{}, utils.EDependencyNotFound("warehouse", "id: 2"))
+				return internal.Section{}, internalError
+			},
+		},
 	}
 	for _, scenario := range cases {
 		t.Run(scenario.Name, func(m *testing.T) {

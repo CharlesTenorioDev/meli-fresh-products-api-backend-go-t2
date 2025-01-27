@@ -3,6 +3,7 @@ package section
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -13,7 +14,7 @@ type SectionMysqlRepository struct {
 }
 
 // NewSectionMysql Initialize a MemorySectionRepository and set the next id to 1
-func NewSectionMysql(db *sql.DB) *SectionMysqlRepository {
+func NewSectionMysql(db *sql.DB) internal.SectionRepository {
 	return &SectionMysqlRepository{db}
 }
 
@@ -95,7 +96,7 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 
 // Save Generate a new ID and save the entity
 // All validatinos should be made on service layer
-func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Section, error) {
+func (r *SectionMysqlRepository) Save(newSection *internal.Section) error {
 	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID)
 
@@ -107,23 +108,23 @@ func (r *SectionMysqlRepository) Save(newSection *internal.Section) (internal.Se
 				err = utils.ErrConflict
 			}
 
-			return internal.Section{}, err
+			return err
 		}
 
-		return internal.Section{}, err
+		return err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return internal.Section{}, err
+		return err
 	}
 
 	(*newSection).ID = int(id)
 
-	return *newSection, err
+	return err
 }
 
-func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.Section, error) {
+func (r *SectionMysqlRepository) Update(newSection *internal.Section) error {
 	_, err := r.db.Exec(
 		"UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, product_type_id=? WHERE id=?",
 		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature,
@@ -139,13 +140,13 @@ func (r *SectionMysqlRepository) Update(newSection *internal.Section) (internal.
 				err = utils.ErrConflict
 			}
 
-			return internal.Section{}, err
+			return err
 		}
 
-		return internal.Section{}, err
+		return err
 	}
 
-	return *newSection, nil
+	return nil
 }
 
 // Delete the section by its id

@@ -204,7 +204,7 @@ func (s *DefaultSectionService) Update(id int, sectionToUpdate internal.SectionP
 	if sectionToUpdate.WarehouseID != nil {
 		section.WarehouseID = *sectionToUpdate.WarehouseID
 		if section.WarehouseID == 0 {
-			return internal.Section{}, errors.Join(utils.ErrInvalidArguments, errors.New("warehouse_id cannot be empty/null"))
+			return internal.Section{}, utils.EZeroValue("warehouse_id")
 		}
 
 		if err := s.warehouseExistsByID(section.WarehouseID); err != nil {
@@ -260,13 +260,12 @@ func (s *DefaultSectionService) GetSectionProductsReport(id int) ([]internal.Sec
 
 		return report, nil
 	} else {
-		sectionExists, err := s.repo.GetByID(id)
+		_, err := s.repo.GetByID(id)
 		if err != nil {
+			if errors.Is(err, utils.ErrNotFound) {
+				return nil, utils.ENotFound("section")
+			}
 			return nil, err
-		}
-
-		if sectionExists == (internal.Section{}) {
-			return nil, utils.ENotFound("section")
 		}
 
 		report, err = s.repo.GetSectionProductsReportByID(id)
