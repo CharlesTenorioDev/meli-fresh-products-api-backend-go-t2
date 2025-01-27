@@ -45,7 +45,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new section with the provided details",
+                "description": "CreateInboundOrder a new section with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -55,7 +55,7 @@ const docTemplate = `{
                 "tags": [
                     "sections"
                 ],
-                "summary": "Create a new section",
+                "summary": "CreateInboundOrder a new section",
                 "parameters": [
                     {
                         "description": "Section details",
@@ -384,7 +384,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new seller with the provided details",
+                "description": "CreateInboundOrder a new seller with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -394,7 +394,7 @@ const docTemplate = `{
                 "tags": [
                     "sellers"
                 ],
-                "summary": "Create a new seller",
+                "summary": "CreateInboundOrder a new seller",
                 "parameters": [
                     {
                         "description": "Seller details",
@@ -582,7 +582,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new warehouse with the provided details",
+                "description": "CreateInboundOrder a new warehouse with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -592,7 +592,7 @@ const docTemplate = `{
                 "tags": [
                     "warehouses"
                 ],
-                "summary": "Create a new warehouse",
+                "summary": "CreateInboundOrder a new warehouse",
                 "parameters": [
                     {
                         "description": "Warehouse details",
