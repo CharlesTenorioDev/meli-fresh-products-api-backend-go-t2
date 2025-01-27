@@ -4,7 +4,7 @@ type SellerService interface {
 	GetAll() ([]Seller, error)
 	GetByID(id int) (Seller, error)
 	Create(*Seller) error
-	Update(int, SellerRequestPointer) (Seller, error)
+	Update(int, *Seller) (Seller, error)
 	Delete(int) error
 }
 

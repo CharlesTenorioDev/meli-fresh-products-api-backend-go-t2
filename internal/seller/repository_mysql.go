@@ -9,19 +9,19 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-// NewSellerMysql creates a new instance of the seller repository
-func NewSellerMysql(db *sql.DB) internal.SellerRepository {
-	return &SellerMysql{db}
-}
-
-// SellerMysql is the mysql implementation of the seller repository
-type SellerMysql struct {
+// MySQLSellerRepository is the mysql implementation of the seller repository
+type MySQLSellerRepository struct {
 	// db is the database connection to mysql
 	db *sql.DB
 }
 
+// NewSellerRepository creates a new instance of the seller repository
+func NewSellerRepository(db *sql.DB) internal.SellerRepository {
+	return &MySQLSellerRepository{db}
+}
+
 // GetAll returns all sellers from the database
-func (r *SellerMysql) GetAll() (sellers []internal.Seller, err error) {
+func (r *MySQLSellerRepository) GetAll() (sellers []internal.Seller, err error) {
 	// execute the query
 	rows, err := r.db.Query("SELECT `id`, `cid`, `company_name`, `address`, `telephone`, `locality_id` FROM `sellers`")
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *SellerMysql) GetAll() (sellers []internal.Seller, err error) {
 }
 
 // GetByID returns a seller from the database by its id
-func (r *SellerMysql) GetByID(id int) (seller internal.Seller, err error) {
+func (r *MySQLSellerRepository) GetByID(id int) (seller internal.Seller, err error) {
 	// execute the query
 	row := r.db.QueryRow("SELECT `id`, `cid`, `company_name`, `address`, `telephone`, `locality_id` FROM `sellers` WHERE `id` = ?", id)
 
@@ -69,7 +69,7 @@ func (r *SellerMysql) GetByID(id int) (seller internal.Seller, err error) {
 
 	return
 }
-func (r *SellerMysql) GetByCid(cid int) (seller internal.Seller, err error) {
+func (r *MySQLSellerRepository) GetByCid(cid int) (seller internal.Seller, err error) {
 	// execute the query
 	row := r.db.QueryRow("SELECT `id`, `cid`, `company_name`, `address`, `telephone`, `locality_id` FROM `sellers` WHERE `cid` = ?", cid)
 
@@ -88,7 +88,7 @@ func (r *SellerMysql) GetByCid(cid int) (seller internal.Seller, err error) {
 }
 
 // Create Save saves a seller into the database
-func (r *SellerMysql) Create(seller *internal.Seller) (err error) {
+func (r *MySQLSellerRepository) Create(seller *internal.Seller) (err error) {
 	// execute the query
 	result, err := r.db.Exec(
 		"INSERT INTO `sellers` (`cid`, `company_name`, `address`, `telephone`, `locality_id`) VALUES (?, ?, ?, ?, ?)",
@@ -122,7 +122,7 @@ func (r *SellerMysql) Create(seller *internal.Seller) (err error) {
 }
 
 // Update updates a seller in the database
-func (r *SellerMysql) Update(seller *internal.Seller) (err error) {
+func (r *MySQLSellerRepository) Update(seller *internal.Seller) (err error) {
 	// execute the query
 	_, err = r.db.Exec(
 		"UPDATE `sellers` SET `cid` = ?, `company_name` = ?, `address` = ?, `telephone` = ?, `locality_id` = ? WHERE `id` = ?",
@@ -147,7 +147,7 @@ func (r *SellerMysql) Update(seller *internal.Seller) (err error) {
 }
 
 // Delete deletes a seller from the database
-func (r *SellerMysql) Delete(id int) error {
+func (r *MySQLSellerRepository) Delete(id int) error {
 	// execute the query
 	_, err := r.db.Exec("DELETE FROM `sellers` WHERE `id` = ?", id)
 	if err != nil {
