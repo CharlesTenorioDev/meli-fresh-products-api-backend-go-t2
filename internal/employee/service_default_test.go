@@ -103,11 +103,11 @@ var (
 func TestEmployeeService_FindAll(t *testing.T) {
 	t.Run("FindAll - Success", func(t *testing.T) {
 		mockRepo := new(mockEmployeeRepository)
-		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee, mockEmployee2}, nil)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{1: mockEmployee, 2: mockEmployee2}, nil)
 		service := NewEmployeeService(mockRepo, nil)
 		result, err := service.FindAll()
 
-		assert.Equal(t, []internal.Employee{mockEmployee, mockEmployee2}, result)
+		assert.Equal(t, map[int]internal.Employee{1: mockEmployee, 2: mockEmployee2}, result)
 		assert.Nil(t, err)
 	})
 
