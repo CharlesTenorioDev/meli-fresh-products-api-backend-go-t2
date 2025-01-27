@@ -217,11 +217,10 @@ func TestEmployeeService_Update(t *testing.T) {
 
 func TestEmployeeService_Create(t *testing.T) {
 	t.Run("Create - Success", func(t *testing.T) {
-		// ERRO
 		mockRepo := new(mockEmployeeRepository)
 		mockWV := new(mockWarehouseValidation)
 		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
-		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee}, nil)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{1: mockEmployee}, nil)
 		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(mockEmployee2, nil)
 		service := NewEmployeeService(mockRepo, mockWV)
 		result, err := service.CreateEmployee(mockEmployeeAttr)
@@ -231,16 +230,15 @@ func TestEmployeeService_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Conflict CardNumberID", func(t *testing.T) {
-		// ERRO
 		mockRepo := new(mockEmployeeRepository)
 		mockWV := new(mockWarehouseValidation)
 		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
-		mockRepo.On("FindAll").Return([]internal.Employee{mockEmployee}, nil)
-		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(mockEmployee2, nil)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{1: mockEmployee}, nil)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(internal.Employee{}, utils.ErrConflict)
 		service := NewEmployeeService(mockRepo, mockWV)
 		result, err := service.CreateEmployee(mockEmployeeAttr)
 
-		assert.Equal(t, mockEmployee2, result)
-		assert.Nil(t, err)
+		assert.Equal(t, internal.Employee{}, result)
+		assert.Equal(t, utils.ErrConflict, err)
 	})
 }
