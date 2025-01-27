@@ -102,7 +102,7 @@ func TestUnitProduct_GetProducts(t *testing.T) {
 					mock.Mock{},
 				},
 			},
-			wantListProducts: []internal.Product{},
+			wantListProducts: []internal.Product(nil),
 			wantErr:          true,
 		},
 	}
@@ -307,7 +307,7 @@ func TestUnitProduct_CreateProduct(t *testing.T) {
 			},
 			want:        internal.Product{},
 			wantErr:     true,
-			expectedErr: utils.ErrConflict,
+			expectedErr: utils.EConflict("Product", "ProductCode"),
 		},
 		{
 			name: "CreateProduct Error - Empty Field : ProductCode",

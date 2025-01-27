@@ -40,7 +40,7 @@ func NewMySQLCarryService(repo internal.CarryRepository, validateLocality intern
 //	error: An error if any validation fails or if there is an issue saving the Carry object.
 func (s *MySQLCarryService) Save(carry *internal.Carry) error {
 	if _, err := s.validateLocality.GetByID(carry.LocalityID); err != nil {
-		return err
+		return utils.ENotFound("Locality")
 	}
 
 	if err := s.validateEmptyFields(carry); err != nil {
@@ -86,21 +86,7 @@ func (s *MySQLCarryService) Update(carry *internal.Carry) error {
 		return err
 	}
 
-	if carry.CID == 0 {
-		(*carry).CID = existingCarry.CID
-	}
-
-	if carry.CompanyName == "" {
-		(*carry).CompanyName = existingCarry.CompanyName
-	}
-
-	if carry.Address == "" {
-		(*carry).Address = existingCarry.Address
-	}
-
-	if carry.Telephone == "" {
-		(*carry).Telephone = existingCarry.Telephone
-	}
+	s.prepareCarryQuery(carry, existingCarry)
 
 	if carry.LocalityID == 0 {
 		(*carry).LocalityID = existingCarry.LocalityID
@@ -135,20 +121,53 @@ func (s *MySQLCarryService) Delete(id int) error {
 //	error: Returns utils.ErrInvalidArguments if any required field is empty or zero, otherwise returns nil.
 func (s *MySQLCarryService) validateEmptyFields(carry *internal.Carry) error {
 	if carry.CID == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("CID")
 	}
 
 	if carry.CompanyName == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("CompanyName")
 	}
 
 	if carry.Address == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Address")
 	}
 
 	if carry.Telephone == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Telephone")
 	}
 
 	return nil
+}
+
+// prepareCarryQuery updates the fields of the given carry object with the values
+// from the existingCarry object if they are not already set. Specifically, it
+// checks if the CID, CompanyName, Address, Telephone, and LocalityID fields of
+// the carry object are zero values (e.g., 0 for integers, empty string for strings)
+// and if so, assigns the corresponding values from the existingCarry object.
+//
+// Parameters:
+//
+//	carry - a pointer to the Carry object that needs to be updated.
+//	existingCarry - the Carry object containing the existing values to be used
+//	                for updating the carry object.
+func (s *MySQLCarryService) prepareCarryQuery(carry *internal.Carry, existingCarry internal.Carry) {
+	if carry.CID == 0 {
+		(*carry).CID = existingCarry.CID
+	}
+
+	if carry.CompanyName == "" {
+		(*carry).CompanyName = existingCarry.CompanyName
+	}
+
+	if carry.Address == "" {
+		(*carry).Address = existingCarry.Address
+	}
+
+	if carry.Telephone == "" {
+		(*carry).Telephone = existingCarry.Telephone
+	}
+
+	if carry.LocalityID == 0 {
+		(*carry).LocalityID = existingCarry.LocalityID
+	}
 }
