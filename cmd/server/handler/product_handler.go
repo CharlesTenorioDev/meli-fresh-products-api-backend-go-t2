@@ -2,10 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"net/http"
 	"strconv"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
@@ -23,7 +23,7 @@ func NewProductHandler(service internal.ProductService) *ProductHandler {
 func (p *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := p.service.GetProducts()
 	if err != nil {
-		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
+		utils.HandleError(w, err)
 		return
 	}
 
@@ -35,13 +35,13 @@ func (p *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 func (p *ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+		utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 		return
 	}
 
 	product, err := p.service.GetProductByID(id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
+		utils.HandleError(w, err)
 		return
 	}
 
@@ -55,19 +55,14 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+		utils.HandleError(w, err)
 		return
 	}
 
 	product, err := p.service.CreateProduct(newProduct)
 	if err != nil {
-		if errors.Is(err, utils.ErrConflict) {
-			response.Error(w, http.StatusConflict, utils.ErrConflict.Error())
-			return
-		} else {
-			response.Error(w, http.StatusUnprocessableEntity, utils.ErrInvalidArguments.Error())
-			return
-		}
+		utils.HandleError(w, err)
+		return
 	}
 
 	response.JSON(w, http.StatusCreated, map[string]any{
@@ -78,7 +73,7 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+		utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 		return
 	}
 
@@ -86,7 +81,7 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&inputProduct)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid request body")
+		utils.HandleError(w, err)
 		return
 	}
 
@@ -94,7 +89,7 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := p.service.UpdateProduct(inputProduct)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.HandleError(w, err)
 		return
 	}
 
@@ -106,15 +101,15 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+		utils.HandleError(w, utils.EBadRequest("Invalid ID"))
 		return
 	}
 
 	err = p.service.DeleteProduct(id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
+		utils.HandleError(w, err)
 		return
 	}
 
-	response.JSON(w, http.StatusNoContent, nil)
+	response.JSON(w, http.StatusNoContent, map[string]any{})
 }
