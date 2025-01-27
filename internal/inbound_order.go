@@ -29,8 +29,8 @@ type InboundOrderService interface {
 
 type InboundOrderRepository interface {
 	CreateInboundOrder(newOrder InboundOrderAttributes) (InboundOrder, error)
-	GenerateByIDInboundOrdersReport(employeeID int) (EmployeeInboundOrdersReport, error)
 	GenerateInboundOrdersReport() ([]EmployeeInboundOrdersReport, error)
+	GenerateByIDInboundOrdersReport(employeeID int) (EmployeeInboundOrdersReport, error)
 	FindByID(id int) (InboundOrder, error)
 	FindByOrderNumber(orderNumber string) (InboundOrder, error)
 }

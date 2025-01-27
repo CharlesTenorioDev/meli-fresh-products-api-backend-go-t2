@@ -22,7 +22,7 @@ func (s *InboundOrderService) CreateInboundOrder(newOrder internal.InboundOrderA
 	if err != nil && errors.Is(err, utils.ErrNotFound) {
 		return internal.InboundOrder{}, utils.ErrNotFound
 	}
-	if !errors.Is(err, utils.ErrNotFound) {
+	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return internal.InboundOrder{}, err
 	}
 
