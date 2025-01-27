@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	errors2 "errors"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
@@ -54,17 +55,21 @@ func TestProductRecordsHandler_GetProductRecords(t *testing.T) {
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       `{"message":"Invalid 'id' format", "status":"Bad Request"}`,
 		},
+		{
+			TestName:           "GetProductRecords_NotFound",
+			IDQueryParam:       "99",
+			ServiceResponse:    nil,
+			ServiceError:       utils.ErrNotFound,
+			ExpectedStatusCode: http.StatusNotFound,
+			ExpectedBody:       `{"message":"entity not found", "status":"Not Found"}`,
+		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
 			service := new(mockProductRecordsService)
-			if c.ServiceError == nil {
-				id, _ := strconv.Atoi(c.IDQueryParam)
-				service.On("GetProductRecords", id).Return(c.ServiceResponse, nil)
-			} else {
-				service.On("GetProductRecords", mock.Anything).Return(nil, c.ServiceError)
-			}
+			id, _ := strconv.Atoi(c.IDQueryParam)
+			service.On("GetProductRecords", id).Return(c.ServiceResponse, c.ServiceError)
 
 			h := NewProductRecordsHandler(service)
 			req := httptest.NewRequest(http.MethodGet, "/product-records?id="+c.IDQueryParam, nil)
@@ -80,7 +85,7 @@ func TestProductRecordsHandler_GetProductRecords(t *testing.T) {
 func TestProductRecordsHandler_CreateProductRecord(t *testing.T) {
 	cases := []struct {
 		TestName           string
-		RequestBody        internal.ProductRecords
+		RequestBody        any
 		ServiceResponse    internal.ProductRecords
 		ServiceError       error
 		ExpectedStatusCode int
@@ -130,6 +135,33 @@ func TestProductRecordsHandler_CreateProductRecord(t *testing.T) {
 			ServiceError:       utils.ErrInvalidArguments,
 			ExpectedStatusCode: http.StatusUnprocessableEntity,
 			ExpectedBody:       `{"message":"invalid arguments", "status":"Unprocessable Entity"}`,
+		},
+		{
+			TestName: "CreateProductRecord_OK",
+			RequestBody: internal.ProductRecords{
+				LastUpdateDate: "2025-01-27",
+				PurchasePrice:  100.50,
+				SalePrice:      150.00,
+				ProductID:      1,
+			},
+			ServiceResponse: internal.ProductRecords{
+				ID:             1,
+				LastUpdateDate: "2025-01-27",
+				PurchasePrice:  100.50,
+				SalePrice:      150.00,
+				ProductID:      1,
+			},
+			ServiceError:       errors2.New("Internal server error"),
+			ExpectedStatusCode: http.StatusInternalServerError,
+			ExpectedBody:       `{"message":"Internal server error", "status":"Internal Server Error"}`,
+		},
+		{
+			TestName:           "CreateProductRecord_InvalidFormat",
+			RequestBody:        `invalid-json-format`,
+			ServiceResponse:    internal.ProductRecords{},
+			ServiceError:       nil,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedBody:       `{"message":"invalid format", "status":"Bad Request"}`,
 		},
 	}
 
