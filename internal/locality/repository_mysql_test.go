@@ -2,13 +2,27 @@ package locality_test
 
 import (
 	"database/sql"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
 	"testing"
+
+	"github.com/DATA-DOG/go-txdb"
+	"github.com/go-sql-driver/mysql"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	cfg := mysql.Config{
+		User:   "root",
+		Passwd: "example",
+		Net:    "tcp",
+		Addr:   "localhost:3307",
+		DBName: "fresh_products",
+	}
+	txdb.Register("txdb", "mysql", cfg.FormatDSN())
+}
 
 func TestIntegrationLocality_GetById(t *testing.T) {
 	db, err := sql.Open("txdb", "fantasy_products")
