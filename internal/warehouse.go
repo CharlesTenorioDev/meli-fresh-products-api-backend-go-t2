@@ -34,3 +34,7 @@ type WarehouseRepository interface {
 	GetByID(id int) (Warehouse, error)
 	Delete(id int) error
 }
+
+type WarehouseLocalityValidation interface {
+	GetByID(id int) (locality Locality, err error)
+}

@@ -1,7 +1,10 @@
 package locality_test
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/locality"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -58,7 +61,7 @@ func (m *MockCountryRepository) GetByName(name string) (internal.Country, error)
 }
 
 func TestUnitLocality_Save(t *testing.T) {
-
+	var internalServerError = errors.New("internal server error")
 	cases := []struct {
 		TestName      string
 		Mock          func(*MockLocalityRepository, *MockProvinceRepository, *MockCountryRepository)
@@ -134,12 +137,151 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given an existing locality ID, return ",
+			TestName: "given an existing locality ID, return internal server error",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, internalServerError)
+			},
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, countryRepo.GetByName, return internal server error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
-				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, internalServerError)
 			},
-			ErrorToReturn: utils.ErrConflict,
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, when countryRepo.Save, return internal server error",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, utils.ErrNotFound)
+				mcr.On("Save", mock.Anything).Return(internalServerError)
+			},
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, when provinceRepo.GetByName, return internal server error",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{
+					ID:          192,
+					CountryName: "Brazil",
+				}, nil)
+				mcr.On("Save", mock.Anything).Return(nil)
+				mpr.On("GetByName", mock.Anything).Return(internal.Province{}, internalServerError)
+			},
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, when provinceRepo.Save, return internal server error",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{
+					ID:          192,
+					CountryName: "Brazil",
+				}, nil)
+				mcr.On("Save", mock.Anything).Return(nil)
+				mpr.On("GetByName", mock.Anything).Return(internal.Province{}, utils.ErrNotFound)
+				mpr.On("Save", mock.Anything).Return(internalServerError)
+			},
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, when localityRepo.Save, return nil",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{
+					ID:          192,
+					CountryName: "Brazil",
+				}, nil)
+				mcr.On("Save", mock.Anything).Return(nil)
+				mpr.On("GetByName", mock.Anything).Return(internal.Province{
+					ID:           333,
+					ProvinceName: "Westails",
+					CountryID:    1,
+				}, nil)
+				mlr.On("Save", mock.Anything).Return(internalServerError)
+			},
+			ErrorToReturn: internalServerError,
+			DataLocality: internal.Locality{
+				ID:           7000,
+				LocalityName: "A random locality",
+			},
+			DataProvince: internal.Province{
+				ProvinceName: "Westails",
+			},
+			DataCountry: internal.Country{
+				CountryName: "Ostania",
+			},
+		},
+		{
+			TestName: "given a valid locality, when localityRepo.Save, return nil",
+			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
+				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+				mcr.On("GetByName", mock.Anything).Return(internal.Country{
+					ID:          192,
+					CountryName: "Brazil",
+				}, nil)
+				mcr.On("Save", mock.Anything).Return(nil)
+				mpr.On("GetByName", mock.Anything).Return(internal.Province{
+					ID:           333,
+					ProvinceName: "Westails",
+					CountryID:    1,
+				}, nil)
+				mlr.On("Save", mock.Anything).Return(nil)
+			},
+			ErrorToReturn: nil,
 			DataLocality: internal.Locality{
 				ID:           7000,
 				LocalityName: "A random locality",
@@ -158,7 +300,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			pr := new(MockProvinceRepository)
 			cr := new(MockCountryRepository)
 			c.Mock(lr, pr, cr)
-			service := NewBasicLocalityService(lr, pr, cr)
+			service := locality.NewBasicLocalityService(lr, pr, cr)
 			err := service.Save(&c.DataLocality, &c.DataProvince, &c.DataCountry)
 			require.ErrorIs(t, err, c.ErrorToReturn)
 		})
@@ -173,26 +315,83 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 		LocalityName: "A random locality",
 		SellersCount: 2,
 	}
-	t.Run("given an existing locality ID, return the count", func(t *testing.T) {
+
+	t.Run("given an invalid locality ID, return an empty report and err of type utils.ErrInvalidArguments", func(t *testing.T) {
+		lr := new(MockLocalityRepository)
+		pr := new(MockProvinceRepository)
+		cr := new(MockCountryRepository)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
+
+		report, err := service.GetSellersByLocalityID(-1)
+		require.ErrorIs(t, err, utils.ErrInvalidArguments)
+		require.Len(t, report, 0)
+	})
+
+	t.Run("given a valid and existing locality ID, return the report row", func(t *testing.T) {
 		lr := new(MockLocalityRepository)
 		pr := new(MockProvinceRepository)
 		cr := new(MockCountryRepository)
 		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 		lr.On("GetSellersByLocalityID", mock.Anything).Return([]internal.SellersByLocality{sampleSellerByLocality}, nil)
-		service := NewBasicLocalityService(lr, pr, cr)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
 
-		report, err := service.GetSellersByLocalityID(0)
+		report, err := service.GetSellersByLocalityID(1)
 		require.NoError(t, err)
 		require.Len(t, report, 1)
 	})
-	t.Run("given a not existing locality ID, return an empty report and utils.", func(t *testing.T) {
+
+	t.Run("given a valid and not existing locality ID, return an empty report and utils.ErrNotFound", func(t *testing.T) {
 		lr := new(MockLocalityRepository)
 		pr := new(MockProvinceRepository)
 		cr := new(MockCountryRepository)
 		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
-		service := NewBasicLocalityService(lr, pr, cr)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
 
 		report, err := service.GetSellersByLocalityID(99)
+		require.ErrorIs(t, err, utils.ErrNotFound)
+		require.Len(t, report, 0)
+	})
+}
+
+func TestUnitLocality_GetCarriesByLocalityID(t *testing.T) {
+	sampleCarriesByLocality := internal.CarriesByLocality{
+		LocalityID:   1,
+		LocalityName: "A random locality",
+		CarriesCount: 2,
+	}
+
+	t.Run("given an invalid locality ID, return an empty report and err of type utils.ErrInvalidArguments", func(t *testing.T) {
+		lr := new(MockLocalityRepository)
+		pr := new(MockProvinceRepository)
+		cr := new(MockCountryRepository)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
+
+		report, err := service.GetCarriesByLocalityID(-1)
+		require.ErrorIs(t, err, utils.ErrInvalidArguments)
+		require.Len(t, report, 0)
+	})
+
+	t.Run("given a valid and existing locality ID, return the report row", func(t *testing.T) {
+		lr := new(MockLocalityRepository)
+		pr := new(MockProvinceRepository)
+		cr := new(MockCountryRepository)
+		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
+		lr.On("GetCarriesByLocalityID", mock.Anything).Return([]internal.CarriesByLocality{sampleCarriesByLocality}, nil)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
+
+		report, err := service.GetCarriesByLocalityID(1)
+		require.NoError(t, err)
+		require.Len(t, report, 1)
+	})
+
+	t.Run("given a valid and not existing locality ID, return an empty report and utils.ErrNotFound", func(t *testing.T) {
+		lr := new(MockLocalityRepository)
+		pr := new(MockProvinceRepository)
+		cr := new(MockCountryRepository)
+		lr.On("GetByID", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
+		service := locality.NewBasicLocalityService(lr, pr, cr)
+
+		report, err := service.GetCarriesByLocalityID(99)
 		require.ErrorIs(t, err, utils.ErrNotFound)
 		require.Len(t, report, 0)
 	})

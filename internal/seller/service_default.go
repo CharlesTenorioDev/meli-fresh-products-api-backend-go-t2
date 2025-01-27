@@ -7,16 +7,16 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-func NewSellerService(rp internal.SellerRepository, localityRp internal.SellerLocalityValidation) internal.SellerService {
-	return &SellerService{rp: rp, localityRp: localityRp}
-}
-
-type SellerService struct {
+type DefaultSellerService struct {
 	rp         internal.SellerRepository
 	localityRp internal.SellerLocalityValidation
 }
 
-func (s *SellerService) GetAll() ([]internal.Seller, error) {
+func NewSellerService(rp internal.SellerRepository, localityRp internal.SellerLocalityValidation) internal.SellerService {
+	return &DefaultSellerService{rp: rp, localityRp: localityRp}
+}
+
+func (s *DefaultSellerService) GetAll() ([]internal.Seller, error) {
 	sellers, err := s.rp.GetAll()
 
 	if err != nil {
@@ -26,7 +26,7 @@ func (s *SellerService) GetAll() ([]internal.Seller, error) {
 	return sellers, nil
 }
 
-func (s *SellerService) GetByID(id int) (internal.Seller, error) {
+func (s *DefaultSellerService) GetByID(id int) (internal.Seller, error) {
 	seller, err := s.rp.GetByID(id)
 
 	if err != nil {
@@ -34,13 +34,13 @@ func (s *SellerService) GetByID(id int) (internal.Seller, error) {
 	}
 
 	if seller == (internal.Seller{}) {
-		return internal.Seller{}, utils.ErrNotFound
+		return internal.Seller{}, utils.ENotFound("Seller")
 	}
 
 	return seller, nil
 }
 
-func (s *SellerService) Create(newSeller *internal.Seller) error {
+func (s *DefaultSellerService) Create(newSeller *internal.Seller) error {
 	sellerValidation := s.verify(*newSeller)
 
 	if sellerValidation != nil {
@@ -51,7 +51,7 @@ func (s *SellerService) Create(newSeller *internal.Seller) error {
 
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
-			return errors.Join(utils.ErrInvalidArguments, errors.New("invalid locality_id"))
+			return utils.EDependencyNotFound("Seller", "locality ID")
 		}
 
 		return err
@@ -66,40 +66,40 @@ func (s *SellerService) Create(newSeller *internal.Seller) error {
 	return nil
 }
 
-func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) (internal.Seller, error) {
+func (s *DefaultSellerService) Update(id int, newSeller *internal.Seller) (internal.Seller, error) {
 	existingSeller, err := s.rp.GetByID(id)
 	if err != nil {
 		return internal.Seller{}, err
 	}
 
 	if existingSeller == (internal.Seller{}) {
-		return internal.Seller{}, utils.ErrNotFound
+		return internal.Seller{}, utils.ENotFound("Seller")
 	}
 
-	existingCid, err := s.rp.GetByCid(*newSeller.Cid)
+	existingCid, err := s.rp.GetByCid(newSeller.Cid)
 
 	if err != nil {
 		return internal.Seller{}, err
 	}
 
 	if existingCid.Cid != 0 && existingCid.ID != id {
-		return internal.Seller{}, utils.ErrConflict
+		return internal.Seller{}, utils.EConflict("Cid", "Seller")
 	}
 
-	if *newSeller.Cid != 0 {
-		existingSeller.Cid = *newSeller.Cid
+	if newSeller.Cid != 0 {
+		existingSeller.Cid = newSeller.Cid
 	}
 
-	if newSeller.CompanyName != nil {
-		existingSeller.CompanyName = *newSeller.CompanyName
+	if len(newSeller.CompanyName) != 0 {
+		existingSeller.CompanyName = newSeller.CompanyName
 	}
 
-	if newSeller.Address != nil {
-		existingSeller.Address = *newSeller.Address
+	if len(newSeller.Address) != 0 {
+		existingSeller.Address = newSeller.Address
 	}
 
-	if newSeller.Telephone != nil {
-		existingSeller.Telephone = *newSeller.Telephone
+	if len(newSeller.Telephone) != 0 {
+		existingSeller.Telephone = newSeller.Telephone
 	}
 
 	err = s.rp.Update(&existingSeller)
@@ -110,7 +110,7 @@ func (s *SellerService) Update(id int, newSeller internal.SellerRequestPointer) 
 	return existingSeller, nil
 }
 
-func (s *SellerService) Delete(id int) error {
+func (s *DefaultSellerService) Delete(id int) error {
 	existingSeller, err := s.rp.GetByID(id)
 
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *SellerService) Delete(id int) error {
 	}
 
 	if existingSeller == (internal.Seller{}) {
-		return utils.ErrNotFound
+		return utils.ENotFound("Seller")
 	}
 
 	err = s.rp.Delete(id)
@@ -130,9 +130,9 @@ func (s *SellerService) Delete(id int) error {
 	return nil
 }
 
-func (s *SellerService) verify(newSeller internal.Seller) error {
+func (s *DefaultSellerService) verify(newSeller internal.Seller) error {
 	if newSeller.Cid <= 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Cid")
 	}
 
 	existingCid, err := s.rp.GetByCid(newSeller.Cid)
@@ -141,19 +141,19 @@ func (s *SellerService) verify(newSeller internal.Seller) error {
 	}
 
 	if existingCid.Cid != 0 {
-		return utils.ErrConflict
+		return utils.EConflict("Cid", "Seller")
 	}
 
 	if len(newSeller.CompanyName) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Company name")
 	}
 
 	if len(newSeller.Telephone) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Telephone")
 	}
 
 	if len(newSeller.Address) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Address")
 	}
 
 	return nil

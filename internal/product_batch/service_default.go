@@ -5,22 +5,22 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type MySQLProductBatchService struct {
+type DefaultProductBatchService struct {
 	batchRepo   internal.ProductBatchRepository
 	productRepo internal.ProductRepository
 	sectionRepo internal.SectionRepository
 }
 
-func NewProductBatchesService(batch internal.ProductBatchRepository,
+func NewProductBatchService(batch internal.ProductBatchRepository,
 	product internal.ProductRepository, section internal.SectionRepository) internal.ProductBatchService {
-	return &MySQLProductBatchService{
+	return &DefaultProductBatchService{
 		batchRepo:   batch,
 		productRepo: product,
 		sectionRepo: section,
 	}
 }
 
-func (s *MySQLProductBatchService) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
+func (s *DefaultProductBatchService) Save(newBatch *internal.ProductBatchRequest) (internal.ProductBatch, error) {
 	batchValidation := s.verify(newBatch)
 
 	if batchValidation != nil {
@@ -35,41 +35,41 @@ func (s *MySQLProductBatchService) Save(newBatch *internal.ProductBatchRequest) 
 	return createdBatch, nil
 }
 
-func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest) error {
+func (s *DefaultProductBatchService) verify(newBatch *internal.ProductBatchRequest) error {
 	if newBatch.BatchNumber <= 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Batch number")
 	}
 
 	if newBatch.CurrentQuantity < 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Current quantity")
 	}
 
 	if newBatch.CurrentTemperature <= 0.0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Current temperature")
 	}
 
 	if len(newBatch.DueDate) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Due date")
 	}
 
 	if newBatch.InitialQuantity < 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Initial quantity")
 	}
 
 	if len(newBatch.ManufacturingDate) == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Manufacturing date")
 	}
 
 	if newBatch.ManufacturingHour < 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Manufactoring hour")
 	}
 	//MinimumTemperature não validada porque pode ser positiva, negativa ou zero
 	if newBatch.ProductID <= 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Product ID")
 	}
 
 	if newBatch.SectionID <= 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("Section ID")
 	}
 
 	batchExists, err := s.batchRepo.GetBatchNumber(newBatch.BatchNumber)
@@ -78,13 +78,13 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 	}
 
 	if batchExists != 0 {
-		return utils.ErrConflict
+		return utils.EConflict("batch number", "Product batch")
 	}
 
 	sectionExists, err := s.sectionRepo.GetByID(newBatch.SectionID)
 
 	if sectionExists == (internal.Section{}) {
-		return utils.ErrConflict
+		return utils.ENotFound("Section ID")
 	}
 
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *MySQLProductBatchService) verify(newBatch *internal.ProductBatchRequest
 
 	productExists, err := s.productRepo.GetByID(newBatch.ProductID)
 	if productExists == (internal.Product{}) {
-		return utils.ErrConflict
+		return utils.ENotFound("Product ID")
 	}
 
 	if err != nil {

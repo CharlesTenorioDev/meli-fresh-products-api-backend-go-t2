@@ -8,7 +8,7 @@ package section
 // 	"github.com/stretchr/testify/require"
 // )
 
-// var simpleSection = internal.Section{
+// var mockSection = internal.Section{
 // 	ID:                 1,
 // 	SectionNumber:      1,
 // 	CurrentTemperature: 1,
@@ -22,19 +22,19 @@ package section
 
 // func Test_GetAll(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
 // 	sections, _ := repo.GetAll()
 // 	require.Equal(t, 1, len(sections))
-// 	require.Equal(t, simpleSection, sections[0])
+// 	require.Equal(t, mockSection, sections[0])
 // }
 
 // func Test_GetById_WhenExists(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
 // 	section, _ := repo.GetByID(1)
-// 	require.Equal(t, simpleSection, section)
+// 	require.Equal(t, mockSection, section)
 // }
 
 // func Test_GetById_WhenNotExists(t *testing.T) {
@@ -45,10 +45,10 @@ package section
 
 // func Test_GetBySectionNumber_WhenExists(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
 // 	section, _ := repo.GetBySectionNumber(1)
-// 	require.Equal(t, simpleSection, section)
+// 	require.Equal(t, mockSection, section)
 // }
 
 // func Test_GetBySectionNumber_WhenNotExists(t *testing.T) {
@@ -59,7 +59,7 @@ package section
 
 // func Test_Delete_WhenExist(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
 // 	err := repo.Delete(1)
 // 	require.Nil(t, err)
@@ -73,7 +73,7 @@ package section
 
 // func Test_Save_WhenLoadedDb(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
 // 	newSection, _ := repo.Save(internal.Section{
 // 		SectionNumber:      2,
@@ -105,9 +105,9 @@ package section
 
 // func Test_Update_WhenExists(t *testing.T) {
 // 	repo := NewMemorySectionRepository(map[int]internal.Section{
-// 		1: simpleSection,
+// 		1: mockSection,
 // 	})
-// 	sectionToUpdate := simpleSection
+// 	sectionToUpdate := mockSection
 // 	sectionToUpdate.MaximumCapacity = 99
 // 	updatedSection, _ := repo.Update(sectionToUpdate)
 // 	require.Equal(t, 99, updatedSection.MaximumCapacity)

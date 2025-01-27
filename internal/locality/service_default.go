@@ -2,8 +2,6 @@ package locality
 
 import (
 	"errors"
-	"fmt"
-
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -41,64 +39,64 @@ func NewBasicLocalityService(
 //	error - an error if any validation or save operation fails, otherwise nil
 func (s *BasicLocalityService) Save(locality *internal.Locality, province *internal.Province, country *internal.Country) error {
 	if locality.LocalityName == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("locality_name")
 	}
 
 	if locality.ID == 0 {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("id")
 	}
 
 	if province.ProvinceName == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("province_name")
 	}
 
 	if country.CountryName == "" {
-		return utils.ErrInvalidArguments
+		return utils.EZeroValue("country_name")
 	}
+
 	// If locality exists by id
+	// Check for error 500
 	possibleLocality, err := s.localityRepo.GetByID(locality.ID)
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}
 
 	if possibleLocality != (internal.Locality{}) {
-		return utils.ErrConflict
+		return utils.EConflict("id", "locality")
 	}
 
 	// Check if we find a country by its name
 	possibleCountry, err := s.countryRepo.GetByName(country.CountryName)
-	if err != nil {
-		// If not exists, we create on
-		if errors.Is(err, utils.ErrNotFound) {
-			if err = s.countryRepo.Save(country); err != nil {
-				return err
-			}
-		} else {
+
+	// We find the country
+	if err == nil {
+		country.ID = possibleCountry.ID
+	} else if errors.Is(err, utils.ErrNotFound) { // We need to create the country
+		if err = s.countryRepo.Save(country); err != nil {
+			// Internal error
 			return err
 		}
-	} else {
-		country.ID = possibleCountry.ID
+	} else { // Internal error
+		return err
 	}
 
 	(*province).CountryID = country.ID
 
 	// Check if we find a province by its name
 	possibleProvince, err := s.provinceRepo.GetByName(province.ProvinceName)
-	if err != nil {
-		// If not exists, we create on
-		if errors.Is(err, utils.ErrNotFound) {
-			if err = s.provinceRepo.Save(province); err != nil {
-				return err
-			}
-		} else {
+
+	if err == nil {
+		province.ID = possibleProvince.ID
+	} else if errors.Is(err, utils.ErrNotFound) {
+		if err = s.provinceRepo.Save(province); err != nil {
+			// Internal error
 			return err
 		}
-	} else {
-		province.ID = possibleProvince.ID
+	} else { // Internal error
+		return err
 	}
 
 	(*locality).ProvinceID = province.ID
-	fmt.Printf("%+v %+v %+v\n\n", locality, province, country)
 
 	if err = s.localityRepo.Save(locality); err != nil {
 		return err
@@ -110,12 +108,12 @@ func (s *BasicLocalityService) Save(locality *internal.Locality, province *inter
 // GetSellersByLocalityID the sellers quantity by there location
 // if id == 0, then all location are returned
 func (s *BasicLocalityService) GetSellersByLocalityID(localityID int) ([]internal.SellersByLocality, error) {
-	// Of id != 0, check if locality exists
-	if localityID != 0 {
-		_, err := s.localityRepo.GetByID(localityID)
-		if err != nil {
-			return []internal.SellersByLocality{}, err
-		}
+	if localityID <= 0 {
+		return []internal.SellersByLocality{}, utils.EZeroValue("locality_id")
+	}
+
+	if _, err := s.localityRepo.GetByID(localityID); err != nil {
+		return []internal.SellersByLocality{}, err
 	}
 
 	return s.localityRepo.GetSellersByLocalityID(localityID)
@@ -133,12 +131,12 @@ func (s *BasicLocalityService) GetSellersByLocalityID(localityID int) ([]interna
 //   - []internal.CarriesByLocality: A slice of carriers associated with the locality.
 //   - error: An error if the locality does not exist or if there is an issue retrieving the carriers.
 func (s *BasicLocalityService) GetCarriesByLocalityID(localityID int) ([]internal.CarriesByLocality, error) {
-	// Of id != 0, check if locality exists
-	if localityID != 0 {
-		_, err := s.localityRepo.GetByID(localityID)
-		if err != nil {
-			return []internal.CarriesByLocality{}, err
-		}
+	if localityID <= 0 {
+		return []internal.CarriesByLocality{}, utils.EZeroValue("locality_id")
+	}
+
+	if _, err := s.localityRepo.GetByID(localityID); err != nil {
+		return []internal.CarriesByLocality{}, err
 	}
 
 	return s.localityRepo.GetCarriesByLocalityID(localityID)

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"net/http"
@@ -26,18 +25,7 @@ func (h *ProductBatchHandler) Create() http.HandlerFunc {
 
 		newBatch, err := h.service.Save(&body)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
-
+			utils.HandleError(w, err)
 			return
 		}
 

@@ -2,13 +2,14 @@ package handler_test
 
 import (
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -36,44 +37,44 @@ func (m *MockLocalityService) GetCarriesByLocalityID(localityId int) ([]internal
 
 func TestUnitLocality_CreateLocality(t *testing.T) {
 	cases := []struct {
-		TestName           string
+		Name               string
 		ErrorToReturn      error
 		Body               string
 		ExpectedStatusCode int
 	}{
 		{
-			TestName:           "CREATED",
+			Name:               "CREATED",
 			Body:               `{"data":{"id":6701,"locality_name":"Lujan","province_name":"Buenos Aires","country_name":"USA"}}`,
 			ExpectedStatusCode: 201,
 			ErrorToReturn:      nil,
 		},
 		{
-			TestName:           "BAD_REQUEST",
+			Name:               "BAD_REQUEST",
 			Body:               `data:{"id":6701,"locality_name":"Lujan","province_name":"Buenos Aires","country_name":"USA"}}`,
 			ExpectedStatusCode: 400,
 			ErrorToReturn:      nil, // Error is genereated by JSON parsing process
 		},
 		{
-			TestName:           "CONFLICT",
+			Name:               "CONFLICT",
 			Body:               `{"data":{"id":6701,"locality_name":"Lujan","province_name":"Buenos Aires","country_name":"USA"}}`,
 			ExpectedStatusCode: 409,
 			ErrorToReturn:      utils.ErrConflict,
 		},
 		{
-			TestName:           "UNPROCESSABLE_ENTITY",
+			Name:               "UNPROCESSABLE_ENTITY",
 			Body:               `{"data":{"id":6701,"locality_name":"","province_name":"","country_name":"USA"}}`,
 			ExpectedStatusCode: 422,
 			ErrorToReturn:      utils.ErrInvalidArguments,
 		},
 		{
-			TestName:           "INTERNAL_SERVER_ERROR",
+			Name:               "INTERNAL_SERVER_ERROR",
 			Body:               `{"data":{"id":6701,"locality_name":"Lujan","province_name":"Buenos Aires","country_name":"USA"}}`,
 			ExpectedStatusCode: 500,
 			ErrorToReturn:      errors.New("Internal Server Error"),
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.TestName, func(t *testing.T) {
+		t.Run(c.Name, func(t *testing.T) {
 			service := new(MockLocalityService)
 			service.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(c.ErrorToReturn)
 			handler := handler.NewLocalityHandler(service)
@@ -139,6 +140,60 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 			}
 			response := httptest.NewRecorder()
 			handler.GetSellersByLocalityID()(response, request)
+			require.Equal(t, c.ExpectedStatusCode, response.Result().StatusCode)
+		})
+	}
+
+}
+
+func TestUnitLocality_GetSellersByLocalityID(t *testing.T) {
+	cases := []struct {
+		TestName           string
+		ErrorToReturn      error
+		DataToReturn       []internal.CarriesByLocality
+		RawQuery           string
+		ExpectedStatusCode int
+	}{
+		{
+			TestName:           "OK",
+			ExpectedStatusCode: 200,
+			DataToReturn:       []internal.CarriesByLocality{},
+			ErrorToReturn:      nil,
+			RawQuery:           "",
+		},
+		{
+			TestName:           "BAD_REQUEST",
+			ExpectedStatusCode: 400,
+			DataToReturn:       []internal.CarriesByLocality{},
+			ErrorToReturn:      nil,
+			RawQuery:           "id=asd",
+		},
+		{
+			TestName:           "NOT_FOUND",
+			ExpectedStatusCode: 404,
+			DataToReturn:       []internal.CarriesByLocality{},
+			ErrorToReturn:      utils.ErrNotFound,
+			RawQuery:           "id=99",
+		},
+		{
+			TestName:           "INTERNAL_SERVER_ERROR",
+			ExpectedStatusCode: 500,
+			DataToReturn:       []internal.CarriesByLocality{},
+			ErrorToReturn:      errors.New("Internal Server Error"),
+			RawQuery:           "id=1",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.TestName, func(t *testing.T) {
+			service := new(MockLocalityService)
+			service.On("GetCarriesByLocalityID", mock.Anything).Return(c.DataToReturn, c.ErrorToReturn)
+			handler := handler.NewLocalityHandler(service)
+			request := &http.Request{
+				URL:    &url.URL{RawQuery: c.RawQuery},
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+			}
+			response := httptest.NewRecorder()
+			handler.GetCarriesByLocalityID()(response, request)
 			require.Equal(t, c.ExpectedStatusCode, response.Result().StatusCode)
 		})
 	}

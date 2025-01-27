@@ -2,8 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -39,8 +37,9 @@ type reqPostLocality struct {
 func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostLocality
+
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			utils.HandleError(w, utils.EBadRequest("body"))
 			return
 		}
 
@@ -57,18 +56,7 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 
 		err := h.service.Save(&newLocality, &province, &country)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -91,20 +79,15 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 		if strings.TrimSpace(r.URL.Query().Get("id")) != "" {
 			id, err = strconv.Atoi(r.URL.Query().Get("id"))
 			if err != nil {
-				utils.Error(w, http.StatusBadRequest, "invalid id")
+				utils.HandleError(w, utils.EBadRequest("id"))
 				return
 			}
 		}
 
 		locality, err := h.service.GetSellersByLocalityID(id)
+
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("no locality for id %d", id))
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Some error occurs")
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -121,25 +104,24 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 // The response is returned as a JSON-encoded list of carriers with a status code of 200 OK.
 func (handler *LocalityHandler) GetCarriesByLocalityID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
+		id := 0
 
-		idInt, err := strconv.Atoi(id)
-		if err != nil {
-			idInt = 0
+		var err error
+
+		if strings.TrimSpace(r.URL.Query().Get("id")) != "" {
+			id, err = strconv.Atoi(r.URL.Query().Get("id"))
+			if err != nil {
+				utils.HandleError(w, utils.EBadRequest("id"))
+				return
+			}
 		}
 
-		buyers, err := handler.service.GetCarriesByLocalityID(idInt)
+		buyers, err := handler.service.GetCarriesByLocalityID(id)
 		if err != nil {
-			utils.Error(w, http.StatusNotFound, "Locality: "+utils.ErrNotFound.Error())
+			utils.HandleError(w, err)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if err := json.NewEncoder(w).Encode(buyers); err != nil {
-			utils.Error(w, http.StatusInternalServerError, "Failed to encode buyers: "+err.Error())
-			return
-		}
+		utils.JSON(w, http.StatusOK, buyers)
 	}
 }

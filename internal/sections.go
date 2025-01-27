@@ -32,8 +32,8 @@ type SectionProductsReport struct {
 type (
 	SectionRepository interface {
 		GetAll() ([]Section, error)
-		Save(*Section) (Section, error)
-		Update(*Section) (Section, error)
+		Save(*Section) error
+		Update(*Section) error
 		GetByID(int) (Section, error)
 		GetBySectionNumber(int) (Section, error)
 		Delete(int) error

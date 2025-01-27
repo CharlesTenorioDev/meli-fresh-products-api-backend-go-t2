@@ -115,7 +115,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	// return
 	// }
 	// sellerRepo := repository.NewSellerDBRepository(dbSellers)
-	sellerRepo := seller.NewSellerMysql(a.db)
+	sellerRepo := seller.NewSellerRepository(a.db)
 	sellerService := seller.NewSellerService(sellerRepo, localityRepo)
 
 	if err := seller.RegisterSellerRoutes(router, sellerService); err != nil {
@@ -149,7 +149,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	}
 
 	// Requisito 2 - Warehouses
-	warehouseRepo := warehouse.NewWarehouseRepository(a.db)
+	warehouseRepo := warehouse.NewWarehouseDB(a.db)
 	warehouseService := warehouse.NewWarehouseService(warehouseRepo, localityRepo)
 
 	err = warehouse.NewWarehouseRoutes(router, warehouseService)
@@ -203,7 +203,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 
 	// Sprint2 Requisito 3 - Product Batch
 	productBatchRepo := product_batch.NewProductBatchRepository(a.db)
-	productBatchService := product_batch.NewProductBatchesService(productBatchRepo, productRepo, sectionRepo)
+	productBatchService := product_batch.NewProductBatchService(productBatchRepo, productRepo, sectionRepo)
 
 	if err = product_batch.ProductBatchRoutes(router, productBatchService); err != nil {
 		panic(err)
