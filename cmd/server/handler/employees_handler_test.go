@@ -135,9 +135,10 @@ var (
 )
 
 func TestEmployeeHandler_FindAll(t *testing.T) {
-	mockService := new(mockEmployeeService)
-	handler := NewEmployeeHandler(mockService)
+
 	t.Run("FindAll - Success", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("FindAll").Return(map[int]internal.Employee{}, nil)
 
 		req := httptest.NewRequest("GET", "/employees", nil)
@@ -149,6 +150,8 @@ func TestEmployeeHandler_FindAll(t *testing.T) {
 	})
 
 	t.Run("FindAll - Internal Error", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("FindAll").Return(map[int]internal.Employee{}, assert.AnError)
 
 		req := httptest.NewRequest("GET", "/employees", nil)
@@ -289,10 +292,9 @@ func TestEmployeeHandler_Update(t *testing.T) {
 }
 
 func TestEmployeeHandler_Create(t *testing.T) {
-	mockService := new(mockEmployeeService)
-	handler := NewEmployeeHandler(mockService)
-
 	t.Run("Create - Success", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("CreateEmployee", mockNewEmployee).Return(mockUpdatedEmployee, nil)
 
 		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
@@ -305,6 +307,8 @@ func TestEmployeeHandler_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Conflict", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrConflict)
 
 		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
@@ -317,6 +321,8 @@ func TestEmployeeHandler_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Empty Arguments", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrEmptyArguments)
 
 		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))

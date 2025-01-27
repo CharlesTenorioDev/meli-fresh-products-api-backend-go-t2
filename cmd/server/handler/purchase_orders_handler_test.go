@@ -101,10 +101,9 @@ func TestPurchaseOrdersHandler_FindAll(t *testing.T) {
 }
 
 func TestPurchaseOrdersHandler_Create(t *testing.T) {
-	mockService := new(mockPurchaseOrderService)
-	handler := NewPurchaseOrdersHandler(mockService)
-
 	t.Run("Create - Success", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(mockPurchaseOrder, nil)
 
 		req := httptest.NewRequest("POST", "/purchaseOrders", bytes.NewBufferString(mockJsonPurchaseOrder))
@@ -117,6 +116,8 @@ func TestPurchaseOrdersHandler_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Conflict", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(internal.PurchaseOrder{}, utils.ErrConflict)
 
 		req := httptest.NewRequest("POST", "/purchaseOrders", bytes.NewBufferString(mockJsonPurchaseOrder))
@@ -129,6 +130,8 @@ func TestPurchaseOrdersHandler_Create(t *testing.T) {
 	})
 
 	t.Run("Create - Empty Arguments", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(internal.PurchaseOrder{}, utils.ErrEmptyArguments)
 
 		req := httptest.NewRequest("POST", "/purchaseOrders", bytes.NewBufferString(mockJsonPurchaseOrder))
