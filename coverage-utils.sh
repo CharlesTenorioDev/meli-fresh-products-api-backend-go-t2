@@ -25,31 +25,6 @@ if [[ $1 == "Debora" ]]; then
     sed '/internal\/product_batch\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
     go tool cover -html=coverage_filter.out
 fi
-# Pedro S1 Req6 - Buyers, S2 Req5 - Inbound Order
-if [[ $1 == "Pedro" ]]; then
-    echo "Starting the tests for Pedro ..."
-    go test -coverprofile=coverage.out ./internal/buyer/... ./internal/inbound_order/... ./cmd/server/handler/...
-
-    echo "mode: set" > ./coverage_filter.out
-    sed '/buyer_handler/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/inbound_orders_handler/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/internal\/buyer\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/internal\/inbound_order\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
-    go tool cover -html=coverage_filter.out
-fi
-
-# Matheus S1 Req4 - Products, S2 Req2 - Carry
-if [[ $1 == "Matheus" ]]; then
-    echo "Starting the tests for Matheus ..."
-    go test -coverprofile=coverage.out ./internal/product/... ./internal/carry/... ./cmd/server/handler/...
-
-    echo "mode: set" > ./coverage_filter.out
-    sed '/product_handler/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/carry_handler/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/internal\/product\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/internal\/carry\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
-    go tool cover -html=coverage_filter.out
-fi
 
 # João S1 Req2 - Warehouse, S2 Req4 - Product Record
 if [[ $1 == "João" ]]; then
@@ -74,5 +49,33 @@ if [[ $1 == "Yuri" ]]; then
     sed '/locality_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/section\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/locality\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    go tool cover -html=coverage_filter.out
+fi
+
+
+
+# Matheus S1 Req4 - Products, S2 Req2 - Carry
+if [[ $1 == "Matheus" ]]; then
+    echo "Starting the tests for Matheus ..."
+    go test -coverprofile=coverage.out ./internal/product/... ./internal/carry/... ./cmd/server/handler/...
+
+    echo "mode: set" > ./coverage_filter.out
+    sed '/product_handler/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/carry_handler/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/product\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/carry\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    go tool cover -html=coverage_filter.out
+fi
+
+# Pedro S1 Req6 - Buyers, S2 Req5 - Inbound Order
+if [[ $1 == "Pedro" ]]; then
+    echo "Starting the tests for Pedro ..."
+    go test -coverprofile=coverage.out ./internal/buyer/... ./internal/inbound_order/... ./cmd/server/handler/...
+
+    echo "mode: set" > ./coverage_filter.out
+    sed '/buyer_handler/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/inbound_orders_handler/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/buyer\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/inbound_order\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
     go tool cover -html=coverage_filter.out
 fi
