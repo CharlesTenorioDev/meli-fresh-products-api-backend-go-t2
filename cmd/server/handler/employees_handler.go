@@ -30,10 +30,9 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 		if err != nil {
 			if err == utils.ErrNotFound {
 				utils.Error(w, http.StatusNotFound, "No employees found")
+			} else {
+				utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
 			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
-
 			return
 		}
 		// returns status 200 and the data if all ok
@@ -121,7 +120,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		// decode the json request body into Employee struct
 		err = json.NewDecoder(r.Body).Decode(&inputEmployee)
 		if err != nil {
-			utils.HandleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.EBadRequest("employee"))
 			return
 		}
 
@@ -130,7 +129,6 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		employee, err := h.sv.UpdateEmployee(inputEmployee)
 		if err != nil {
 			utils.HandleError(w, err)
-
 			return
 		}
 

@@ -16,7 +16,7 @@ func RegisterInboundOrderRoutes(mux *chi.Mux, service internal.InboundOrderServi
 	})
 
 	mux.Route("/api/v1/employees/reportInboundOrders", func(router chi.Router) {
-		router.Get("/", orderHandler.GetInboundOrdersReport())
+		router.Get("/", orderHandler.GenerateInboundOrdersReport())
 	})
 
 	return nil
