@@ -138,6 +138,45 @@ func TestProductRecordsService_CreateProductRecord(t *testing.T) {
 			ExpectedError:   utils.ErrInvalidArguments,
 		},
 		{
+			TestName: "CreateProductRecord_InvalidArguments",
+			NewProduct: internal.ProductRecords{
+				LastUpdateDate: "2025-01-27",
+				PurchasePrice:  0,
+				SalePrice:      0,
+				ProductID:      0,
+			},
+			RepoResponse:    internal.ProductRecords{},
+			RepoError:       nil,
+			ValidationError: nil,
+			ExpectedError:   utils.ErrInvalidArguments,
+		},
+		{
+			TestName: "CreateProductRecord_InvalidArguments",
+			NewProduct: internal.ProductRecords{
+				LastUpdateDate: "2025-01-27",
+				PurchasePrice:  150.00,
+				SalePrice:      0,
+				ProductID:      0,
+			},
+			RepoResponse:    internal.ProductRecords{},
+			RepoError:       nil,
+			ValidationError: nil,
+			ExpectedError:   utils.ErrInvalidArguments,
+		},
+		{
+			TestName: "CreateProductRecord_InvalidArguments",
+			NewProduct: internal.ProductRecords{
+				LastUpdateDate: "2025-01-27",
+				PurchasePrice:  100.50,
+				SalePrice:      120.50,
+				ProductID:      0,
+			},
+			RepoResponse:    internal.ProductRecords{},
+			RepoError:       nil,
+			ValidationError: nil,
+			ExpectedError:   utils.ErrInvalidArguments,
+		},
+		{
 			TestName: "CreateProductRecord_Conflict",
 			NewProduct: internal.ProductRecords{
 				LastUpdateDate: "2025-01-27",
