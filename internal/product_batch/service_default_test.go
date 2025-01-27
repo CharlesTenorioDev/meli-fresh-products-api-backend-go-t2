@@ -2,12 +2,14 @@ package product_batch
 
 import (
 	"errors"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 
+	"testing"
+
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type MockProductBatchRepository struct {
@@ -64,14 +66,14 @@ func (ms *MockSectionRepository) GetAll() ([]internal.Section, error) {
 	return args.Get(0).([]internal.Section), args.Error(1)
 }
 
-func (ms *MockSectionRepository) Save(section *internal.Section) (internal.Section, error) {
+func (ms *MockSectionRepository) Save(section *internal.Section) error {
 	args := ms.Called(section)
-	return args.Get(0).(internal.Section), args.Error(1)
+	return args.Error(0)
 }
 
-func (ms *MockSectionRepository) Update(section *internal.Section) (internal.Section, error) {
+func (ms *MockSectionRepository) Update(section *internal.Section) error {
 	args := ms.Called(section)
-	return args.Get(0).(internal.Section), args.Error(1)
+	return args.Error(0)
 }
 
 func (ms *MockSectionRepository) GetBySectionNumber(id int) (internal.Section, error) {
