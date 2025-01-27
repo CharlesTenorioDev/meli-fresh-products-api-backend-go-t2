@@ -9,18 +9,18 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
-type WarehouseDB struct {
+type MySQLWarehouseRepository struct {
 	db *sql.DB
 }
 
-func NewWarehouseRepository(db *sql.DB) *WarehouseDB {
-	return &WarehouseDB{db: db}
+func NewWarehouseDB(db *sql.DB) *MySQLWarehouseRepository {
+	return &MySQLWarehouseRepository{db: db}
 }
 
 // GetAll retrieves all warehouses from the database.
 // It returns a slice of Warehouse structs and an error if any occurs during the query execution or row scanning.
 // The function queries the database for the following fields: id, address, telephone, warehouse_code, and locality_id.
-func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
+func (w *MySQLWarehouseRepository) GetAll() ([]internal.Warehouse, error) {
 	var warehouseList []internal.Warehouse
 	// query the database
 	rows, err := w.db.Query("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses")
@@ -63,8 +63,8 @@ func (w *WarehouseDB) GetAll() ([]internal.Warehouse, error) {
 // Returns:
 //   - internal.Warehouse: the warehouse details.
 //   - error: an error if the warehouse is not found or if there is a database issue.
-func (r *WarehouseDB) GetByID(id int) (internal.Warehouse, error) {
-	row := r.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses WHERE id = ?", id)
+func (w *MySQLWarehouseRepository) GetByID(id int) (internal.Warehouse, error) {
+	row := w.db.QueryRow("SELECT `id`, `address`, `telephone`, `warehouse_code`, `locality_id`, `minimum_capacity`, `minimum_temperature` FROM warehouses WHERE id = ?", id)
 
 	if err := row.Err(); err != nil {
 		return internal.Warehouse{}, err
@@ -93,9 +93,9 @@ func (r *WarehouseDB) GetByID(id int) (internal.Warehouse, error) {
 // Returns:
 //   - internal.Warehouse: The saved warehouse object with its ID populated.
 //   - error: An error object if there was an issue during the save operation.
-func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
+func (w *MySQLWarehouseRepository) Save(newWarehouse internal.Warehouse) (internal.Warehouse, error) {
 	// prepare the query
-	statement, err := r.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES (?, ?, ?, ?)")
+	statement, err := w.db.Prepare("INSERT INTO warehouses (address, telephone, warehouse_code, locality_id, minimum_capacity, minimum_temperature) VALUES (?, ?, ?, ?,?,?)")
 
 	if err != nil {
 		return internal.Warehouse{}, err
@@ -144,14 +144,14 @@ func (r *WarehouseDB) Save(newWarehouse internal.Warehouse) (internal.Warehouse,
 // Returns:
 // - The updated warehouse data if the update is successful.
 // - An error if the warehouse does not exist or if there is an issue with the update operation.
-func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Warehouse, error) {
-	_, err := r.GetByID(updatedWarehouse.ID)
+func (w *MySQLWarehouseRepository) Update(updatedWarehouse internal.Warehouse) (internal.Warehouse, error) {
+	_, err := w.GetByID(updatedWarehouse.ID)
 
 	if err != nil {
 		return internal.Warehouse{}, err
 	}
 	// prepare the query
-	statement, err := r.db.Prepare(
+	statement, err := w.db.Prepare(
 		"UPDATE `warehouses` AS `w` SET `address` = ?, `telephone` = ?, `warehouse_code` = ?, `locality_id` = ?, `minimum_capacity`= ?, `minimum_temperature`= ? WHERE `id` = ?",
 	)
 
@@ -191,14 +191,14 @@ func (r *WarehouseDB) Update(updatedWarehouse internal.Warehouse) (internal.Ware
 //
 // Returns:
 //   - error: an error object if any error occurs, otherwise nil.
-func (r *WarehouseDB) Delete(warehouseID int) error {
-	_, err := r.GetByID(warehouseID)
+func (w *MySQLWarehouseRepository) Delete(warehouseID int) error {
+	_, err := w.GetByID(warehouseID)
 
 	if err != nil {
 		return err
 	}
 
-	statement, err := r.db.Prepare("DELETE FROM warehouses WHERE warehouseID = ?")
+	statement, err := w.db.Prepare("DELETE FROM warehouses WHERE id = ?")
 
 	if err != nil {
 		return err

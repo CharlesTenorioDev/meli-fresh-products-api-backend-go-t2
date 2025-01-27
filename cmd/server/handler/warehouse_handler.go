@@ -2,8 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,6 +9,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+)
+
+const (
+	INVALID = "Invalid ID"
 )
 
 // reqPostWarehouse represents the request payload for creating a new warehouse.
@@ -74,13 +76,7 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		warehouses, err := h.service.GetAll()
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, "No warehouses found")
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving warehouses")
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -104,19 +100,13 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
+			utils.HandleError(w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		warehouse, err := h.service.GetByID(id)
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
-
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving the warehouse")
+			utils.HandleError(w, err)
 
 			return
 		}
@@ -144,7 +134,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body reqPostWarehouse
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -159,19 +149,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 
 		newWarehouse, err := h.service.Save(newWarehouse)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while saving the warehouse")
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -199,35 +177,19 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
+			utils.HandleError(w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		var body internal.WarehousePointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			utils.HandleError(w, err)
 			return
 		}
 
 		updatedWarehouse, err := h.service.Update(id, body)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while updating the warehouse: "+err.Error())
-
+			utils.HandleError(w, err)
 			return
 		}
 
@@ -252,21 +214,14 @@ func (h *WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "Invalid ID format")
+			utils.HandleError(w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		err = h.service.Delete(id)
 
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintf("No warehouse found with ID %d", id))
-
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while deleting the warehouse")
-
+			utils.HandleError(w, err)
 			return
 		}
 
