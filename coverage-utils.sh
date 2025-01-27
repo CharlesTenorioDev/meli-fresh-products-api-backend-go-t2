@@ -18,8 +18,8 @@ if [[ $1 == "Pedro" ]]; then
 fi
 
 # Matheus S1 Req4 - Products, S2 Req2 - Carry
-if [[ $1 == "Pedro" ]]; then
-    echo "Starting the tests for Pedro ..."
+if [[ $1 == "Matheus" ]]; then
+    echo "Starting the tests for Matheus ..."
     go test -coverprofile=coverage.out ./internal/product/... ./internal/carry/... ./cmd/server/handler/... && go tool cover -html=coverage.out
 fi
 
