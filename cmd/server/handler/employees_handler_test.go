@@ -1,625 +1,330 @@
-package handler_test
+package handler
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
-type MockEmployeesService struct {
+type mockEmployeeService struct {
 	mock.Mock
 }
 
-func (m *MockEmployeesService) FindAll() (map[int]internal.Employee, error) {
+func (m *mockEmployeeService) FindAll() (map[int]internal.Employee, error) {
 	args := m.Called()
 	return args.Get(0).(map[int]internal.Employee), args.Error(1)
 }
 
-func (m *MockEmployeesService) FindByID(id int) (internal.Employee, error) {
+func (m *mockEmployeeService) FindByID(id int) (internal.Employee, error) {
 	args := m.Called(id)
 	return args.Get(0).(internal.Employee), args.Error(1)
 }
 
-func (m *MockEmployeesService) CreateEmployee(newEmployee internal.EmployeeAttributes) (internal.Employee, error) {
-	args := m.Called(newEmployee)
-	return args.Get(0).(internal.Employee), args.Error(1)
-}
-
-func (m *MockEmployeesService) UpdateEmployee(inputEmployee internal.Employee) (internal.Employee, error) {
+func (m *mockEmployeeService) CreateEmployee(inputEmployee internal.EmployeeAttributes) (employee internal.Employee, err error) {
 	args := m.Called(inputEmployee)
 	return args.Get(0).(internal.Employee), args.Error(1)
 }
 
-func (m *MockEmployeesService) DeleteEmployee(id int) error {
+func (m *mockEmployeeService) UpdateEmployee(newEmployee internal.Employee) (internal.Employee, error) {
+	args := m.Called(newEmployee)
+	return args.Get(0).(internal.Employee), args.Error(1)
+}
+
+func (m *mockEmployeeService) DeleteEmployee(id int) (err error) {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-func TestUnitEmployees_GetAllEmployees(t *testing.T) {
-	type testCase struct {
-		name               string
-		mockEmployees      map[int]internal.Employee
-		mockError          error
-		expectedStatusCode int
-		expectedResponse   map[string]any
-	}
-
-	tests := []testCase{
-		{
-			name: "OK",
-			mockEmployees: map[int]internal.Employee{
-				1: {
-					ID: 1,
-					Attributes: internal.EmployeeAttributes{
-						CardNumberID: "E001",
-						FirstName:    "Alice",
-						LastName:     "Johnson",
-						WarehouseID:  1,
-					},
-				},
-			},
-			mockError:          nil,
-			expectedStatusCode: http.StatusOK,
-			expectedResponse: map[string]any{
-				"message": "success",
-				"data": map[string]any{
-					"1": map[string]any{
-						"id": float64(1),
-						"attributes": map[string]any{
-							"card_number_id": "E001",
-							"first_name":     "Alice",
-							"last_name":      "Johnson",
-							"warehouse_id":   float64(1),
-						},
-					},
-				},
-			},
-		},
-		{
-			name:               "NOT_FOUND",
-			mockEmployees:      nil,
-			mockError:          utils.ErrNotFound,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse: map[string]interface{}{
-				"status":  http.StatusText(http.StatusNotFound),
-				"message": "No employees found",
-			},
-		},
-		{
-			name:               "INTERNAL_SERVER_ERROR",
-			mockEmployees:      nil,
-			mockError:          errors.New("some internal error"),
-			expectedStatusCode: http.StatusInternalServerError,
-			expectedResponse: map[string]interface{}{
-				"status":  http.StatusText(http.StatusInternalServerError),
-				"message": "An error occurred while retrieving employees",
-			},
-		},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			service := new(MockEmployeesService)
-			handler := handler.NewEmployeeHandler(service)
-
-			service.On("FindAll").Return(tc.mockEmployees, tc.mockError)
-
-			request := httptest.NewRequest("GET", "/employees", nil)
-			request.Header.Set("Content-Type", "application/json")
-
-			response := httptest.NewRecorder()
-
-			handler.GetAllEmployees()(response, request)
-
-			require.Equal(t, tc.expectedStatusCode, response.Code)
-
-			var actualResponse map[string]any
-			err := json.Unmarshal(response.Body.Bytes(), &actualResponse)
-			require.NoError(t, err)
-
-			require.Equal(t, tc.expectedResponse, actualResponse)
-
-			service.AssertExpectations(t)
-		})
-	}
+type mockWarehouseValidation struct {
+	mock.Mock
 }
 
-func TestUnitEmployees_GetEmployeesByID(t *testing.T) {
-	type testCase struct {
-		name               string
-		paramID            string
-		mockEmployee       internal.Employee
-		mockError          error
-		expectedStatusCode int
-		expectedResponse   map[string]any
-	}
+func (m *mockWarehouseValidation) GetByID(id int) (internal.Warehouse, error) {
+	args := m.Called(id)
+	return args.Get(0).(internal.Warehouse), args.Error(1)
+}
 
-	employeeOK := internal.Employee{
+var (
+	mockEmployee = internal.Employee{
 		ID: 1,
 		Attributes: internal.EmployeeAttributes{
-			CardNumberID: "E001",
-			FirstName:    "Alice",
-			LastName:     "Johnson",
+			CardNumberID: "12345",
+			FirstName:    "Aelin",
+			LastName:     "Galanthynius",
 			WarehouseID:  1,
 		},
 	}
-
-	tests := []testCase{
-		{
-			name:               "OK",
-			paramID:            "1",
-			mockEmployee:       employeeOK,
-			mockError:          nil,
-			expectedStatusCode: http.StatusOK,
-			expectedResponse: map[string]any{
-				"message": "success",
-				"data": map[string]any{
-					"id": float64(employeeOK.ID),
-					"attributes": map[string]any{
-						"card_number_id": employeeOK.Attributes.CardNumberID,
-						"first_name":     employeeOK.Attributes.FirstName,
-						"last_name":      employeeOK.Attributes.LastName,
-						"warehouse_id":   float64(employeeOK.Attributes.WarehouseID),
-					},
-				},
-			},
-		},
-		{
-			name:               "INVALID ID",
-			paramID:            "abc",
-			mockEmployee:       internal.Employee{},
-			mockError:          nil,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusBadRequest),
-				"message": "invalid format",
-			},
-		},
-		{
-			name:               "NOT_FOUND",
-			paramID:            "2",
-			mockEmployee:       internal.Employee{},
-			mockError:          utils.ErrNotFound,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusNotFound),
-				"message": "entity not found",
-			},
+	mockEmployee2 = internal.Employee{
+		ID: 2,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "67890",
+			FirstName:    "Rowan",
+			LastName:     "Withethorn",
+			WarehouseID:  1,
 		},
 	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-
-			service := new(MockEmployeesService)
-			handler := handler.NewEmployeeHandler(service)
-
-			if tc.name != "INVALID ID" {
-				idInt, _ := strconv.Atoi(tc.paramID)
-				service.On("FindByID", idInt).Return(tc.mockEmployee, tc.mockError)
-			}
-
-			request := httptest.NewRequest("GET", "/employees/"+tc.paramID, nil)
-			response := httptest.NewRecorder()
-
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("id", tc.paramID)
-
-			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, rctx))
-
-			handler.GetEmployeesByID()(response, request)
-
-			require.Equal(t, tc.expectedStatusCode, response.Code)
-
-			var actualResponse map[string]any
-			err := json.Unmarshal(response.Body.Bytes(), &actualResponse)
-			require.NoError(t, err)
-
-			require.Equal(t, tc.expectedResponse, actualResponse)
-
-			service.AssertExpectations(t)
-		})
-	}
-}
-
-func TestUnitEmployees_CreateEmployee(t *testing.T) {
-	type testCase struct {
-		name               string
-		requestBody        string
-		mockInput          internal.EmployeeAttributes
-		mockOutput         internal.Employee
-		mockError          error
-		expectedStatusCode int
-		expectedResponse   map[string]any
-		callService        bool
-	}
-
-	employeeOKInput := internal.EmployeeAttributes{
-		CardNumberID: "E001",
-		FirstName:    "Alice",
-		LastName:     "Johnson",
+	mockEmployeeAttr = internal.EmployeeAttributes{
+		CardNumberID: "67890",
+		FirstName:    "Rowan",
+		LastName:     "Withethorn",
 		WarehouseID:  1,
 	}
-
-	employeeOKOutput := internal.Employee{
+	mockInputEmployee = internal.Employee{
 		ID: 1,
 		Attributes: internal.EmployeeAttributes{
-			CardNumberID: "E001",
-			FirstName:    "Alice",
-			LastName:     "Johnson",
+			CardNumberID: "12345",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
 			WarehouseID:  1,
 		},
 	}
-
-	tests := []testCase{
-		{
-			name:               "OK",
-			requestBody:        `{"card_number_id":"E001","first_name":"Alice","last_name":"Johnson","warehouse_id":1}`,
-			mockInput:          employeeOKInput,
-			mockOutput:         employeeOKOutput,
-			mockError:          nil,
-			expectedStatusCode: http.StatusCreated,
-			expectedResponse: map[string]any{
-				"message": "success",
-				"data": map[string]any{
-					"id": float64(employeeOKOutput.ID),
-					"attributes": map[string]any{
-						"card_number_id": employeeOKOutput.Attributes.CardNumberID,
-						"first_name":     employeeOKOutput.Attributes.FirstName,
-						"last_name":      employeeOKOutput.Attributes.LastName,
-						"warehouse_id":   float64(employeeOKOutput.Attributes.WarehouseID),
-					},
-				},
-			},
-			callService: true,
-		},
-		{
-			name:               "INVALID BODY",
-			requestBody:        `{"card_number_id":"E001"`,
-			mockInput:          internal.EmployeeAttributes{},
-			mockOutput:         internal.Employee{},
-			mockError:          nil,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusBadRequest),
-				"message": "invalid format: employee with invalid format",
-			},
-			callService: false,
-		},
-		{
-			name:               "CONFLICT",
-			requestBody:        `{"card_number_id":"E001","first_name":"Alice","last_name":"Johnson","warehouse_id":1}`,
-			mockInput:          employeeOKInput,
-			mockOutput:         internal.Employee{},
-			mockError:          utils.ErrConflict,
-			expectedStatusCode: http.StatusConflict,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusConflict),
-				"message": "entity already exists",
-			},
-			callService: true,
-		},
-		{
-			name:               "INTERNAL_SERVER_ERROR",
-			requestBody:        `{"card_number_id":"E001","first_name":"Alice","last_name":"Johnson","warehouse_id":1}`,
-			mockInput:          employeeOKInput,
-			mockOutput:         internal.Employee{},
-			mockError:          errors.New("some internal error"),
-			expectedStatusCode: http.StatusInternalServerError,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusInternalServerError),
-				"message": "internal server error",
-			},
-			callService: true,
-		},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			service := new(MockEmployeesService)
-			empHandler := handler.NewEmployeeHandler(service)
-
-			if tc.callService {
-				service.On("CreateEmployee", tc.mockInput).Return(tc.mockOutput, tc.mockError)
-			}
-
-			request := httptest.NewRequest("POST", "/employees",
-
-				strings.NewReader(tc.requestBody),
-			)
-			request.Header.Set("Content-Type", "application/json")
-			response := httptest.NewRecorder()
-
-			empHandler.PostEmployees()(response, request)
-
-			require.Equal(t, tc.expectedStatusCode, response.Code)
-
-			var actualResponse map[string]any
-			err := json.Unmarshal(response.Body.Bytes(), &actualResponse)
-			require.NoError(t, err)
-
-			require.Equal(t, tc.expectedResponse, actualResponse)
-
-			service.AssertExpectations(t)
-		})
-	}
-}
-
-func TestUnitEmployees_UpdateEmployee(t *testing.T) {
-	type testCase struct {
-		name               string
-		paramID            string
-		requestBody        string
-		mockInputEmployee  internal.Employee
-		mockOutputEmployee internal.Employee
-		mockError          error
-		expectedStatusCode int
-		expectedResponse   map[string]any
-		callService        bool
-	}
-
-	validBody := `{
-		"attributes": {
-			"card_number_id":"E001",
-			"first_name":"AliceUpdated",
-			"last_name":"Johnson",
-			"warehouse_id":2
-		}
-	}`
-
-	inputEmployee := internal.Employee{
-		ID: 0,
+	mockInputEmployeeInvalidID = internal.Employee{
+		ID: 99,
 		Attributes: internal.EmployeeAttributes{
-			CardNumberID: "E001",
-			FirstName:    "AliceUpdated",
-			LastName:     "Johnson",
-			WarehouseID:  2,
+			CardNumberID: "12345",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
 		},
 	}
-
-	outputEmployee := internal.Employee{
+	mockJsonEmployee = `{
+		"attributes": {
+		  "card_number_id": "123",
+		  "first_name": "Celaena",
+		  "last_name": "Sardothien",
+		  "warehouse_id": 1
+		}
+	  }`
+	mockUpdatedEmployee = internal.Employee{
 		ID: 1,
 		Attributes: internal.EmployeeAttributes{
-			CardNumberID: "E001",
-			FirstName:    "AliceUpdated",
-			LastName:     "Johnson",
-			WarehouseID:  2,
+			CardNumberID: "123",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
 		},
 	}
-
-	tests := []testCase{
-		{
-			name:               "OK",
-			paramID:            "1",
-			requestBody:        validBody,
-			mockInputEmployee:  inputEmployee,
-			mockOutputEmployee: outputEmployee,
-			mockError:          nil,
-			expectedStatusCode: http.StatusOK,
-			expectedResponse: map[string]any{
-				"message": "success",
-				"data": map[string]any{
-					"id": float64(outputEmployee.ID),
-					"attributes": map[string]any{
-						"card_number_id": outputEmployee.Attributes.CardNumberID,
-						"first_name":     outputEmployee.Attributes.FirstName,
-						"last_name":      outputEmployee.Attributes.LastName,
-						"warehouse_id":   float64(outputEmployee.Attributes.WarehouseID),
-					},
-				},
-			},
-			callService: true,
-		},
-		{
-			name:               "INVALID ID",
-			paramID:            "abc",
-			requestBody:        validBody,
-			mockInputEmployee:  internal.Employee{},
-			mockOutputEmployee: internal.Employee{},
-			mockError:          nil,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusBadRequest),
-				"message": "invalid format",
-			},
-			callService: false,
-		},
-		{
-			name:               "INVALID BODY",
-			paramID:            "1",
-			requestBody:        `{"attributes": { "card_number_id": "E001"`,
-			mockInputEmployee:  internal.Employee{},
-			mockOutputEmployee: internal.Employee{},
-			mockError:          nil,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusBadRequest),
-				"message": "invalid format",
-			},
-			callService: false,
-		},
-		{
-			name:               "NOT_FOUND",
-			paramID:            "2",
-			requestBody:        validBody,
-			mockInputEmployee:  inputEmployee,
-			mockOutputEmployee: internal.Employee{},
-			mockError:          utils.ErrNotFound,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusNotFound),
-				"message": "entity not found",
-			},
-			callService: true,
-		},
-		{
-			name:               "CONFLICT",
-			paramID:            "2",
-			requestBody:        validBody,
-			mockInputEmployee:  inputEmployee,
-			mockOutputEmployee: internal.Employee{},
-			mockError:          utils.ErrConflict,
-			expectedStatusCode: http.StatusConflict,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusConflict),
-				"message": "entity already exists",
-			},
-			callService: true,
-		},
-		{
-			name:               "INTERNAL_SERVER_ERROR",
-			paramID:            "2",
-			requestBody:        validBody,
-			mockInputEmployee:  inputEmployee,
-			mockOutputEmployee: internal.Employee{},
-			mockError:          errors.New("some internal error"),
-			expectedStatusCode: http.StatusInternalServerError,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusInternalServerError),
-				"message": "internal server error",
-			},
-			callService: true,
-		},
+	mockJsonNewEmployee = `{
+		  "card_number_id": "123",
+		  "first_name": "Celaena",
+		  "last_name": "Sardothien",
+		  "warehouse_id": 1
+	  }`
+	mockNewEmployee = internal.EmployeeAttributes{
+		CardNumberID: "123",
+		FirstName:    "Celaena",
+		LastName:     "Sardothien",
+		WarehouseID:  1,
 	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			service := new(MockEmployeesService)
-			empHandler := handler.NewEmployeeHandler(service)
-
-			if tc.callService {
-				idInt, _ := strconv.Atoi(tc.paramID)
-				tc.mockInputEmployee.ID = idInt
-
-				service.On("UpdateEmployee", tc.mockInputEmployee).Return(tc.mockOutputEmployee, tc.mockError)
-			}
-
-			request := httptest.NewRequest("PATCH", "/employees/"+tc.paramID, strings.NewReader(tc.requestBody))
-			request.Header.Set("Content-Type", "application/json")
-
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("id", tc.paramID)
-			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, rctx))
-
-			response := httptest.NewRecorder()
-
-			empHandler.PatchEmployees()(response, request)
-
-			require.Equal(t, tc.expectedStatusCode, response.Code)
-
-			var actualResponse map[string]any
-			err := json.Unmarshal(response.Body.Bytes(), &actualResponse)
-			require.NoError(t, err)
-
-			require.Equal(t, tc.expectedResponse, actualResponse)
-
-			service.AssertExpectations(t)
-		})
+	mockWarehouse = internal.Warehouse{
+		ID:                 1,
+		Address:            "Terrasen 452",
+		Telephone:          "0123456789",
+		WarehouseCode:      "XYZ",
+		MinimumCapacity:    10,
+		MinimumTemperature: 10,
 	}
+)
+
+func TestEmployeeHandler_FindAll(t *testing.T) {
+	mockService := new(mockEmployeeService)
+	handler := NewEmployeeHandler(mockService)
+	t.Run("FindAll - Success", func(t *testing.T) {
+		mockService.On("FindAll").Return(map[int]internal.Employee{}, nil)
+
+		req := httptest.NewRequest("GET", "/employees", nil)
+		res := httptest.NewRecorder()
+		handler.GetAllEmployees()(res, req)
+
+		assert.Equal(t, http.StatusOK, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("FindAll - Internal Error", func(t *testing.T) {
+		mockService.On("FindAll").Return(map[int]internal.Employee{}, assert.AnError)
+
+		req := httptest.NewRequest("GET", "/employees", nil)
+		res := httptest.NewRecorder()
+		handler.GetAllEmployees()(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
 }
 
-func TestUnitEmployees_DeleteEmployee(t *testing.T) {
-	type testCase struct {
-		name               string
-		paramID            string
-		mockError          error
-		expectedStatusCode int
-		expectedResponse   map[string]any
-		callService        bool
-	}
+func TestEmployeeHandler_FindByID(t *testing.T) {
+	mockService := new(mockEmployeeService)
+	handler := NewEmployeeHandler(mockService)
 
-	tests := []testCase{
-		{
-			name:               "INVALID ID",
-			paramID:            "abc",
-			mockError:          nil,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusBadRequest),
-				"message": "invalid format",
-			},
-			callService: false,
-		},
-		{
-			name:               "NOT FOUND",
-			paramID:            "2",
-			mockError:          utils.ErrNotFound,
-			expectedStatusCode: http.StatusNotFound,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusNotFound),
-				"message": "entity not found",
-			},
-			callService: true,
-		},
-		{
-			name:               "INVALID ARGUMENTS",
-			paramID:            "3",
-			mockError:          errors.New("some random error"),
-			expectedStatusCode: http.StatusUnprocessableEntity,
-			expectedResponse: map[string]any{
-				"status":  http.StatusText(http.StatusUnprocessableEntity),
-				"message": "invalid arguments",
-			},
-			callService: true,
-		},
-		{
-			name:               "OK",
-			paramID:            "1",
-			mockError:          nil,
-			expectedStatusCode: http.StatusNoContent,
-			expectedResponse: map[string]any{
-				"message": "employee deleted successfully",
-			},
-			callService: true,
-		},
-	}
+	t.Run("FindByID - Valid ID", func(t *testing.T) {
+		mockService.On("FindByID", 1).Return(mockEmployee, nil)
 
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			service := new(MockEmployeesService)
-			empHandler := handler.NewEmployeeHandler(service)
+		req := httptest.NewRequest("GET", "/employees/1", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.GetEmployeesByID()(res, req)
 
-			if tc.callService {
-				idInt, _ := strconv.Atoi(tc.paramID)
-				service.On("DeleteEmployee", idInt).Return(tc.mockError)
-			}
+		assert.Equal(t, http.StatusOK, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
 
-			request := httptest.NewRequest("DELETE", "/employees/"+tc.paramID, nil)
-			response := httptest.NewRecorder()
+	t.Run("FindByID - Invalid ID", func(t *testing.T) {
+		mockService.On("FindByID", 99).Return(internal.Employee{}, utils.ErrNotFound)
 
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("id", tc.paramID)
-			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, rctx))
+		req := httptest.NewRequest("GET", "/employees/99", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "99")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.GetEmployeesByID()(res, req)
 
-			empHandler.DeleteEmployees()(response, request)
+		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
 
-			require.Equal(t, tc.expectedStatusCode, response.Code)
+	t.Run("FindByID - Invalid Param Format", func(t *testing.T) {
+		mockService.On("FindByID").Return(internal.Employee{}, utils.ErrInvalidFormat)
 
-			var actualResponse map[string]any
-			err := json.Unmarshal(response.Body.Bytes(), &actualResponse)
+		req := httptest.NewRequest("GET", "/employees/x", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "x")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.GetEmployeesByID()(res, req)
 
-			require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+}
 
-			require.Equal(t, tc.expectedResponse, actualResponse)
+func TestEmployeeHandler_Delete(t *testing.T) {
+	mockService := new(mockEmployeeService)
+	handler := NewEmployeeHandler(mockService)
 
-			service.AssertExpectations(t)
-		})
-	}
+	t.Run("Delete - Valid ID", func(t *testing.T) {
+		mockService.On("DeleteEmployee", 1).Return(nil)
+
+		req := httptest.NewRequest("DELETE", "/employees/1", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.DeleteEmployees()(res, req)
+
+		assert.Equal(t, http.StatusNoContent, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Delete - Invalid ID", func(t *testing.T) {
+		mockService.On("DeleteEmployee", 99).Return(utils.ErrNotFound)
+
+		req := httptest.NewRequest("DELETE", "/employees/99", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "99")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.DeleteEmployees()(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Delete - Invalid Param Format", func(t *testing.T) {
+		mockService.On("DeleteEmployee").Return(utils.ErrInvalidFormat)
+
+		req := httptest.NewRequest("DELETE", "/employees/x", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "x")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.DeleteEmployees()(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+}
+
+func TestEmployeeHandler_Update(t *testing.T) {
+	mockService := new(mockEmployeeService)
+	handler := NewEmployeeHandler(mockService)
+
+	t.Run("Update - Valid ID", func(t *testing.T) {
+		mockService.On("UpdateEmployee", mockUpdatedEmployee).Return(mockUpdatedEmployee, nil)
+
+		req := httptest.NewRequest("PATCH", "/employees/1", bytes.NewBufferString(mockJsonEmployee))
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		res := httptest.NewRecorder()
+		handler.PatchEmployees()(res, req)
+
+		assert.Equal(t, http.StatusOK, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Update - Invalid ID", func(t *testing.T) {
+		mockService.On("UpdateEmployee", mock.Anything).Return(internal.Employee{}, utils.ErrNotFound)
+
+		req := httptest.NewRequest("PATCH", "/employees/99", bytes.NewBufferString(mockJsonEmployee))
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "99")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.PatchEmployees()(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+}
+
+func TestEmployeeHandler_Create(t *testing.T) {
+	mockService := new(mockEmployeeService)
+	handler := NewEmployeeHandler(mockService)
+
+	t.Run("Create - Success", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(mockUpdatedEmployee, nil)
+
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusCreated, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Create - Conflict", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrConflict)
+
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusConflict, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Create - Empty Arguments", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrEmptyArguments)
+
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
 }

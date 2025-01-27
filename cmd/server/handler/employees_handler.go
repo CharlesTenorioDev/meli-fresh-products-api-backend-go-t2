@@ -120,7 +120,7 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		// decode the json request body into Employee struct
 		err = json.NewDecoder(r.Body).Decode(&inputEmployee)
 		if err != nil {
-			utils.HandleError(w, utils.ErrInvalidFormat)
+			utils.HandleError(w, utils.EBadRequest("employee"))
 			return
 		}
 
@@ -129,7 +129,6 @@ func (h *EmployeeDefault) PatchEmployees() http.HandlerFunc {
 		employee, err := h.sv.UpdateEmployee(inputEmployee)
 		if err != nil {
 			utils.HandleError(w, err)
-
 			return
 		}
 
