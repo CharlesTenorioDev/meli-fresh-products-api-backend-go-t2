@@ -1,6 +1,7 @@
 package inbound_order_test
 
 import (
+	"errors"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -137,6 +138,109 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 			}
 
 			repository.AssertExpectations(t)
+		})
+	}
+}
+
+func TestUnitInboundOrder_GenerateInboundOrdersReport(t *testing.T) {
+	type testCase struct {
+		name string
+		ids  []int
+
+		mockAllReport      []internal.EmployeeInboundOrdersReport
+		mockAllReportError error
+
+		mockFindByIDError   error
+		mockGenerateByIDRes internal.EmployeeInboundOrdersReport
+		mockGenerateByIDErr error
+
+		expectedReports []internal.EmployeeInboundOrdersReport
+		expectedError   error
+	}
+
+	reportAll := []internal.EmployeeInboundOrdersReport{
+		{
+			ID:                 1,
+			CardNumberID:       "E001",
+			FirstName:          "Alice",
+			LastName:           "Johnson",
+			WarehouseID:        1,
+			InboundOrdersCount: 5,
+		},
+		{
+			ID:                 2,
+			CardNumberID:       "E002",
+			FirstName:          "Bob",
+			LastName:           "Anderson",
+			WarehouseID:        2,
+			InboundOrdersCount: 3,
+		},
+	}
+
+	tests := []testCase{
+		{
+			name:               "OK - sem IDs",
+			ids:                nil,
+			mockAllReport:      reportAll,
+			mockAllReportError: nil,
+			expectedReports:    reportAll,
+			expectedError:      nil,
+		},
+		{
+			name:              "NOT_FOUND - single ID => FindByID retorna ErrNotFound",
+			ids:               []int{10},
+			mockFindByIDError: utils.ErrNotFound,
+			expectedReports:   nil,
+			expectedError:     utils.ErrNotFound,
+		},
+		{
+			name:              "ERROR - single ID => FindByID retorna erro diferente de ErrNotFound",
+			ids:               []int{2},
+			mockFindByIDError: errors.New("db fail"),
+			expectedReports:   nil,
+			expectedError:     errors.New("db fail"),
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			repo := new(MockInboundOrderRepository)
+			service := inbound_order.NewInboundOrderService(repo)
+
+			if len(tc.ids) == 0 {
+				repo.
+					On("GenerateInboundOrdersReport").
+					Return(tc.mockAllReport, tc.mockAllReportError).
+					Maybe()
+			} else {
+				for _, id := range tc.ids {
+					repo.
+						On("FindByID", id).
+						Return(internal.InboundOrder{}, tc.mockFindByIDError).
+						Maybe()
+
+					if tc.mockFindByIDError == nil {
+						repo.
+							On("GenerateByIDInboundOrdersReport", id).
+							Return(tc.mockGenerateByIDRes, tc.mockGenerateByIDErr).
+							Maybe()
+					}
+				}
+			}
+
+			result, err := service.GenerateInboundOrdersReport(tc.ids)
+
+			if tc.expectedError == nil {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedReports, result)
+			} else {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.expectedError.Error())
+				require.Nil(t, result)
+			}
+
+			repo.AssertExpectations(t)
 		})
 	}
 }

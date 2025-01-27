@@ -30,10 +30,9 @@ func (h *EmployeeDefault) GetAllEmployees() http.HandlerFunc {
 		if err != nil {
 			if err == utils.ErrNotFound {
 				utils.Error(w, http.StatusNotFound, "No employees found")
+			} else {
+				utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
 			}
-
-			utils.Error(w, http.StatusInternalServerError, "An error occurred while retrieving employees")
-
 			return
 		}
 		// returns status 200 and the data if all ok
