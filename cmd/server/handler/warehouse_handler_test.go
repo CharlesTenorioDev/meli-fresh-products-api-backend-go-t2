@@ -246,7 +246,7 @@ func TestWarehouseHandler_Update(t *testing.T) {
 			ID:                 "1",
 			RequestBody:        `{INVALID_JSON}`,
 			ErrorToReturn:      errors.New("invalid Json"),
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"EA}`,
+			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 	}
