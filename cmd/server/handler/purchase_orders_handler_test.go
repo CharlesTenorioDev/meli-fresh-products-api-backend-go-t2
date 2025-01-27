@@ -21,11 +21,6 @@ func (m *mockPurchaseOrderService) FindAll() (map[int]internal.PurchaseOrder, er
 	return args.Get(0).(map[int]internal.PurchaseOrder), args.Error(1)
 }
 
-func (m *mockPurchaseOrderService) FindByID(id int) (internal.PurchaseOrder, error) {
-	args := m.Called(id)
-	return args.Get(0).(internal.PurchaseOrder), args.Error(1)
-}
-
 func (m *mockPurchaseOrderService) FindAllByBuyerID(buyerID int) (PurchaseOrders []internal.PurchaseOrderSummary, err error) {
 	args := m.Called(buyerID)
 	return args.Get(0).([]internal.PurchaseOrderSummary), args.Error(1)
@@ -34,16 +29,6 @@ func (m *mockPurchaseOrderService) FindAllByBuyerID(buyerID int) (PurchaseOrders
 func (m *mockPurchaseOrderService) CreatePurchaseOrder(inputPurchaseOrder internal.PurchaseOrderAttributes) (PurchaseOrder internal.PurchaseOrder, err error) {
 	args := m.Called(inputPurchaseOrder)
 	return args.Get(0).(internal.PurchaseOrder), args.Error(1)
-}
-
-func (m *mockPurchaseOrderService) UpdatePurchaseOrder(newPurchaseOrder internal.PurchaseOrder) (internal.PurchaseOrder, error) {
-	args := m.Called(newPurchaseOrder)
-	return args.Get(0).(internal.PurchaseOrder), args.Error(1)
-}
-
-func (m *mockPurchaseOrderService) DeletePurchaseOrder(id int) (err error) {
-	args := m.Called(id)
-	return args.Error(0)
 }
 
 var (
