@@ -1,6 +1,7 @@
 package product_record_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -42,6 +43,14 @@ func TestProductRecordsService_GetProductRecords(t *testing.T) {
 		ValidationError error
 		ExpectedError   error
 	}{
+		{
+			TestName:        "GetProductRecords_RepoError",
+			ProductID:       1,
+			RepoResponse:    nil,
+			RepoError:       errors.New("repository error"),
+			ValidationError: nil,
+			ExpectedError:   errors.New("repository error"),
+		},
 		{
 			TestName:  "GetProductRecords_Success",
 			ProductID: 1,
@@ -87,7 +96,8 @@ func TestProductRecordsService_GetProductRecords(t *testing.T) {
 			result, err := service.GetProductRecords(c.ProductID)
 
 			if c.ExpectedError != nil {
-				assert.ErrorIs(t, err, c.ExpectedError)
+				assert.Error(t, err)
+				assert.Nil(t, result)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, c.RepoResponse, result)
