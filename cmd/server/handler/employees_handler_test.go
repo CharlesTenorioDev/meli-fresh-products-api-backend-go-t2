@@ -97,12 +97,33 @@ var (
 	}
 	mockJsonEmployee = `{
 		"attributes": {
-		  "card_number_id": 12345,
+		  "card_number_id": "123",
 		  "first_name": "Celaena",
 		  "last_name": "Sardothien",
 		  "warehouse_id": 1
 		}
 	  }`
+	mockUpdatedEmployee = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "123",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
+		},
+	}
+	mockJsonNewEmployee = `{
+		  "card_number_id": "123",
+		  "first_name": "Celaena",
+		  "last_name": "Sardothien",
+		  "warehouse_id": 1
+	  }`
+	mockNewEmployee = internal.EmployeeAttributes{
+		CardNumberID: "123",
+		FirstName:    "Celaena",
+		LastName:     "Sardothien",
+		WarehouseID:  1,
+	}
 	mockWarehouse = internal.Warehouse{
 		ID:                 1,
 		Address:            "Terrasen 452",
@@ -238,24 +259,24 @@ func TestEmployeeHandler_Update(t *testing.T) {
 	handler := NewEmployeeHandler(mockService)
 
 	t.Run("Update - Valid ID", func(t *testing.T) {
-		mockService.On("FindByID", 1).Return(mockEmployee, nil)
-		mockService.On("UpdateEmployee", 1).Return(nil)
-		// ERRO
+		mockService.On("UpdateEmployee", mockUpdatedEmployee).Return(mockUpdatedEmployee, nil)
+
 		req := httptest.NewRequest("PATCH", "/employees/1", bytes.NewBufferString(mockJsonEmployee))
 		rctx := chi.NewRouteContext()
 		rctx.URLParams.Add("id", "1")
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
 		res := httptest.NewRecorder()
 		handler.PatchEmployees()(res, req)
 
-		assert.Equal(t, http.StatusNoContent, res.Result().StatusCode)
+		assert.Equal(t, http.StatusOK, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 
 	t.Run("Update - Invalid ID", func(t *testing.T) {
-		mockService.On("UpdateEmployee", 99).Return(utils.ErrNotFound)
-		// ERRO
-		req := httptest.NewRequest("PATCH", "/employees/99", nil)
+		mockService.On("UpdateEmployee", mock.Anything).Return(internal.Employee{}, utils.ErrNotFound)
+
+		req := httptest.NewRequest("PATCH", "/employees/99", bytes.NewBufferString(mockJsonEmployee))
 		rctx := chi.NewRouteContext()
 		rctx.URLParams.Add("id", "99")
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
@@ -271,32 +292,39 @@ func TestEmployeeHandler_Create(t *testing.T) {
 	mockService := new(mockEmployeeService)
 	handler := NewEmployeeHandler(mockService)
 
-	t.Run("Update - Valid ID", func(t *testing.T) {
-		mockService.On("FindByID", 1).Return(mockEmployee, nil)
-		mockService.On("UpdateEmployee", 1).Return(nil)
-		// ERRO
-		req := httptest.NewRequest("PATCH", "/employees/1", bytes.NewBufferString(mockJsonEmployee))
-		rctx := chi.NewRouteContext()
-		rctx.URLParams.Add("id", "1")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
-		res := httptest.NewRecorder()
-		handler.PatchEmployees()(res, req)
+	t.Run("Create - Success", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(mockUpdatedEmployee, nil)
 
-		assert.Equal(t, http.StatusNoContent, res.Result().StatusCode)
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusCreated, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 
-	t.Run("Update - Invalid ID", func(t *testing.T) {
-		mockService.On("UpdateEmployee", 99).Return(utils.ErrNotFound)
-		// ERRO
-		req := httptest.NewRequest("PATCH", "/employees/99", nil)
-		rctx := chi.NewRouteContext()
-		rctx.URLParams.Add("id", "99")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
-		res := httptest.NewRecorder()
-		handler.PatchEmployees()(res, req)
+	t.Run("Create - Conflict", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrConflict)
 
-		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusConflict, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Create - Empty Arguments", func(t *testing.T) {
+		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, utils.ErrEmptyArguments)
+
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }
