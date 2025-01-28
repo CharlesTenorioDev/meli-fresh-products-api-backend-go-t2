@@ -146,7 +146,7 @@ func TestUnitLocality_GetSellersByLocalityId(t *testing.T) {
 
 }
 
-func TestUnitLocality_GetSellersByLocalityID(t *testing.T) {
+func TestUnitLocality_GetCarriersByLocalityID(t *testing.T) {
 	cases := []struct {
 		TestName           string
 		ErrorToReturn      error

@@ -415,7 +415,7 @@ func TestUnitSection_GetSectionProductsReport(t *testing.T) {
 			MockData:           nil,
 		},
 		{
-			Name:               "GET-GET_SECTION_BY_PRODUCTS-400",
+			Name:               "GET-GET_SECTION_BY_PRODUCTS-404",
 			RawQuery:           "id=9999",
 			ExpectedBody:       `{"message":"entity not found: section doesn't exist", "status":"Not Found"}`,
 			ExpectedStatusCode: 404,
