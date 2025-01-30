@@ -9,6 +9,10 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
+//	@title			Meli Fresh Products API
+//	@version		0.0.2.1
+//	@description	This is a HTTP REST API server.
+//	@termsOfService	http://swagger.io/terms/
 func main() {
 	err := utils.LoadProperties("./.env")
 	if err != nil {
@@ -17,7 +21,7 @@ func main() {
 
 	// - config
 	cfg := &application.ConfigApplicationDefault{
-		Db: &mysql.Config{
+		DB: &mysql.Config{
 			User:   os.Getenv("DB.USERNAME"),
 			Passwd: os.Getenv("DB.PASSWORD"),
 			Net:    "tcp",
@@ -39,5 +43,4 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
 }

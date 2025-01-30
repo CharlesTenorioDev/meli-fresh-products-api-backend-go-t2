@@ -12,7 +12,7 @@ type Carry struct {
 type CarryRepository interface {
 	Save(*Carry) error
 	GetAll() ([]Carry, error)
-	GetById(id int) (Carry, error)
+	GetByID(id int) (Carry, error)
 	Update(*Carry) error
 	Delete(id int) error
 }
@@ -20,11 +20,11 @@ type CarryRepository interface {
 type CarryService interface {
 	Save(*Carry) error
 	GetAll() ([]Carry, error)
-	GetById(id int) (Carry, error)
+	GetByID(id int) (Carry, error)
 	Update(*Carry) error
 	Delete(id int) error
 }
 
 type LocalityValidation interface {
-	GetById(id int) (Locality, error)
+	GetByID(id int) (Locality, error)
 }

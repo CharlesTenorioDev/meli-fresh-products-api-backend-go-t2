@@ -8,26 +8,26 @@ type Employee struct {
 
 // EmployeeAttributes defines the details associated with an employee
 type EmployeeAttributes struct {
-	CardNumberId string `json:"card_number_id"`
+	CardNumberID string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
-	WarehouseId  int    `json:"warehouse_id"`
+	WarehouseID  int    `json:"warehouse_id"`
 }
 
-// EmployeeJson defines the structure of the employee data as it appears in a json file
-type EmployeeJson struct {
+// EmployeeJSON defines the structure of the employee data as it appears in a json file
+type EmployeeJSON struct {
 	ID           int    `json:"id"`
-	CardNumberId string `json:"card_number_id"`
+	CardNumberID string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
-	WarehouseId  int    `json:"warehouse_id"`
+	WarehouseID  int    `json:"warehouse_id"`
 }
 
 // EmployeeRepository defines the interface for employee data persistence
 // it specifies methods for fetching and creating employee data
 type EmployeeRepository interface {
 	FindAll() (employees map[int]Employee, err error)
-	FindById(id int) (employee Employee, err error)
+	FindByID(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
 	DeleteEmployee(id int) (err error)
@@ -37,12 +37,12 @@ type EmployeeRepository interface {
 // it includes methods for fetching and creating employees
 type EmployeeService interface {
 	FindAll() (employees map[int]Employee, err error)
-	FindById(id int) (employee Employee, err error)
+	FindByID(id int) (employee Employee, err error)
 	CreateEmployee(newEmployee EmployeeAttributes) (employee Employee, err error)
 	UpdateEmployee(inputEmployee Employee) (employee Employee, err error)
 	DeleteEmployee(id int) (err error)
 }
 
 type EmployeesWarehouseValidation interface {
-	GetById(int) (Warehouse, error)
+	GetByID(int) (Warehouse, error)
 }

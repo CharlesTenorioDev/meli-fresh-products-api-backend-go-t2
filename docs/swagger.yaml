@@ -1,0 +1,716 @@
+definitions:
+  handler.reqPostSection:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  handler.reqPostWarehouse:
+    properties:
+      address:
+        description: |-
+          The address of the warehouse
+          required: true
+          example: 1234 Warehouse St.
+        type: string
+      locality_id:
+        description: |-
+          The ID of the locality where the warehouse is located
+          required: true
+          example: 101
+        type: integer
+      minimum_capacity:
+        description: |-
+          The minimum capacity of the warehouse
+          required: true
+          example: 1000
+        type: integer
+      minimum_temperature:
+        description: |-
+          The minimum temperature that the warehouse can maintain
+          required: true
+          example: -5
+        type: integer
+      telephone:
+        description: |-
+          The telephone number of the warehouse
+          required: true
+          example: +1-800-555-5555
+        type: string
+      warehouse_code:
+        description: |-
+          The unique code of the warehouse
+          required: true
+          example: WH-001
+        type: string
+    type: object
+  internal.Section:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      id:
+        type: integer
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  internal.SectionPointers:
+    properties:
+      current_capacity:
+        type: integer
+      current_temperature:
+        type: number
+      maximum_capacity:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: number
+      product_type_id:
+        type: integer
+      section_number:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  internal.SectionProductsReport:
+    properties:
+      products_count:
+        type: integer
+      section_id:
+        type: integer
+      section_number:
+        type: integer
+    type: object
+  internal.Seller:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      id:
+        type: integer
+      locality_id:
+        type: integer
+      telephone:
+        type: string
+    type: object
+  internal.SellerRequest:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      locality_id:
+        type: integer
+      telephone:
+        type: string
+    type: object
+  internal.SellerRequestPointer:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      telephone:
+        type: string
+    type: object
+  internal.Warehouse:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      locality_id:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: integer
+      telephone:
+        type: string
+      warehouse_code:
+        type: string
+    type: object
+  internal.WarehousePointers:
+    properties:
+      address:
+        type: string
+      locality_id:
+        type: integer
+      minimum_capacity:
+        type: integer
+      minimum_temperature:
+        type: integer
+      telephone:
+        type: string
+      warehouse_code:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a HTTP REST API server.
+  termsOfService: http://swagger.io/terms/
+  title: Meli Fresh Products API
+  version: 0.0.2.1
+paths:
+  /api/v1/sections:
+    get:
+      description: Retrieve a list of all sections
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sections
+          schema:
+            items:
+              $ref: '#/definitions/internal.Section'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all sections
+      tags:
+      - sections
+    post:
+      consumes:
+      - application/json
+      description: Create a new section with the provided details
+      parameters:
+      - description: Section details
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/handler.reqPostSection'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Section conflict
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new section
+      tags:
+      - sections
+  /api/v1/sections/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a section by its ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a section
+      tags:
+      - sections
+    get:
+      consumes:
+      - application/json
+      description: Get a section by its ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get section by ID
+      tags:
+      - sections
+    put:
+      consumes:
+      - application/json
+      description: Update a section by ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Section data
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SectionPointers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Section'
+        "400":
+          description: Invalid ID or request body
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Conflict error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a section
+      tags:
+      - sections
+  /api/v1/sections/products/report:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a report of products for a given section ID
+      parameters:
+      - description: Section ID
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.SectionProductsReport'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Section not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get section products report
+      tags:
+      - sections
+  /api/v1/sellers/{id}:
+    get:
+      description: Retrieve a seller by its ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Seller details
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get seller by ID
+      tags:
+      - sellers
+  /sellers:
+    get:
+      description: Retrieve a list of all sellers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sellers
+          schema:
+            items:
+              $ref: '#/definitions/internal.Seller'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all sellers
+      tags:
+      - sellers
+    post:
+      consumes:
+      - application/json
+      description: Create a new seller with the provided details
+      parameters:
+      - description: Seller details
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SellerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created seller
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Seller already exists
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new seller
+      tags:
+      - sellers
+  /sellers/{id}:
+    delete:
+      description: Delete a seller by its ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a seller
+      tags:
+      - sellers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing seller with the provided details
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated seller details
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/internal.SellerRequestPointer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated seller
+          schema:
+            $ref: '#/definitions/internal.Seller'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Seller not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Seller already exists
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a seller
+      tags:
+      - sellers
+  /warehouses:
+    get:
+      description: Retrieve a list of all warehouses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of warehouses
+          schema:
+            items:
+              $ref: '#/definitions/internal.Warehouse'
+            type: array
+        "404":
+          description: No warehouses found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while retrieving warehouses
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all warehouses
+      tags:
+      - warehouses
+    post:
+      consumes:
+      - application/json
+      description: Create a new warehouse with the provided details
+      parameters:
+      - description: Warehouse details
+        in: body
+        name: warehouse
+        required: true
+        schema:
+          $ref: '#/definitions/handler.reqPostWarehouse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created warehouse
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Warehouse code conflict
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new warehouse
+      tags:
+      - warehouses
+  /warehouses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a warehouse by its ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found with the given ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while deleting the warehouse
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a warehouse
+      tags:
+      - warehouses
+    get:
+      description: Get a warehouse by its ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: No warehouse found with ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: An error occurred while retrieving the warehouse
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get warehouse by ID
+      tags:
+      - warehouses
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing warehouse by ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Warehouse data
+        in: body
+        name: warehouse
+        required: true
+        schema:
+          $ref: '#/definitions/internal.WarehousePointers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Warehouse'
+        "400":
+          description: Invalid ID format or request body
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Warehouse not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Conflict error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a warehouse
+      tags:
+      - warehouses
+swagger: "2.0"

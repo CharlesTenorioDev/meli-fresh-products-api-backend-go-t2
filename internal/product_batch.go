@@ -14,8 +14,8 @@ type ProductBatchRequest struct {
 	ManufacturingDate  string  `json:"manufacturing_date"`
 	ManufacturingHour  int     `json:"manufacturing_hour"`
 	MinimumTemperature float64 `json:"minimum_temperature"`
-	ProductId          int     `json:"product_id"`
-	SectionId          int     `json:"section_id"`
+	ProductID          int     `json:"product_id"`
+	SectionID          int     `json:"section_id"`
 }
 type (
 	ProductBatchRepository interface {

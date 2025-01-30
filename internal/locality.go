@@ -7,26 +7,26 @@ type Locality struct {
 }
 
 type SellersByLocality struct {
-	LocalityId   int    `json:"locality_id"`
+	LocalityID   int    `json:"locality_id"`
 	LocalityName string `json:"locality_name"`
 	SellersCount int    `json:"seller_count"`
 }
 
 type CarriesByLocality struct {
-	LocalityId   int    `json:"locality_id"`
+	LocalityID   int    `json:"locality_id"`
 	LocalityName string `json:"locality_name"`
 	CarriesCount int    `json:"carries_count"`
 }
 
 type LocalityRepository interface {
 	Save(*Locality) error
-	GetById(id int) (Locality, error)
-	GetSellersByLocalityId(localityId int) ([]SellersByLocality, error)
-	GetCarriesByLocalityId(localityId int) ([]CarriesByLocality, error)
+	GetByID(id int) (Locality, error)
+	GetSellersByLocalityID(localityID int) ([]SellersByLocality, error)
+	GetCarriesByLocalityID(localityID int) ([]CarriesByLocality, error)
 }
 
 type LocalityService interface {
 	Save(*Locality, *Province, *Country) error
-	GetSellersByLocalityId(localityId int) ([]SellersByLocality, error)
-	GetCarriesByLocalityId(localityId int) ([]CarriesByLocality, error)
+	GetSellersByLocalityID(localityID int) ([]SellersByLocality, error)
+	GetCarriesByLocalityID(localityID int) ([]CarriesByLocality, error)
 }
