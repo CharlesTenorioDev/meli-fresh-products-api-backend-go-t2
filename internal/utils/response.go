@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 type ErrorResponse struct {
@@ -66,6 +69,32 @@ func JSON(w http.ResponseWriter, code int, body any) {
 
 	if _, err = w.Write(bytes); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+func JSONContext(ctx context.Context, w http.ResponseWriter, code int, body any) {
+	// check body
+	if body == nil {
+		w.WriteHeader(code)
+		return
+	}
+
+	response := successResponse{body}
+	bytes, err := json.Marshal(response)
+
+	if err != nil {
+		// default error
+		w.WriteHeader(http.StatusInternalServerError)
+		logger.Info(ctx, "unexpected return, status code: 500, "+err.Error(), nil)
+		return
+	}
+
+	// set header (before code due to it sets by default "text/plain")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	if _, err = w.Write(bytes); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		logger.Info(ctx, "unexpected return, status code: 500, "+err.Error(), nil)
 		return
 	}
 }

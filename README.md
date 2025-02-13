@@ -43,3 +43,11 @@ With that, we can run the unit tests apart from integration tests
 # Features
 **We're going
 **Nice to Have**
+
+
+
+# Testcontainers
+```bash
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock;
+export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
+```

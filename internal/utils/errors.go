@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/bootcamp-go/web/response"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 var (
@@ -48,6 +51,40 @@ func EBR(message string) error {
 // due to their format
 func EBadRequest(attribute string) error {
 	return errors.Join(ErrInvalidFormat, errors.New(attribute+" with invalid format"))
+}
+func HandleErrorContext(ctx context.Context, w http.ResponseWriter, err error) {
+	var status int
+
+	var message string
+
+	if err == nil {
+		status = http.StatusInternalServerError
+		message = "internal server error"
+	}
+
+	if errors.Is(err, ErrInvalidFormat) {
+		status = http.StatusBadRequest
+		message = err.Error()
+	} else if errors.Is(err, ErrInvalidArguments) {
+		status = http.StatusUnprocessableEntity
+		message = err.Error()
+	} else if errors.Is(err, ErrEmptyArguments) {
+		status = http.StatusUnprocessableEntity
+		message = err.Error()
+	} else if errors.Is(err, ErrConflict) {
+		status = http.StatusConflict
+		message = err.Error()
+	} else if errors.Is(err, ErrNotFound) {
+		status = http.StatusNotFound
+		message = err.Error()
+	} else {
+		status = http.StatusInternalServerError
+		message = "internal server error"
+	}
+
+	message = strings.Replace(message, "\n", ": ", 1)
+	response.Error(w, status, message)
+	logger.Error(ctx, message+", status code: "+fmt.Sprintf("%d", status), nil)
 }
 
 // HandleError centralizes error handling and response formatting
