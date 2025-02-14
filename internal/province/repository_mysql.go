@@ -21,6 +21,7 @@ func (r *MysqlProvinceRepository) GetByName(name string) (internal.Province, err
 	if err != nil {
 		return internal.Province{}, err
 	}
+	defer stmt.Close()
 
 	row := stmt.QueryRow(name)
 
@@ -29,7 +30,7 @@ func (r *MysqlProvinceRepository) GetByName(name string) (internal.Province, err
 	err = row.Scan(&province.ID, &province.ProvinceName, &province.CountryID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return internal.Province{}, utils.ErrNotFound
+			err = utils.ErrNotFound
 		}
 
 		return internal.Province{}, err
@@ -43,6 +44,7 @@ func (r *MysqlProvinceRepository) Save(province *internal.Province) error {
 	if err != nil {
 		return err
 	}
+	defer stmt.Close()
 
 	res, err := stmt.Exec(province.ProvinceName, province.CountryID)
 	if err != nil {
