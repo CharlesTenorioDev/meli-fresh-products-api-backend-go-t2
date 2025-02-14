@@ -40,6 +40,7 @@ func (r *MysqlLocalityRepository) Save(locality *internal.Locality) error {
 	if err != nil {
 		return err
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(locality.ID, locality.LocalityName, locality.ProvinceID)
 	if err != nil {
@@ -66,8 +67,8 @@ func (r *MysqlLocalityRepository) GetByID(id int) (internal.Locality, error) {
 	if err != nil {
 		return internal.Locality{}, err
 	}
-
 	defer stmt.Close()
+
 	row := stmt.QueryRow(id)
 
 	var locality internal.Locality
@@ -178,6 +179,7 @@ func (r *MysqlLocalityRepository) GetCarriesByLocalityID(localityID int) ([]inte
 		if err != nil {
 			return []internal.CarriesByLocality{}, err
 		}
+		defer stmt.Close()
 
 		rows, err = stmt.Query(localityID)
 		if err != nil {
