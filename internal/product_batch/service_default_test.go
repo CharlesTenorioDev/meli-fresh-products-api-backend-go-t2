@@ -167,6 +167,34 @@ func TestUnitProductBatch_Save_BatchNumberAlreadyExists(t *testing.T) {
 
 }
 
+func TestUnitProductBatch_Save_InternalErrorGettingBatchNumber(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        100,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "2022-01-01",
+		InitialQuantity:    10,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	batchRepo.On("GetBatchNumber", mock.Anything).Return(1, utils.ENotFound("batch number"))
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.ENotFound("batch number"), err)
+
+}
+
 func TestUnitProductBatch_Save_SectionIdDoesNotExist(t *testing.T) {
 	newBatch := internal.ProductBatchRequest{
 		BatchNumber:        100,
@@ -193,6 +221,35 @@ func TestUnitProductBatch_Save_SectionIdDoesNotExist(t *testing.T) {
 	_, err := service.Save(&newBatch)
 
 	require.Equal(t, utils.ENotFound("Section ID"), err)
+
+}
+
+func TestUnitProductBatch_Save_InternalErrorGettingSectionId(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        100,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "2022-01-01",
+		InitialQuantity:    10,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	batchRepo.On("GetBatchNumber", mock.Anything).Return(0, nil)
+	sectionRepo.On("GetByID", newBatch.SectionID).Return(internal.Section{ID: 1}, errors.New("Internal Error"))
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, errors.New("Internal Error"), err)
 
 }
 
@@ -223,6 +280,36 @@ func TestUnitProductBatch_Save_ProductIdDoesNotExist(t *testing.T) {
 	_, err := service.Save(&newBatch)
 
 	require.Equal(t, utils.ENotFound("Product ID"), err)
+
+}
+
+func TestUnitProductBatch_Save_InternalErrorGettingProductId(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        100,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "2022-01-01",
+		InitialQuantity:    10,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	batchRepo.On("GetBatchNumber", mock.Anything).Return(0, nil)
+	sectionRepo.On("GetByID", newBatch.SectionID).Return(internal.Section{ID: 1}, nil)
+	productRepo.On("GetByID", newBatch.ProductID).Return(internal.Product{ID: 1}, errors.New("Internal Error"))
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, errors.New("Internal Error"), err)
 
 }
 
@@ -324,6 +411,131 @@ func TestUnitProductBatch_Save_InvalidOrEmptySectionID(t *testing.T) {
 	_, err := service.Save(&newBatch)
 
 	require.Equal(t, utils.EZeroValue("Section ID"), err)
+}
+
+func TestUnitProductBatch_Save_InvalidOrEmptyCurrentQuantity(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        1,
+		CurrentQuantity:    -50,
+		CurrentTemperature: 22.4,
+		DueDate:            "Company",
+		InitialQuantity:    10,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.EZeroValue("Current quantity"), err)
+}
+
+func TestUnitProductBatch_Save_InvalidOrEmptyCurrentTemperature(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        1,
+		CurrentQuantity:    50,
+		CurrentTemperature: -22.4,
+		DueDate:            "Company",
+		InitialQuantity:    10,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.EZeroValue("Current temperature"), err)
+}
+
+func TestUnitProductBatch_Save_InvalidOrEmptyInitialQuantity(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        1,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "Company",
+		InitialQuantity:    -1,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.EZeroValue("Initial quantity"), err)
+}
+
+func TestUnitProductBatch_Save_InvalidOrEmptyManufacturingDate(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        1,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "Company",
+		InitialQuantity:    1,
+		ManufacturingDate:  "",
+		ManufacturingHour:  18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.EZeroValue("Manufacturing date"), err)
+}
+
+func TestUnitProductBatch_Save_InvalidOrEmptyManufacturinghour(t *testing.T) {
+	newBatch := internal.ProductBatchRequest{
+		BatchNumber:        1,
+		CurrentQuantity:    50,
+		CurrentTemperature: 22.4,
+		DueDate:            "Company",
+		InitialQuantity:    1,
+		ManufacturingDate:  "2022-01-01",
+		ManufacturingHour:  -18,
+		MinimumTemperature: -3,
+		ProductID:          1,
+		SectionID:          1,
+	}
+
+	batchRepo := new(MockProductBatchRepository)
+	productRepo := new(MockProductRepository)
+	sectionRepo := new(MockSectionRepository)
+
+	service := NewProductBatchService(batchRepo, productRepo, sectionRepo)
+
+	_, err := service.Save(&newBatch)
+
+	require.Equal(t, utils.EZeroValue("Manufactoring hour"), err)
 }
 
 func TestUnitProductBatch_InternalServerError(t *testing.T) {
