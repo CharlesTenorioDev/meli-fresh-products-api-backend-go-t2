@@ -53,19 +53,14 @@ func (s *InboundOrderService) GenerateInboundOrdersReport(ids []int) ([]internal
 			if err != nil && errors.Is(err, utils.ErrNotFound) {
 				return nil, utils.ErrNotFound
 			}
-			if !errors.Is(err, utils.ErrNotFound) {
-				return nil, err
-			}
 
 			report, err := s.repo.GenerateByIDInboundOrdersReport(id)
 			if err != nil {
-				if err == utils.ErrNotFound {
-					return nil, utils.ErrNotFound
+				if errors.Is(err, utils.ErrNotFound) {
+					return []internal.EmployeeInboundOrdersReport{}, utils.ErrNotFound
 				}
-
 				return nil, err
 			}
-
 			reports = append(reports, report)
 		}
 	}
