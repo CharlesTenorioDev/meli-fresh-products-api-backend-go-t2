@@ -6,10 +6,12 @@ if [[ $1 == "Barbara" ]]; then
     go test -coverprofile=coverage.out ./internal/employee/... ./internal/purchase_order/... ./cmd/server/handler/... 
 
     echo "mode: set" > ./coverage_filter.out
-    sed '/locality_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/employees_handler/!d' ./coverage.out >> ./coverage_filter.out
-    sed '/internal\/purchase_order\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/purchase_orders_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/employee\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/purchase_order\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/employee\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/purchase_order\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
     go tool cover -html=coverage_filter.out
 fi
 
