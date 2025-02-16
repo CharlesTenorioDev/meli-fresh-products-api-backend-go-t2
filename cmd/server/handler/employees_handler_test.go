@@ -132,6 +132,18 @@ var (
 		MinimumCapacity:    10,
 		MinimumTemperature: 10,
 	}
+	mockJsonErrNewEmployee = `{
+		"card_number_id": 4,
+		"first_name": 3,
+		"last_name": 2,
+		"warehouse_id": 1
+	}`
+	mockErrEmployee = `{
+		"card_number_id": aaa,
+		"first_name": 3,
+		"last_name": 2,
+		"warehouse_id": 1
+	}`
 )
 
 func TestEmployeeHandler_FindAll(t *testing.T) {
@@ -159,6 +171,19 @@ func TestEmployeeHandler_FindAll(t *testing.T) {
 		handler.GetAllEmployees()(res, req)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("FindAll - Not Found", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
+		mockService.On("FindAll").Return(map[int]internal.Employee{}, utils.ErrNotFound)
+
+		req := httptest.NewRequest("GET", "/employees", nil)
+		res := httptest.NewRecorder()
+		handler.GetAllEmployees()(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }
@@ -211,10 +236,9 @@ func TestEmployeeHandler_FindByID(t *testing.T) {
 }
 
 func TestEmployeeHandler_Delete(t *testing.T) {
-	mockService := new(mockEmployeeService)
-	handler := NewEmployeeHandler(mockService)
-
 	t.Run("Delete - Valid ID", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("DeleteEmployee", 1).Return(nil)
 
 		req := httptest.NewRequest("DELETE", "/employees/1", nil)
@@ -229,6 +253,8 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 	})
 
 	t.Run("Delete - Invalid ID", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("DeleteEmployee", 99).Return(utils.ErrNotFound)
 
 		req := httptest.NewRequest("DELETE", "/employees/99", nil)
@@ -243,6 +269,8 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 	})
 
 	t.Run("Delete - Invalid Param Format", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("DeleteEmployee").Return(utils.ErrInvalidFormat)
 
 		req := httptest.NewRequest("DELETE", "/employees/x", nil)
@@ -255,13 +283,28 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
+
+	t.Run("Delete - Another Error", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
+		mockService.On("DeleteEmployee", 1).Return(assert.AnError)
+
+		req := httptest.NewRequest("DELETE", "/employees/1", nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.DeleteEmployees()(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
 }
 
 func TestEmployeeHandler_Update(t *testing.T) {
-	mockService := new(mockEmployeeService)
-	handler := NewEmployeeHandler(mockService)
-
 	t.Run("Update - Valid ID", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("UpdateEmployee", mockUpdatedEmployee).Return(mockUpdatedEmployee, nil)
 
 		req := httptest.NewRequest("PATCH", "/employees/1", bytes.NewBufferString(mockJsonEmployee))
@@ -277,6 +320,8 @@ func TestEmployeeHandler_Update(t *testing.T) {
 	})
 
 	t.Run("Update - Invalid ID", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
 		mockService.On("UpdateEmployee", mock.Anything).Return(internal.Employee{}, utils.ErrNotFound)
 
 		req := httptest.NewRequest("PATCH", "/employees/99", bytes.NewBufferString(mockJsonEmployee))
@@ -287,6 +332,38 @@ func TestEmployeeHandler_Update(t *testing.T) {
 		handler.PatchEmployees()(res, req)
 
 		assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Update - Error on Atoi", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
+		mockService.On("UpdateEmployee", mock.Anything).Return(internal.Employee{}, assert.AnError)
+
+		req := httptest.NewRequest("PATCH", "/employees/99", bytes.NewBufferString(mockJsonEmployee))
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "$")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.PatchEmployees()(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Update - Error on Decode", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
+		mockService.On("UpdateEmployee", mock.Anything).Return(internal.Employee{}, assert.AnError)
+
+		req := httptest.NewRequest("PATCH", "/employees/99", bytes.NewBufferString(mockErrEmployee))
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "99")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		res := httptest.NewRecorder()
+		handler.PatchEmployees()(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }
@@ -331,6 +408,20 @@ func TestEmployeeHandler_Create(t *testing.T) {
 		handler.PostEmployees()(res, req)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Create - Another Error", func(t *testing.T) {
+		mockService := new(mockEmployeeService)
+		handler := NewEmployeeHandler(mockService)
+		mockService.On("CreateEmployee", mockNewEmployee).Return(internal.Employee{}, assert.AnError)
+
+		req := httptest.NewRequest("POST", "/employees", bytes.NewBufferString(mockJsonErrNewEmployee))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostEmployees()(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }
