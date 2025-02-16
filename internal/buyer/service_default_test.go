@@ -1,434 +1,467 @@
 package buyer
 
 import (
-	"testing"
-
+	"errors"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
-type BuyerRepositoryMock struct {
+// Implementation of repository mock
+type MockBuyerRepository struct {
 	mock.Mock
 }
 
-func (m *BuyerRepositoryMock) GetAll() ([]internal.Buyer, error) {
+func (m *MockBuyerRepository) GetAll() ([]internal.Buyer, error) {
 	args := m.Called()
 	return args.Get(0).([]internal.Buyer), args.Error(1)
 }
 
-func (m *BuyerRepositoryMock) GetOne(id int) (*internal.Buyer, error) {
+func (m *MockBuyerRepository) GetOne(id int) (*internal.Buyer, error) {
 	args := m.Called(id)
 	return args.Get(0).(*internal.Buyer), args.Error(1)
 }
 
-func (m *BuyerRepositoryMock) CreateBuyer(buyer internal.Buyer) (*internal.Buyer, error) {
+func (m *MockBuyerRepository) CreateBuyer(buyer internal.Buyer) (*internal.Buyer, error) {
 	args := m.Called(buyer)
 	return args.Get(0).(*internal.Buyer), args.Error(1)
 }
 
-func (m *BuyerRepositoryMock) UpdateBuyer(buyer *internal.Buyer) (*internal.Buyer, error) {
+func (m *MockBuyerRepository) UpdateBuyer(buyer *internal.Buyer) (*internal.Buyer, error) {
 	args := m.Called(buyer)
 	return args.Get(0).(*internal.Buyer), args.Error(1)
 }
 
-func (m *BuyerRepositoryMock) DeleteBuyer(id int) error {
+func (m *MockBuyerRepository) DeleteBuyer(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
 func TestBuyerService_GetAll(t *testing.T) {
 	tests := []struct {
-		name        string
-		mockRepo    func() *BuyerRepositoryMock
-		expected    []internal.Buyer
-		wantErr     bool
-		expectedErr error
+		name    string
+		want    []internal.Buyer
+		wantErr error
 	}{
 		{
-			name: "Get all buyers",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				return m
-			},
-			expected: []internal.Buyer{
+			name: "*Get All* Success to return all buyers",
+			want: []internal.Buyer{
 				{
-					ID: 1,
+					ID: 0,
 					BuyerAttributes: internal.BuyerAttributes{
-						CardNumberID: "123456789",
-						FirstName:    "John",
-						LastName:     "Doe",
+						CardNumberID: "9762",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
 					},
 				},
 			},
-			wantErr: false,
+			wantErr: nil,
 		},
 		{
-			name: "Error to get all buyers",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{}, utils.ErrNotFound)
-				return m
+			name: "*Get All* Fail to return all buyers",
+			want: []internal.Buyer{
+				{
+					ID: 0,
+					BuyerAttributes: internal.BuyerAttributes{
+						CardNumberID: "9762",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
+					},
+				},
 			},
-			expected:    []internal.Buyer{},
-			wantErr:     true,
-			expectedErr: utils.ErrNotFound,
+			wantErr: errors.New("error getting all buyers"),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := tt.mockRepo()
-			service := NewBuyer(repo)
+			repo := &MockBuyerRepository{}
+			repo.On("GetAll").Return(tt.want, tt.wantErr)
+			defer repo.AssertExpectations(t)
 
-			got, err := service.GetAll()
-			require.Equal(t, tt.expectedErr, err)
-			require.Equal(t, tt.expected, got)
+			service := NewBuyer(repo)
+			results, err := service.GetAll()
+
+			require.Equal(t, tt.want, results)
+			require.Equal(t, tt.wantErr, err)
+
+			repo.AssertNumberOfCalls(t, "GetAll", 1)
 		})
 	}
 }
 
 func TestBuyerService_GetOne(t *testing.T) {
 	tests := []struct {
-		name        string
-		mockRepo    func() *BuyerRepositoryMock
-		id          int
-		expected    *internal.Buyer
-		wantErr     bool
-		expectedErr error
+		name     string
+		id       int
+		repo     []internal.Buyer
+		wantResp *internal.Buyer
+		wantErr  error
 	}{
 		{
-			name: "Get one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				return m
-			},
-			id: 1,
-			expected: &internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "123456789",
-					FirstName:    "John",
-					LastName:     "Doe",
-				},
-			},
-			wantErr: false,
+			name:     "*Get One* Success to return a buyer",
+			id:       1,
+			repo:     []internal.Buyer{{ID: 1}},
+			wantResp: &internal.Buyer{ID: 1},
+			wantErr:  nil,
 		},
 		{
-			name: "Error to get one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{}, utils.ErrNotFound)
-				return m
-			},
-			id:          1,
-			expected:    nil,
-			wantErr:     true,
-			expectedErr: utils.ErrNotFound,
+			name:     "*Get One* Fail to return a buyer",
+			id:       1,
+			repo:     nil,
+			wantResp: nil,
+			wantErr:  errors.New("error getting buyer"),
+		},
+		{
+			name:     "*Get One* Fail to return a buyer with ID different",
+			id:       1,
+			repo:     []internal.Buyer{{ID: 2}},
+			wantResp: nil,
+			wantErr:  nil,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := tt.mockRepo()
-			service := NewBuyer(repo)
+			repo := &MockBuyerRepository{}
+			repo.On("GetAll").Return(tt.repo, tt.wantErr)
+			defer repo.AssertExpectations(t)
 
-			got, err := service.GetOne(tt.id)
-			require.Equal(t, tt.expectedErr, err)
-			require.Equal(t, tt.expected, got)
+			service := NewBuyer(repo)
+			results, err := service.GetOne(tt.id)
+			require.Equal(t, tt.wantResp, results)
+			require.Equal(t, tt.wantErr, err)
+
+			repo.AssertNumberOfCalls(t, "GetAll", 1)
 		})
 	}
 }
 
-func TestUnitBuyerService_Delete(t *testing.T) {
+func TestBuyerService_CreateBuyer(t *testing.T) {
 	tests := []struct {
-		name        string
-		mockRepo    func() *BuyerRepositoryMock
-		id          int
-		wantErr     bool
-		expectedErr error
+		name                string
+		buyerAttributes     internal.BuyerAttributes
+		repo                []internal.Buyer
+		newBuyer            internal.Buyer
+		want                *internal.Buyer
+		wantErr             error
+		wantErrValidation   error
+		numberOfCallsAll    int
+		numberOfCallsCreate int
 	}{
 		{
-			name: "Delete one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				m.On("DeleteBuyer", 1).Return(nil)
-				return m
+			name: "*Create Buyer* Success to create a buyer",
+			buyerAttributes: internal.BuyerAttributes{
+				CardNumberID: "282948",
+				FirstName:    "Ronaldo",
+				LastName:     "Messi",
 			},
-			id:      1,
-			wantErr: false,
+			repo: []internal.Buyer{},
+			newBuyer: internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "282948",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			want: &internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "282948",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			wantErr:             nil,
+			numberOfCallsCreate: 1,
+			numberOfCallsAll:    2,
 		},
 		{
-			name: "Error to delete one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				m.On("DeleteBuyer", 1).Return(utils.ErrNotFound)
-				return m
+			name:                "*Create Buyer* Fail to create a buyer - Repository error (Get All)",
+			buyerAttributes:     internal.BuyerAttributes{},
+			repo:                nil,
+			newBuyer:            internal.Buyer{},
+			want:                nil,
+			wantErr:             errors.New("error getting all buyers"),
+			numberOfCallsCreate: 0,
+			numberOfCallsAll:    1,
+		},
+
+		{
+			name: "*Create Buyer* Fail to create a buyer - validation error",
+			buyerAttributes: internal.BuyerAttributes{
+				CardNumberID: "282948",
+				FirstName:    "Ronaldo",
+				LastName:     "Messi",
 			},
-			id:          1,
-			wantErr:     true,
-			expectedErr: utils.ErrNotFound,
+			repo: []internal.Buyer{
+				{
+					ID: 1,
+					BuyerAttributes: internal.BuyerAttributes{
+						CardNumberID: "282948",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
+					},
+				},
+			},
+			newBuyer: internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "282948",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			want:                nil,
+			wantErr:             nil,
+			wantErrValidation:   errors.New("entity already exists"),
+			numberOfCallsCreate: 0,
+			numberOfCallsAll:    2,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := tt.mockRepo()
-			service := NewBuyer(repo)
+			repo := &MockBuyerRepository{}
+			repo.On("GetAll").Return(tt.repo, tt.wantErr)
+			if tt.want != nil {
+				repo.On("CreateBuyer", tt.newBuyer).Return(tt.want, tt.wantErr)
+			}
+			defer repo.AssertExpectations(t)
 
+			service := NewBuyer(repo)
+			results, err := service.CreateBuyer(tt.buyerAttributes)
+
+			require.Equal(t, tt.want, results)
+
+			if tt.wantErrValidation == nil {
+				require.Equal(t, tt.wantErr, err)
+			} else {
+				require.Equal(t, tt.wantErrValidation, err)
+			}
+
+			repo.AssertNumberOfCalls(t, "GetAll", tt.numberOfCallsAll)
+			repo.AssertNumberOfCalls(t, "CreateBuyer", tt.numberOfCallsCreate)
+		})
+	}
+}
+
+func TestBuyerService_UpdateBuyer(t *testing.T) {
+	tests := []struct {
+		name         string
+		repo         []internal.Buyer
+		updatedBuyer *internal.Buyer
+		want         *internal.Buyer
+		wantErr      error
+	}{
+		{
+			name: "*Update Buyer* Success to update a buyer",
+			repo: []internal.Buyer{{ID: 1}},
+			updatedBuyer: &internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2123",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			want:    &internal.Buyer{ID: 1},
+			wantErr: nil,
+		},
+		{
+			name: "*Update Buyer* Fail to update a buyer - Repository error (Get All)",
+			repo: []internal.Buyer{},
+			updatedBuyer: &internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2123",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			want:    nil,
+			wantErr: errors.New("entity not found"),
+		},
+		{
+			name: "*Update Buyer* Fail to update a buyer - Repository error (Get All)",
+			repo: []internal.Buyer{
+				{
+					ID: 1,
+					BuyerAttributes: internal.BuyerAttributes{
+						CardNumberID: "2123",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
+					},
+				},
+				{
+					ID: 2,
+					BuyerAttributes: internal.BuyerAttributes{
+						CardNumberID: "2125",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
+					},
+				},
+			},
+			updatedBuyer: &internal.Buyer{
+				ID: 2,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2123",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			want:    nil,
+			wantErr: errors.New("entity already exists"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &MockBuyerRepository{}
+			repo.On("GetAll").Return(tt.repo, tt.wantErr)
+			if tt.want != nil {
+				repo.On("UpdateBuyer", tt.updatedBuyer).Return(tt.want, tt.wantErr)
+			}
+			defer repo.AssertExpectations(t)
+
+			service := NewBuyer(repo)
+			results, err := service.UpdateBuyer(tt.updatedBuyer)
+
+			require.Equal(t, tt.want, results)
+			require.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
+func TestBuyerService_DeleteBuyer(t *testing.T) {
+	tests := []struct {
+		name              string
+		repo              *internal.Buyer
+		id                int
+		wantErr           error
+		wantErrValidation error
+	}{
+		{
+			name:              "*Delete Buyer* Success to delete a buyer",
+			repo:              &internal.Buyer{ID: 1},
+			id:                1,
+			wantErr:           nil,
+			wantErrValidation: nil,
+		},
+		{
+			name:              "*Delete Buyer* Fail to delete a buyer - Repository error (Get One)",
+			repo:              nil,
+			id:                2,
+			wantErr:           errors.New("entity not found"),
+			wantErrValidation: errors.New("entity not found"),
+		},
+		{
+			name:              "*Delete Buyer* Fail to delete a buyer - Repository error (DeleteBuyer)",
+			repo:              &internal.Buyer{ID: 1},
+			id:                2,
+			wantErr:           nil,
+			wantErrValidation: errors.New("entity not found"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &MockBuyerRepository{}
+			repo.On("GetOne", tt.id).Return(tt.repo, tt.wantErr)
+			if tt.wantErr == nil {
+				repo.On("DeleteBuyer", tt.id).Return(tt.wantErrValidation)
+			}
+			defer repo.AssertExpectations(t)
+
+			service := NewBuyer(repo)
 			err := service.DeleteBuyer(tt.id)
-			require.Equal(t, tt.expectedErr, err)
+
+			if tt.wantErrValidation == nil {
+				require.Equal(t, tt.wantErr, err)
+			}
+			require.Equal(t, tt.wantErrValidation, err)
 		})
 	}
 }
 
-func TestUnitBuyerService_Create(t *testing.T) {
+func TestBuyerService_validation(t *testing.T) {
 	tests := []struct {
-		name          string
-		mockRepo      func() *BuyerRepositoryMock
-		buyer         internal.BuyerAttributes
-		expectedBuyer *internal.Buyer
-		wantErr       bool
-		expectedErr   error
+		name              string
+		repo              []internal.Buyer
+		newBuyer          internal.Buyer
+		wantErr           error
+		wantErrValidation error
 	}{
 		{
-			name: "Create one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{}, nil)
-				m.On("CreateBuyer", mock.Anything).Return(&internal.Buyer{
+			name: "Success to validate a buyer",
+			repo: []internal.Buyer{
+				{
 					ID: 1,
 					BuyerAttributes: internal.BuyerAttributes{
-						CardNumberID: "123456789",
-						FirstName:    "John",
-						LastName:     "Doe",
+						CardNumberID: "2123",
+						FirstName:    "Ronaldo",
+						LastName:     "Messi",
 					},
-				}, nil)
-				return m
-			},
-			buyer: internal.BuyerAttributes{
-				CardNumberID: "123456789",
-				FirstName:    "John",
-				LastName:     "Doe",
-			},
-			wantErr: false,
-			expectedBuyer: &internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "123456789",
-					FirstName:    "John",
-					LastName:     "Doe",
 				},
 			},
+			newBuyer: internal.Buyer{
+				ID: 2,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2124",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
+			},
+			wantErr:           nil,
+			wantErrValidation: nil,
 		},
 		{
-			name: "Error to create one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{}, nil)
-				m.On("CreateBuyer", mock.Anything).Return(&internal.Buyer{}, utils.ErrNotFound)
-				return m
+			name: "Fail to validate a buyer - Repository error (Get All)",
+			repo: []internal.Buyer{},
+			newBuyer: internal.Buyer{
+				ID: 2,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2124",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
 			},
-			buyer: internal.BuyerAttributes{
-				CardNumberID: "123456789",
-				FirstName:    "John",
-				LastName:     "Doe",
-			},
-			wantErr:       true,
-			expectedErr:   utils.ErrNotFound,
-			expectedBuyer: &internal.Buyer{},
+			wantErr:           errors.New("error getting all buyers"),
+			wantErrValidation: nil,
 		},
 		{
-			name: "Error to create one buyer - CardNumberID already exists",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{{
-					ID: 1,
-					BuyerAttributes: internal.BuyerAttributes{
-						CardNumberID: "123456789",
-						FirstName:    "John",
-						LastName:     "Doe",
-					},
-				}}, nil)
-				m.On("CreateBuyer", mock.Anything).Return(&internal.Buyer{}, utils.ErrConflict)
-				return m
+			name: "Fail to validate a buyer - Same ID",
+			repo: []internal.Buyer{{ID: 1}},
+			newBuyer: internal.Buyer{
+				ID: 1,
+				BuyerAttributes: internal.BuyerAttributes{
+					CardNumberID: "2124",
+					FirstName:    "Ronaldo",
+					LastName:     "Messi",
+				},
 			},
-			buyer: internal.BuyerAttributes{
-				CardNumberID: "123456789",
-				FirstName:    "John",
-				LastName:     "Doe",
-			},
-			wantErr:       true,
-			expectedErr:   utils.ErrConflict,
-			expectedBuyer: &internal.Buyer{},
+			wantErr:           nil,
+			wantErrValidation: errors.New("entity already exists"),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := tt.mockRepo()
+			repo := &MockBuyerRepository{}
+			repo.On("GetAll").Return(tt.repo, tt.wantErr)
+			defer repo.AssertExpectations(t)
+
 			service := NewBuyer(repo)
+			err := service.validation(tt.newBuyer)
 
-			_, err := service.CreateBuyer(tt.buyer)
-			require.Equal(t, tt.expectedErr, err)
+			if tt.wantErrValidation == nil {
+				require.Equal(t, tt.wantErr, err)
+			} else {
+				require.Equal(t, tt.wantErrValidation, err)
+			}
 		})
-	}
-}
 
-func TestUnitBuyerService_Update(t *testing.T) {
-	tests := []struct {
-		name          string
-		mockRepo      func() *BuyerRepositoryMock
-		buyer         internal.Buyer
-		expectedBuyer *internal.Buyer
-		wantErr       bool
-		expectedErr   error
-	}{
-		{
-			name: "Update one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				m.On("UpdateBuyer", mock.Anything).Return(&internal.Buyer{
-					ID: 1,
-					BuyerAttributes: internal.BuyerAttributes{
-						CardNumberID: "987654321",
-						FirstName:    "Jane",
-						LastName:     "Doe",
-					},
-				}, nil)
-				return m
-			},
-			buyer: internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "987654321",
-					FirstName:    "Jane",
-					LastName:     "Doe",
-				},
-			},
-			wantErr: false,
-			expectedBuyer: &internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "987654321",
-					FirstName:    "Jane",
-					LastName:     "Doe",
-				},
-			},
-		},
-		{
-			name: "Error to update one buyer",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				m.On("UpdateBuyer", mock.Anything).Return(&internal.Buyer{}, utils.ErrNotFound)
-				return m
-			},
-			buyer: internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "987654321",
-					FirstName:    "Jane",
-					LastName:     "Doe",
-				},
-			},
-			wantErr:       true,
-			expectedErr:   utils.ErrNotFound,
-			expectedBuyer: &internal.Buyer{},
-		},
-		{
-			name: "Error to update one buyer - Card number already exist",
-			mockRepo: func() *BuyerRepositoryMock {
-				m := &BuyerRepositoryMock{}
-				m.On("GetAll").Return([]internal.Buyer{
-					{
-						ID: 1,
-						BuyerAttributes: internal.BuyerAttributes{
-							CardNumberID: "123456789",
-							FirstName:    "John",
-							LastName:     "Doe",
-						},
-					},
-				}, nil)
-				m.On("UpdateBuyer", mock.Anything).Return(&internal.Buyer{}, utils.ErrConflict)
-				return m
-			},
-			buyer: internal.Buyer{
-				ID: 1,
-				BuyerAttributes: internal.BuyerAttributes{
-					CardNumberID: "123456789",
-					FirstName:    "Jane",
-					LastName:     "Doe",
-				},
-			},
-			wantErr:       true,
-			expectedErr:   utils.ErrConflict,
-			expectedBuyer: &internal.Buyer{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := tt.mockRepo()
-			service := NewBuyer(repo)
-
-			_, err := service.UpdateBuyer(&tt.buyer)
-			require.Equal(t, tt.expectedErr, err)
-		})
 	}
 }
