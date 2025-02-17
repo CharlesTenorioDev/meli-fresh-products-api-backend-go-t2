@@ -2,8 +2,10 @@ package product_type
 
 import (
 	"database/sql"
+	"errors"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -19,6 +21,156 @@ func init() {
 		DBName: "fresh_products",
 	}
 	txdb.Register("txdb", "mysql", cfg.FormatDSN())
+}
+
+func TestUnitProductTypeDB(t *testing.T) {
+	t.Run("GetAll", func(t *testing.T) {
+		t.Run("Given an query.error THEN return an error", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			mock.ExpectQuery("SELECT id, description FROM product_types").WillReturnError(errors.New("error"))
+			listProductTypes, err := repo.GetAll()
+			require.Error(t, err)
+			require.Zero(t, listProductTypes)
+		})
+		t.Run("Given an OK query THEN return an error at rows.Scan", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+			rows := sqlmock.NewRows([]string{"id", "description"}).AddRow(1, "Fruits")
+
+			mock.ExpectQuery("SELECT id, description FROM product_types").WillReturnRows(rows)
+			rows.RowError(0, errors.New("error"))
+			listProductTypes, err := repo.GetAll()
+			require.Error(t, err)
+			require.Zero(t, listProductTypes)
+		})
+	})
+	t.Run("GetByID", func(t *testing.T) {
+		t.Run("Given an query.error THEN return an error", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			mock.ExpectQuery("SELECT id, description FROM product_types WHERE id = ?").WillReturnError(errors.New("error"))
+			productType, err := repo.GetByID(1)
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+		t.Run("Given an OK query THEN return an error at rows.Scan", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+			rows := sqlmock.NewRows([]string{"id", "description"}).AddRow(1, "Fruits")
+
+			mock.ExpectQuery("SELECT id, description FROM product_types WHERE id = ?").WillReturnRows(rows)
+			rows.RowError(0, errors.New("error"))
+			productType, err := repo.GetByID(1)
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+	})
+	t.Run("Create", func(t *testing.T) {
+		t.Run("Given an query.error THEN return an error", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			mock.ExpectExec("INSERT INTO product_types").WillReturnError(errors.New("error"))
+			productType, err := repo.Create(internal.ProductType{Description: "Fruits"})
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+		t.Run("Given an OK query THEN return an error at rows.Scan", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+			stmt := mock.ExpectPrepare("INSERT INTO product_types").ExpectExec().WithArgs("Fruits").WillReturnResult(sqlmock.NewResult(1, 1))
+			stmt.WillReturnError(&mysql.MySQLError{Number: 1062})
+			productType, err := repo.Create(internal.ProductType{Description: "Fruits"})
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+		t.Run("Given an OK query THEN return an error at statement.Exec", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+			stmt := mock.ExpectPrepare("INSERT INTO product_types").ExpectExec().WithArgs("Fruits").WillReturnResult(sqlmock.NewResult(1, 1))
+			stmt.WillReturnError(errors.New("error"))
+			productType, err := repo.Create(internal.ProductType{Description: "Fruits"})
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+	})
+	t.Run("Update", func(t *testing.T) {
+		t.Run("Given an query.error THEN return an error", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			mock.ExpectExec("UPDATE product_types").WillReturnError(errors.New("error"))
+			productType, err := repo.Update(internal.ProductType{ID: 1, Description: "Fruits"})
+			require.Error(t, err)
+			require.Zero(t, productType)
+		})
+		t.Run("Given an OK query THEN return an error at rows.Scan", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			statement := mock.ExpectPrepare("UPDATE product_types SET description=? WHERE id=?")
+			result := statement.ExpectExec().WithArgs("Fruits", 1)
+			result.WillReturnError(errors.New("error"))
+			_, err = repo.Update(internal.ProductType{ID: 1, Description: "Fruits"})
+			require.Error(t, err)
+		})
+	})
+	t.Run("Delete", func(t *testing.T) {
+		t.Run("Given an query.error THEN return an error", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			mock.ExpectExec("DELETE FROM product_types").WillReturnError(errors.New("error"))
+			err = repo.Delete(1)
+			require.Error(t, err)
+		})
+		t.Run("Given an OK query THEN return an error at rows.Scan", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductTypeDB(db)
+
+			result := mock.ExpectPrepare("DELETE FROM product_types WHERE id = ?").ExpectExec().WithArgs(1)
+			result.WillReturnError(errors.New("error"))
+			err = repo.Delete(1)
+			require.Error(t, err)
+		})
+	})
+
 }
 
 func TestProductTypeDB_GetAll(t *testing.T) {

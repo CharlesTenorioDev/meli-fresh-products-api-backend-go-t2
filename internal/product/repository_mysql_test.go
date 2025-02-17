@@ -2,8 +2,10 @@ package product
 
 import (
 	"database/sql"
+	"errors"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -20,6 +22,157 @@ func init() {
 		DBName: "fresh_products",
 	}
 	txdb.Register("txdb", "mysql", cfg.FormatDSN())
+}
+
+func TestUnitProductRepository(t *testing.T) {
+	t.Run("GetByID", func(t *testing.T) {
+		t.Run("Given a r.db.Query error, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectQuery("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM products WHERE id = ?").WillReturnError(errors.New("error"))
+
+			product, err := repo.GetByID(1)
+			require.Error(t, err)
+			require.Empty(t, product)
+		})
+		t.Run("Given a r.db.Query OK, When Row.Scan, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			rows := sqlmock.NewRows([]string{"id", "description", "expiration_rate", "freezing_rate", "height", "length", "net_weight", "product_code", "recommended_freezing_temperature", "width", "product_type_id", "seller_id"}).
+				AddRow(1, "description", 0.1, 0.2, 1.2, 1.3, 1.4, "product_code", -2.5, 5, 2, 1)
+
+			mock.ExpectQuery("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM products WHERE id = ?").WillReturnRows(rows)
+
+			rows.RowError(0, errors.New("error"))
+			product, err := repo.GetByID(1)
+			require.Error(t, err)
+			require.Empty(t, product)
+		})
+	})
+	t.Run("GetAll", func(t *testing.T) {
+		t.Run("Given a r.db.Query error, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectQuery("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products").WillReturnError(errors.New("error"))
+
+			products, err := repo.GetAll()
+			require.Error(t, err)
+			require.Empty(t, products)
+		})
+		t.Run("Given a r.db.Query OK, When Row.Scan, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			rows := sqlmock.NewRows([]string{"id", "description", "expiration_rate", "freezing_rate", "height", "length", "net_weight", "product_code", "recommended_freezing_temperature", "width", "product_type_id", "seller_id"}).
+				AddRow(1, "description", 0.1, 0.2, 1.2, 1.3, 1.4, "product_code", -2.5, 5, 2, 1)
+
+			mock.ExpectQuery("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products").WillReturnRows(rows)
+
+			rows.RowError(0, errors.New("error"))
+			products, err := repo.GetAll()
+			require.Error(t, err)
+			require.Empty(t, products)
+		})
+	})
+	t.Run("Create", func(t *testing.T) {
+		t.Run("Given a r.db.Query error, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectExec("INSERT INTO products").WillReturnError(errors.New("error"))
+
+			product, err := repo.Create(internal.ProductAttributes{})
+			require.Error(t, err)
+			require.Empty(t, product)
+		})
+		t.Run("Given a r.db.Query OK, When Row.Scan, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			statement := mock.ExpectPrepare("INSERT INTO products description, expiration_rate, freezing_rate, height, `length`, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id")
+			statement.ExpectExec().WillReturnError(&mysql.MySQLError{Number: 1062})
+
+			product, err := repo.Create(internal.ProductAttributes{})
+			require.Error(t, err)
+			require.Empty(t, product)
+		})
+
+	})
+	t.Run("Update", func(t *testing.T) {
+		t.Run("Given a r.db.Query error, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectExec("UPDATE products").WillReturnError(errors.New("error"))
+
+			_, err = repo.Update(internal.Product{})
+			require.Error(t, err)
+		})
+		t.Run("Given a r.db.Query OK, When Row.Scan, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			statement := mock.ExpectPrepare("UPDATE products SET description").WillReturnError(errors.New("error"))
+			statement.WillReturnError(errors.New("error"))
+			_, err = repo.Update(internal.Product{})
+			require.Error(t, err)
+		})
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		t.Run("Given a r.db.Query error, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectExec("DELETE FROM products").WillReturnError(errors.New("error"))
+
+			err = repo.Delete(1)
+			require.Error(t, err)
+		})
+		t.Run("Given a r.db.Query OK, When Row.Scan, return nil list of products", func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			defer db.Close()
+			require.NoError(t, err)
+
+			repo := NewProductDB(db)
+
+			mock.ExpectExec("DELETE FROM products").WillReturnError(errors.New("error"))
+
+			err = repo.Delete(1)
+			require.Error(t, err)
+		})
+	})
+
 }
 
 func TestIntegrationProduct_GetAll(t *testing.T) {
