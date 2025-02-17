@@ -66,6 +66,15 @@ var (
 			WarehouseID:  1,
 		},
 	}
+	mockEmployee3 = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "12345",
+			FirstName:    "Celaena",
+			LastName:     "Sardothien",
+			WarehouseID:  1,
+		},
+	}
 	mockEmployeeAttr = internal.EmployeeAttributes{
 		CardNumberID: "67890",
 		FirstName:    "Rowan",
@@ -97,6 +106,30 @@ var (
 		WarehouseCode:      "XYZ",
 		MinimumCapacity:    10,
 		MinimumTemperature: 10,
+	}
+	mockErr1Employee = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "",
+			FirstName:    "",
+			LastName:     "",
+			WarehouseID:  1,
+		},
+	}
+	mockNilInputEmployee = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			WarehouseID: 0,
+		},
+	}
+	mockEmployeeInvalidWarehouse = internal.Employee{
+		ID: 1,
+		Attributes: internal.EmployeeAttributes{
+			CardNumberID: "12345",
+			FirstName:    "Aelin",
+			LastName:     "Galanthynius",
+			WarehouseID:  99,
+		},
 	}
 )
 
@@ -184,6 +217,17 @@ func TestEmployeeService_Delete(t *testing.T) {
 
 		assert.NotNil(t, err)
 	})
+
+	t.Run("Delete - Invalid Arguments", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockRepo.On("FindByID", 1).Return(mockEmployee, nil)
+		mockRepo.On("DeleteEmployee", 1).Return(assert.AnError)
+		service := NewEmployeeService(mockRepo, nil)
+		err := service.DeleteEmployee(1)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, utils.ErrInvalidArguments, err)
+	})
 }
 
 func TestEmployeeService_Update(t *testing.T) {
@@ -213,6 +257,52 @@ func TestEmployeeService_Update(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, utils.ErrNotFound, err)
 	})
+
+	t.Run("Update - Warehouse Not Found", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 99).Return(internal.Warehouse{}, utils.ErrNotFound)
+		mockRepo.On("FindByID", 99).Return(internal.Employee{}, assert.AnError)
+		service := NewEmployeeService(mockRepo, mockWV)
+
+		result, err := service.UpdateEmployee(mockInputEmployeeInvalidID)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.NotNil(t, err)
+		assert.Equal(t, utils.ErrNotFound, err)
+	})
+
+	t.Run("Update - Merge Employee Fields", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 0).Return(mockWarehouse, nil)
+		mockRepo.On("FindByID", 1).Return(mockEmployee3, nil)
+		mockRepo.On("UpdateEmployee", mockInputEmployee).Return(mockEmployee3, nil)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.UpdateEmployee(mockNilInputEmployee)
+
+		assert.Equal(t, mockEmployee3, result)
+		assert.Nil(t, err)
+
+		assert.Equal(t, mockInputEmployee.ID, mockEmployee3.ID)
+		assert.Equal(t, "Celaena", mockEmployee3.Attributes.FirstName)
+		assert.Equal(t, "Sardothien", mockEmployee3.Attributes.LastName)
+		assert.Equal(t, "12345", mockEmployee3.Attributes.CardNumberID)
+		assert.Equal(t, 1, mockEmployee3.Attributes.WarehouseID)
+	})
+
+	t.Run("Update - Error Warehouse Nil", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(internal.Warehouse{}, utils.EDependencyNotFound("warehouse", "id: "+"1"))
+		mockRepo.On("FindByID", 1).Return(mockEmployee, nil)
+		mockRepo.On("UpdateEmployee", mockEmployee).Return(internal.Employee{}, assert.AnError)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.UpdateEmployee(mockEmployee)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.NotNil(t, err)
+	})
 }
 
 func TestEmployeeService_Create(t *testing.T) {
@@ -240,5 +330,55 @@ func TestEmployeeService_Create(t *testing.T) {
 
 		assert.Equal(t, internal.Employee{}, result)
 		assert.Equal(t, utils.ErrConflict, err)
+	})
+
+	t.Run("Create - Error on Validate Fiels", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{1: mockEmployee2}, nil)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(internal.Employee{}, utils.ErrConflict)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.CreateEmployee(mockEmployeeAttr)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.Equal(t, utils.ErrConflict, err)
+	})
+
+	t.Run("Create - Empty Fields", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		service := NewEmployeeService(mockRepo, mockWV)
+
+		result, err := service.CreateEmployee(mockErr1Employee.Attributes)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.Equal(t, utils.ErrEmptyArguments, err)
+	})
+
+	t.Run("Create - Err on FindAll", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, nil)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{}, assert.AnError)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(internal.Employee{}, assert.AnError)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.CreateEmployee(mockEmployeeAttr)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Create - Another Error on Warehouse", func(t *testing.T) {
+		mockRepo := new(mockEmployeeRepository)
+		mockWV := new(mockWarehouseValidation)
+		mockWV.On("GetByID", 1).Return(mockWarehouse, assert.AnError)
+		mockRepo.On("FindAll").Return(map[int]internal.Employee{}, nil)
+		mockRepo.On("CreateEmployee", mockEmployeeAttr).Return(internal.Employee{}, assert.AnError)
+		service := NewEmployeeService(mockRepo, mockWV)
+		result, err := service.CreateEmployee(mockEmployeeAttr)
+
+		assert.Equal(t, internal.Employee{}, result)
+		assert.NotNil(t, err)
 	})
 }

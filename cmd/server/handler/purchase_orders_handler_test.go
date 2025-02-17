@@ -60,12 +60,19 @@ var (
 		TotalOrders: 1,
 		BuyerID:     1,
 	}
+	mockErrJsonPurchaseOrder = `{
+		"order_number": x,
+		"order_date": "2021-04-04",
+		"tracking_code": "abscf123",
+		"buyer_id": 1,
+		"product_record_id": 1
+	}`
 )
 
 func TestPurchaseOrdersHandler_FindAll(t *testing.T) {
-	mockService := new(mockPurchaseOrderService)
-	handler := NewPurchaseOrdersHandler(mockService)
 	t.Run("FindAllByBuyerID - Valid ID", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("FindAllByBuyerID", 1).Return([]internal.PurchaseOrderSummary{mockPurchaseOrderSummary}, nil)
 
 		req := httptest.NewRequest("GET", "/buyers/reportPurchaseOrders?id=1", nil)
@@ -77,6 +84,8 @@ func TestPurchaseOrdersHandler_FindAll(t *testing.T) {
 	})
 
 	t.Run("FindAllByBuyerID - Invalid ID", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("FindAllByBuyerID", 1).Return(map[int]internal.PurchaseOrderSummary{1: mockPurchaseOrderSummary}, nil)
 
 		req := httptest.NewRequest("GET", "/buyers/reportPurchaseOrders?id=x", nil)
@@ -87,7 +96,22 @@ func TestPurchaseOrdersHandler_FindAll(t *testing.T) {
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 
+	t.Run("FindAllByBuyerID - Another Error", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
+		mockService.On("FindAllByBuyerID", 1).Return([]internal.PurchaseOrderSummary{}, assert.AnError)
+
+		req := httptest.NewRequest("GET", "/buyers/reportPurchaseOrders?id=1", nil)
+		res := httptest.NewRecorder()
+		handler.GetAllPurchaseOrders()(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
 	t.Run("FindAll - Success", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
 		mockService.On("FindAllByBuyerID", mock.Anything).Return([]internal.PurchaseOrderSummary{mockPurchaseOrderSummary}, nil)
 		mockService.On("FindAll").Return(map[int]internal.PurchaseOrder{1: mockPurchaseOrder}, nil)
 
@@ -140,6 +164,20 @@ func TestPurchaseOrdersHandler_Create(t *testing.T) {
 		handler.PostPurchaseOrders()(res, req)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
+		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	})
+
+	t.Run("Create - Error on Decode", func(t *testing.T) {
+		mockService := new(mockPurchaseOrderService)
+		handler := NewPurchaseOrdersHandler(mockService)
+		mockService.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return([]internal.PurchaseOrder{}, assert.AnError)
+
+		req := httptest.NewRequest("POST", "/purchaseOrders", bytes.NewBufferString(mockErrJsonPurchaseOrder))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+		handler.PostPurchaseOrders()(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }
