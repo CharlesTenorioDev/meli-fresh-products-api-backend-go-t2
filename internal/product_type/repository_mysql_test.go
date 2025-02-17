@@ -167,30 +167,6 @@ func TestIntegrationProductTypeDB(t *testing.T) {
 
 	repo := NewProductTypeDB(ts.DB)
 
-	t.Run("GetAll", func(t *testing.T) {
-		t.Run("Given existing product types, return all product types", func(t *testing.T) {
-			productTypes, err := repo.GetAll()
-			require.NoError(t, err)
-			require.NotEmpty(t, productTypes)
-		})
-
-		t.Run("Given no product types, return empty list", func(t *testing.T) {
-			// Assuming there's a way to clear the product types table for this test
-			_, err := repo.db.Exec("SET FOREIGN_KEY_CHECKS=0")
-			require.NoError(t, err)
-
-			_, err = repo.db.Exec("DELETE FROM fresh_products.product_types")
-			require.NoError(t, err)
-
-			_, err = repo.db.Exec("SET FOREIGN_KEY_CHECKS=1")
-			require.NoError(t, err)
-
-			products, err := repo.GetAll()
-			require.NoError(t, err)
-			require.Empty(t, products)
-		})
-	})
-
 	t.Run("GetByID", func(t *testing.T) {
 
 		t.Run("Given existing product type, return product type", func(t *testing.T) {
@@ -247,6 +223,30 @@ func TestIntegrationProductTypeDB(t *testing.T) {
 		t.Run("Given a non-existing product type, return error", func(t *testing.T) {
 			err := repo.Delete(0)
 			require.Error(t, err)
+		})
+	})
+
+	t.Run("GetAll", func(t *testing.T) {
+		t.Run("Given existing product types, return all product types", func(t *testing.T) {
+			productTypes, err := repo.GetAll()
+			require.NoError(t, err)
+			require.NotEmpty(t, productTypes)
+		})
+
+		t.Run("Given no product types, return empty list", func(t *testing.T) {
+			// Assuming there's a way to clear the product types table for this test
+			_, err := repo.db.Exec("SET FOREIGN_KEY_CHECKS=0")
+			require.NoError(t, err)
+
+			_, err = repo.db.Exec("DELETE FROM fresh_products.product_types")
+			require.NoError(t, err)
+
+			_, err = repo.db.Exec("SET FOREIGN_KEY_CHECKS=1")
+			require.NoError(t, err)
+
+			products, err := repo.GetAll()
+			require.NoError(t, err)
+			require.Empty(t, products)
 		})
 	})
 }

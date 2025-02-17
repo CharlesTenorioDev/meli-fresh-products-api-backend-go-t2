@@ -2,6 +2,9 @@ package product_batch
 
 import (
 	"database/sql"
+	"regexp"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
@@ -10,8 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"regexp"
-	"testing"
 )
 
 func TestUnitProductBatchRepository(t *testing.T) {
@@ -236,7 +237,7 @@ func TestIntegrationProductBatchRepository(t *testing.T) {
 			}
 
 			createdBatch := internal.ProductBatch{
-				ID:                  1,
+				ID:                  3,
 				ProductBatchRequest: newBatch,
 			}
 
