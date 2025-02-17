@@ -228,6 +228,28 @@ func TestUnitSeller_Create_EmptyOrInvalidCid(t *testing.T) {
 	require.Equal(t, result, utils.EZeroValue("Cid"))
 }
 
+func TestUnitSeller_Create_InternalErrorGettingCid(t *testing.T) {
+	newSeller := internal.Seller{
+		ID:          1,
+		Cid:         1,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, errors.New("internal error"))
+
+	service := NewSellerService(msr, mlr)
+
+	result := service.Create(&newSeller)
+
+	require.Equal(t, result, errors.New("internal error"))
+}
+
 func TestUnitSeller_Create_EmptyOrInvalidCompany(t *testing.T) {
 	newSeller := internal.Seller{
 		ID:          1,
@@ -248,6 +270,50 @@ func TestUnitSeller_Create_EmptyOrInvalidCompany(t *testing.T) {
 	result := service.Create(&newSeller)
 
 	require.Equal(t, result, utils.EZeroValue("Company name"))
+}
+
+func TestUnitSeller_Create_EmptyOrInvalidTelephone(t *testing.T) {
+	newSeller := internal.Seller{
+		ID:          1,
+		Cid:         55,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, utils.ErrNotFound)
+
+	service := NewSellerService(msr, mlr)
+
+	result := service.Create(&newSeller)
+
+	require.Equal(t, result, utils.EZeroValue("Telephone"))
+}
+
+func TestUnitSeller_Create_EmptyOrInvalidAddress(t *testing.T) {
+	newSeller := internal.Seller{
+		ID:          1,
+		Cid:         55,
+		CompanyName: "Company",
+		Address:     "",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, utils.ErrNotFound)
+
+	service := NewSellerService(msr, mlr)
+
+	result := service.Create(&newSeller)
+
+	require.Equal(t, result, utils.EZeroValue("Address"))
 }
 
 func TestUnitSeller_Create_LocalityDoesNotExist(t *testing.T) {
@@ -273,6 +339,31 @@ func TestUnitSeller_Create_LocalityDoesNotExist(t *testing.T) {
 	result := service.Create(&newSeller)
 
 	require.ErrorIs(t, result, errGetLocality)
+}
+
+func TestUnitSeller_Create_ErrorGettingLocality(t *testing.T) {
+	newSeller := internal.Seller{
+		ID:          1,
+		Cid:         55,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	errGetLocality := utils.EDependencyNotFound("Seller", "locality ID")
+
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{Cid: 0}, nil)
+	mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, utils.ErrNotFound)
+
+	service := NewSellerService(msr, mlr)
+
+	result := service.Create(&newSeller)
+
+	require.Equal(t, result, errGetLocality)
 }
 
 func TestUnitSeller_Create_InternalServerError(t *testing.T) {
@@ -349,6 +440,28 @@ func TestUnitSeller_Update_SellerNotFound(t *testing.T) {
 	require.Equal(t, result, internal.Seller{})
 }
 
+func TestUnitSeller_Update_ErrorGettingSeller(t *testing.T) {
+	updatedSeller := internal.Seller{
+		ID:          1,
+		Cid:         55,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByID", mock.Anything).Return(internal.Seller{}, errors.New("some error"))
+
+	service := NewSellerService(msr, mlr)
+
+	_, err := service.Update(1, &updatedSeller)
+
+	require.Equal(t, errors.New("some error"), err)
+}
+
 func TestUnitSeller_Update_CidAlreadyInUseByOtherSeller(t *testing.T) {
 	updatedSeller := internal.Seller{
 		ID:          1,
@@ -371,6 +484,29 @@ func TestUnitSeller_Update_CidAlreadyInUseByOtherSeller(t *testing.T) {
 
 	require.Equal(t, err, utils.EConflict("Cid", "Seller"))
 	require.Equal(t, result, internal.Seller{})
+}
+
+func TestUnitSeller_Update_ErrorGettingCid(t *testing.T) {
+	updatedSeller := internal.Seller{
+		ID:          1,
+		Cid:         55,
+		CompanyName: "Company",
+		Address:     "Address",
+		Telephone:   "1199999999",
+		LocalityID:  1,
+	}
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByID", mock.Anything).Return(internal.Seller{ID: 1, LocalityID: 1}, nil)
+	msr.On("GetByCid", mock.Anything).Return(internal.Seller{}, errors.New("some error"))
+
+	service := NewSellerService(msr, mlr)
+
+	_, err := service.Update(1, &updatedSeller)
+
+	require.Equal(t, err, errors.New("some error"))
 }
 
 func TestUnitSeller_Update_InternalServerError(t *testing.T) {
@@ -428,6 +564,20 @@ func TestUnitSeller_Delete_SellerNotFound(t *testing.T) {
 	err := service.Delete(1)
 
 	require.Equal(t, utils.ENotFound("Seller"), err)
+}
+
+func TestUnitSeller_Delete_ErrorGettingSeller(t *testing.T) {
+
+	msr := new(MockSellerRepository)
+	mlr := new(MockLocalityRepository)
+
+	msr.On("GetByID", mock.Anything).Return(internal.Seller{}, errors.New("error"))
+
+	service := NewSellerService(msr, mlr)
+
+	err := service.Delete(1)
+
+	require.Equal(t, errors.New("error"), err)
 }
 
 func TestUnitSeller_Delete_InternalServerError(t *testing.T) {

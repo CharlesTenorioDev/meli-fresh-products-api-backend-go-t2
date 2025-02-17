@@ -11,11 +11,13 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/melisource/fury_go-toolkit-config/v2 v2.2.1
 	github.com/melisource/fury_go-toolkit-secrets v0.7.0
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
 	github.com/testcontainers/testcontainers-go v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.35.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -64,7 +66,6 @@ require (
 	github.com/newrelic/go-agent/v3 v3.34.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
@@ -95,5 +96,4 @@ require (
 	google.golang.org/grpc v1.66.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
