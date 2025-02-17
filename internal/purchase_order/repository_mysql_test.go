@@ -33,7 +33,7 @@ func TestPurchaseOrderRepository_FindAll(t *testing.T) {
 
 	t.Run("GIVEN no specific buyer ID WHEN executing FindAllByBuyerID THEN return all purchase orders summary", func(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"buyer_id", "total_orders", "order_codes"}).
-			AddRow(10, 3, "12345,67890,11223").
+			AddRow(10, 3, "order#101,67890,11223").
 			AddRow(20, 2, "54321,98765")
 
 		mock.ExpectQuery("SELECT po.buyer_id, COUNT.*GROUP BY po.buyer_id").
@@ -45,12 +45,12 @@ func TestPurchaseOrderRepository_FindAll(t *testing.T) {
 		require.Len(t, res, 2)
 		require.Equal(t, 10, res[0].BuyerID)
 		require.Equal(t, 3, res[0].TotalOrders)
-		require.Equal(t, "12345,67890,11223", res[0].OrderCodes)
+		require.Equal(t, "order#101,67890,11223", res[0].OrderCodes)
 	})
 
 	t.Run("GIVEN an invalid row WHEN executing FindAll THEN return a scan error", func(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id", "order_number", "tracking_code", "order_date", "buyer_id"}).
-			AddRow("invalid_id", "12345", "TRACK123", "2024-02-16", 10)
+			AddRow("invalid_id", "order#101", "abc123", "2024-02-16", 10)
 
 		mock.ExpectQuery("SELECT po.id, po.order_number, po.tracking_code, po.order_date, po.buyer_id").
 			WillReturnRows(rows)
@@ -156,13 +156,13 @@ func TestPurchaseOrderRepository_CreatePurchaseOrder(t *testing.T) {
 
 	t.Run("GIVEN a database error WHEN executing CreatePurchaseOrder THEN return an error", func(t *testing.T) {
 		mock.ExpectExec("INSERT INTO purchase_orders").
-			WithArgs("12345", "2024-02-16", "TRACK123", 10, 5).
+			WithArgs("order#101", "2024-02-16", "abc123", 10, 5).
 			WillReturnError(errors.New("db insert error"))
 
 		order := internal.PurchaseOrderAttributes{
-			OrderNumber:     "12345",
+			OrderNumber:     "order#101",
 			OrderDate:       "2024-02-16",
-			TrackingCode:    "TRACK123",
+			TrackingCode:    "abc123",
 			BuyerID:         10,
 			ProductRecordID: 5,
 		}
@@ -176,13 +176,13 @@ func TestPurchaseOrderRepository_CreatePurchaseOrder(t *testing.T) {
 
 	t.Run("GIVEN a database error WHEN retrieving LastInsertId THEN return an error", func(t *testing.T) {
 		mock.ExpectExec("INSERT INTO purchase_orders").
-			WithArgs("12345", "2024-02-16", "TRACK123", 10, 5).
+			WithArgs("order#101", "2024-02-16", "abc123", 10, 5).
 			WillReturnResult(sqlmock.NewErrorResult(errors.New("last insert id error")))
 
 		order := internal.PurchaseOrderAttributes{
-			OrderNumber:     "12345",
+			OrderNumber:     "order#101",
 			OrderDate:       "2024-02-16",
-			TrackingCode:    "TRACK123",
+			TrackingCode:    "abc123",
 			BuyerID:         10,
 			ProductRecordID: 5,
 		}

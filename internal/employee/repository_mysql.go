@@ -2,7 +2,6 @@ package employee
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -20,7 +19,6 @@ func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {
 func (r *EmployeeRepository) FindAll() (map[int]internal.Employee, error) {
 	rows, err := r.db.Query("SELECT id, id_card_number, first_name, last_name, warehouse_id FROM employees")
 	if err != nil {
-		log.Printf("Error in FindAll Query: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -33,7 +31,6 @@ func (r *EmployeeRepository) FindAll() (map[int]internal.Employee, error) {
 
 		err := rows.Scan(&emp.ID, &emp.Attributes.CardNumberID, &emp.Attributes.FirstName, &emp.Attributes.LastName, &emp.Attributes.WarehouseID)
 		if err != nil {
-			log.Printf("Error scanning row: %v", err)
 			return nil, err
 		}
 
@@ -55,7 +52,6 @@ func (r *EmployeeRepository) FindByID(id int) (internal.Employee, error) {
 	}
 
 	if err != nil {
-		log.Printf("Error in FindByID Query: %v", err)
 		return internal.Employee{}, err
 	}
 
@@ -67,13 +63,11 @@ func (r *EmployeeRepository) CreateEmployee(newEmployee internal.EmployeeAttribu
 	result, err := r.db.Exec("INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) VALUES (?, ?, ?, ?)",
 		newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
 	if err != nil {
-		log.Printf("Error in CreateEmployee Query: %v", err)
 		return internal.Employee{}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		log.Printf("Error getting LastInsertId: %v", err)
 		return internal.Employee{}, err
 	}
 
@@ -85,7 +79,6 @@ func (r *EmployeeRepository) UpdateEmployee(inputEmployee internal.Employee) (in
 	_, err := r.db.Exec("UPDATE employees SET id_card_number = ?, first_name = ?, last_name = ?, warehouse_id = ? WHERE id = ?",
 		inputEmployee.Attributes.CardNumberID, inputEmployee.Attributes.FirstName, inputEmployee.Attributes.LastName, inputEmployee.Attributes.WarehouseID, inputEmployee.ID)
 	if err != nil {
-		log.Printf("Error in UpdateEmployee Query: %v", err)
 		return internal.Employee{}, err
 	}
 
@@ -96,7 +89,6 @@ func (r *EmployeeRepository) UpdateEmployee(inputEmployee internal.Employee) (in
 func (r *EmployeeRepository) DeleteEmployee(id int) error {
 	_, err := r.db.Exec("DELETE FROM employees WHERE id = ?", id)
 	if err != nil {
-		log.Printf("Error in DeleteEmployee Query: %v", err)
 		return err
 	}
 
