@@ -268,7 +268,8 @@ INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) VALU
 -- Insert sample buyers
 INSERT INTO buyers (id_card_number, first_name, last_name) VALUES
 ('B001', 'Charlie', 'Brown'),
-('B002', 'Diana', 'White');
+('B002', 'Diana', 'White'),
+('B003', 'Pedro', 'Guaxinim');
 
 -- Insert sample product batches
 INSERT INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
