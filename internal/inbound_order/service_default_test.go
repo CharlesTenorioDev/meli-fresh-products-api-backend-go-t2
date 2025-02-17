@@ -1,7 +1,6 @@
 package inbound_order_test
 
 import (
-	"errors"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -19,10 +18,12 @@ func (m *MockInboundOrderRepository) CreateInboundOrder(newOrder internal.Inboun
 	args := m.Called(newOrder)
 	return args.Get(0).(internal.InboundOrder), args.Error(1)
 }
+
 func (m *MockInboundOrderRepository) GenerateInboundOrdersReport() ([]internal.EmployeeInboundOrdersReport, error) {
 	args := m.Called()
 	return args.Get(0).([]internal.EmployeeInboundOrdersReport), args.Error(1)
 }
+
 func (m *MockInboundOrderRepository) GenerateByIDInboundOrdersReport(employeeID int) (internal.EmployeeInboundOrdersReport, error) {
 	args := m.Called(employeeID)
 	return args.Get(0).(internal.EmployeeInboundOrdersReport), args.Error(1)
@@ -42,14 +43,14 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 	type testCase struct {
 		name          string
 		input         internal.InboundOrderAttributes
-		mockSetup     func(repository *MockInboundOrderRepository)
+		repo          func(repository *MockInboundOrderRepository)
 		expectedError error
 		expectedOrder internal.InboundOrder
 	}
 
 	cases := []testCase{
 		{
-			name: "201 Created - Successfully create a new inbound order",
+			name: "Created - Successfully create a new inbound order",
 			input: internal.InboundOrderAttributes{
 				OrderDate:      "2021-04-04",
 				OrderNumber:    "order#2742",
@@ -57,7 +58,7 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 				ProductBatchID: 1,
 				WarehouseID:    1,
 			},
-			mockSetup: func(repository *MockInboundOrderRepository) {
+			repo: func(repository *MockInboundOrderRepository) {
 				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, nil)
 				repository.On("FindByOrderNumber", "order#2742").Return(internal.InboundOrder{}, utils.ErrNotFound)
 				repository.On("CreateInboundOrder", mock.Anything).Return(internal.InboundOrder{
@@ -84,7 +85,7 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 			},
 		},
 		{
-			name: "409 Conflict - Order number already exists",
+			name: "Conflict - Order number already exists",
 			input: internal.InboundOrderAttributes{
 				OrderDate:      "2021-04-05",
 				OrderNumber:    "order#1",
@@ -92,14 +93,14 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 				ProductBatchID: 2,
 				WarehouseID:    2,
 			},
-			mockSetup: func(repository *MockInboundOrderRepository) {
+			repo: func(repository *MockInboundOrderRepository) {
 				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, utils.ErrConflict)
 				// No further configuration is needed, the error should occur after calling FindByID
 			},
 			expectedError: utils.ErrConflict,
 		},
 		{
-			name: "422 Unprocessable Entity - Missing required field (OrderDate empty)",
+			name: "Unprocessable Entity - Missing required field (OrderDate empty)",
 			input: internal.InboundOrderAttributes{
 				OrderDate:      "",
 				OrderNumber:    "order#3",
@@ -107,10 +108,59 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 				ProductBatchID: 3,
 				WarehouseID:    3,
 			},
-			mockSetup: func(repository *MockInboundOrderRepository) {
+			repo: func(repository *MockInboundOrderRepository) {
 				// No further configuration is needed, the error should occur before calling the repository
 			},
 			expectedError: utils.ErrInvalidArguments,
+		},
+		{
+			name: "Conflict - Order number cause error in FindByID",
+			input: internal.InboundOrderAttributes{
+				OrderDate:      "2021-04-05",
+				OrderNumber:    "order#1",
+				EmployeeID:     2,
+				ProductBatchID: 2,
+				WarehouseID:    2,
+			},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, utils.ErrNotFound)
+				// No further configuration is needed, the error should occur after calling FindByID
+			},
+			expectedError: utils.ErrNotFound,
+		},
+		{
+			name: "Conflict - Order number cause error in FindByOrderNumber",
+			input: internal.InboundOrderAttributes{
+				OrderDate:      "2021-04-05",
+				OrderNumber:    "order#1",
+				EmployeeID:     2,
+				ProductBatchID: 2,
+				WarehouseID:    2,
+			},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{
+					ID: 1,
+					Attributes: internal.InboundOrderAttributes{
+						OrderDate:      "2021-04-05",
+						OrderNumber:    "order#1",
+						EmployeeID:     2,
+						ProductBatchID: 2,
+						WarehouseID:    2,
+					},
+				}, nil)
+				repository.On("FindByOrderNumber", mock.Anything).Return(internal.InboundOrder{
+					ID: 1,
+					Attributes: internal.InboundOrderAttributes{
+						OrderDate:      "2021-04-05",
+						OrderNumber:    "order#1",
+						EmployeeID:     2,
+						ProductBatchID: 2,
+						WarehouseID:    2,
+					},
+				}, utils.ErrConflict)
+				// No further configuration is needed, the error should occur after calling FindByID
+			},
+			expectedError: utils.ErrConflict,
 		},
 	}
 
@@ -119,8 +169,8 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 			repository := new(MockInboundOrderRepository)
 			service := inbound_order.NewInboundOrderService(repository)
 
-			if tc.mockSetup != nil {
-				tc.mockSetup(repository)
+			if tc.repo != nil {
+				tc.repo(repository)
 			}
 
 			newOrder, err := service.CreateInboundOrder(tc.input)
@@ -143,104 +193,87 @@ func TestUnitInboundOrder_CreateInboundOrder(t *testing.T) {
 }
 
 func TestUnitInboundOrder_GenerateInboundOrdersReport(t *testing.T) {
-	type testCase struct {
-		name string
-		ids  []int
-
-		mockAllReport      []internal.EmployeeInboundOrdersReport
-		mockAllReportError error
-
-		mockFindByIDError   error
-		mockGenerateByIDRes internal.EmployeeInboundOrdersReport
-		mockGenerateByIDErr error
-
-		expectedReports []internal.EmployeeInboundOrdersReport
-		expectedError   error
+	tests := []struct {
+		name           string
+		ids            []int
+		repo           func(repository *MockInboundOrderRepository)
+		expectedReport []internal.EmployeeInboundOrdersReport
+		expectedError  error
+	}{
+		{
+			name: "Success - Generate report for all employees without ids",
+			ids:  []int{},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("GenerateInboundOrdersReport").Return([]internal.EmployeeInboundOrdersReport{{ID: 2}}, nil)
+			},
+			expectedReport: []internal.EmployeeInboundOrdersReport{{ID: 2}},
+			expectedError:  nil,
+		},
+		{
+			name: "Error - Generate report for all employees withou ids",
+			ids:  []int{},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("GenerateInboundOrdersReport").Return([]internal.EmployeeInboundOrdersReport{}, utils.ErrNotFound)
+			},
+			expectedReport: []internal.EmployeeInboundOrdersReport{},
+			expectedError:  utils.ErrNotFound,
+		},
+		{
+			name: "Error - Generate report for all employees with ids - Error Not Found",
+			ids:  []int{2},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, utils.ErrNotFound)
+			},
+			expectedReport: nil,
+			expectedError:  utils.ErrNotFound,
+		},
+		{
+			name: "Error - Generate report for all employees with ids - GenerateByIDInboundOrdersReport",
+			ids:  []int{2},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, nil)
+				repository.On("GenerateByIDInboundOrdersReport", mock.Anything).Return(internal.EmployeeInboundOrdersReport{}, utils.ErrNotFound)
+			},
+			expectedReport: []internal.EmployeeInboundOrdersReport{},
+			expectedError:  utils.ErrNotFound,
+		},
+		{
+			name: "Error - Generate report for all employees with ids - GenerateByIDInboundOrdersReport (error different)",
+			ids:  []int{2},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, nil)
+				repository.On("GenerateByIDInboundOrdersReport", mock.Anything).Return(internal.EmployeeInboundOrdersReport{}, utils.ErrConflict)
+			},
+			expectedReport: nil,
+			expectedError:  utils.ErrConflict,
+		},
+		{
+			name: "Success - Generate report for all employees with ids",
+			ids:  []int{2},
+			repo: func(repository *MockInboundOrderRepository) {
+				repository.On("FindByID", mock.Anything).Return(internal.InboundOrder{}, nil)
+				repository.On("GenerateByIDInboundOrdersReport", mock.Anything).Return(internal.EmployeeInboundOrdersReport{ID: 2}, nil)
+			},
+			expectedReport: []internal.EmployeeInboundOrdersReport{{ID: 2}},
+			expectedError:  nil,
+		},
 	}
 
-	reportAll := []internal.EmployeeInboundOrdersReport{
-		{
-			ID:                 1,
-			CardNumberID:       "E001",
-			FirstName:          "Alice",
-			LastName:           "Johnson",
-			WarehouseID:        1,
-			InboundOrdersCount: 5,
-		},
-		{
-			ID:                 2,
-			CardNumberID:       "E002",
-			FirstName:          "Bob",
-			LastName:           "Anderson",
-			WarehouseID:        2,
-			InboundOrdersCount: 3,
-		},
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repository := new(MockInboundOrderRepository)
+			service := inbound_order.NewInboundOrderService(repository)
 
-	tests := []testCase{
-		{
-			name:               "OK - sem IDs",
-			ids:                nil,
-			mockAllReport:      reportAll,
-			mockAllReportError: nil,
-			expectedReports:    reportAll,
-			expectedError:      nil,
-		},
-		{
-			name:              "NOT_FOUND - single ID => FindByID retorna ErrNotFound",
-			ids:               []int{10},
-			mockFindByIDError: utils.ErrNotFound,
-			expectedReports:   nil,
-			expectedError:     utils.ErrNotFound,
-		},
-		{
-			name:              "ERROR - single ID => FindByID retorna erro diferente de ErrNotFound",
-			ids:               []int{2},
-			mockFindByIDError: errors.New("db fail"),
-			expectedReports:   nil,
-			expectedError:     errors.New("db fail"),
-		},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			repo := new(MockInboundOrderRepository)
-			service := inbound_order.NewInboundOrderService(repo)
-
-			if len(tc.ids) == 0 {
-				repo.
-					On("GenerateInboundOrdersReport").
-					Return(tc.mockAllReport, tc.mockAllReportError).
-					Maybe()
-			} else {
-				for _, id := range tc.ids {
-					repo.
-						On("FindByID", id).
-						Return(internal.InboundOrder{}, tc.mockFindByIDError).
-						Maybe()
-
-					if tc.mockFindByIDError == nil {
-						repo.
-							On("GenerateByIDInboundOrdersReport", id).
-							Return(tc.mockGenerateByIDRes, tc.mockGenerateByIDErr).
-							Maybe()
-					}
-				}
+			if tt.repo != nil {
+				tt.repo(repository)
 			}
+			defer repository.AssertExpectations(t)
 
-			result, err := service.GenerateInboundOrdersReport(tc.ids)
+			report, err := service.GenerateInboundOrdersReport(tt.ids)
 
-			if tc.expectedError == nil {
-				require.NoError(t, err)
-				require.Equal(t, tc.expectedReports, result)
-			} else {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.expectedError.Error())
-				require.Nil(t, result)
-			}
+			require.Equal(t, tt.expectedReport, report)
+			require.ErrorIs(t, err, tt.expectedError)
 
-			repo.AssertExpectations(t)
 		})
 	}
 }

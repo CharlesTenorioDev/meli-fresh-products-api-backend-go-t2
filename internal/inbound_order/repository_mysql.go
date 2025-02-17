@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/pkg/errors"
 )
 
 type MysqlInboundOrderRepository struct {
@@ -25,8 +26,7 @@ func (r *MysqlInboundOrderRepository) CreateInboundOrder(newOrder internal.Inbou
 	return r.FindByID(int(id))
 }
 
-func (r *MysqlInboundOrderRepository) GenerateInboundOrdersReport() ([]internal.EmployeeInboundOrdersReport, error) {
-	report := []internal.EmployeeInboundOrdersReport{}
+func (r *MysqlInboundOrderRepository) GenerateInboundOrdersReport() (report []internal.EmployeeInboundOrdersReport, err error) {
 	rows, err := r.db.Query(`
 		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
 		FROM employees e
@@ -60,12 +60,8 @@ func (r *MysqlInboundOrderRepository) GenerateByIDInboundOrdersReport(employeeID
 		GROUP BY e.id
 	`, employeeID).Scan(&report.ID, &report.CardNumberID, &report.FirstName, &report.LastName, &report.WarehouseID, &report.InboundOrdersCount)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return report, utils.ErrNotFound
-	}
-
-	if err != nil {
-		return report, err
 	}
 
 	return report, nil
@@ -80,7 +76,7 @@ func (r *MysqlInboundOrderRepository) FindByID(id int) (internal.InboundOrder, e
 		FROM inbound_orders
 		WHERE id = ?`, id).Scan(&order.ID, &order.Attributes.OrderDate, &order.Attributes.OrderNumber, &order.Attributes.EmployeeID, &order.Attributes.ProductBatchID, &order.Attributes.WarehouseID)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return internal.InboundOrder{}, utils.ErrNotFound
 	}
 
@@ -95,7 +91,7 @@ func (r *MysqlInboundOrderRepository) FindByOrderNumber(orderNumber string) (int
 	order.Attributes = internal.InboundOrderAttributes{}
 
 	err := r.db.QueryRow("SELECT id, order_date, order_number, employee_id, product_batch_id, warehouse_id FROM inbound_orders WHERE order_number = ?", orderNumber).Scan(&order.ID, &order.Attributes.OrderDate, &order.Attributes.OrderNumber, &order.Attributes.EmployeeID, &order.Attributes.ProductBatchID, &order.Attributes.WarehouseID)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return internal.InboundOrder{}, utils.ErrNotFound
 	}
 

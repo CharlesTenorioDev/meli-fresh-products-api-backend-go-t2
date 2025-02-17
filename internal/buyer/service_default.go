@@ -22,7 +22,7 @@ func (service *BuyerService) GetAll() (buyer []internal.Buyer, err error) {
 }
 
 func (service *BuyerService) GetOne(id int) (*internal.Buyer, error) {
-	buyers, err := service.GetAll()
+	buyers, err := service.repo.GetAll()
 
 	if err != nil {
 		log.Println("Error in GetAll - ", err)
@@ -39,7 +39,7 @@ func (service *BuyerService) GetOne(id int) (*internal.Buyer, error) {
 }
 
 func (service *BuyerService) CreateBuyer(buyer internal.BuyerAttributes) (*internal.Buyer, error) {
-	buyers, err := service.GetAll()
+	buyers, err := service.repo.GetAll()
 
 	if err != nil {
 		log.Println("Error to load - ", err)
@@ -61,12 +61,13 @@ func (service *BuyerService) CreateBuyer(buyer internal.BuyerAttributes) (*inter
 	if err != nil {
 		return nil, err
 	}
+	createdBuyer, err := service.repo.CreateBuyer(newBuyer)
 
-	return service.repo.CreateBuyer(newBuyer)
+	return createdBuyer, err
 }
 
 func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*internal.Buyer, error) {
-	buyers, err := service.GetAll()
+	buyers, err := service.repo.GetAll()
 
 	if err != nil {
 		log.Println("Error internal - ", err)
@@ -91,25 +92,20 @@ func (service *BuyerService) UpdateBuyer(updatedBuyer *internal.Buyer) (*interna
 		}
 	}
 
-	return service.repo.UpdateBuyer(updatedBuyer)
+	reformBuyer, err := service.repo.UpdateBuyer(updatedBuyer)
+	return reformBuyer, err
 }
 
 func (service *BuyerService) DeleteBuyer(id int) error {
-	buyers, err := service.GetAll()
+	buyer, err := service.repo.GetOne(id)
 
-	if err != nil {
+	if err != nil && buyer == nil {
 		log.Println("Error in GetAll - ", err)
 		return err
 	}
 
-	for _, buyer := range buyers {
-		if int(buyer.ID) == id {
-			if err := service.repo.DeleteBuyer(id); err != nil {
-				return err
-			}
-
-			return nil
-		}
+	if err := service.repo.DeleteBuyer(id); err != nil {
+		return err
 	}
 
 	return err
