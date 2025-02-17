@@ -108,12 +108,10 @@ func (p *MySQLProductRepository) Update(inputProduct internal.Product) (product 
 		return internal.Product{}, err
 	}
 
-	statement, err := p.db.Prepare(
+	statement, _ := p.db.Prepare(
 		"UPDATE products SET description=?, expiration_rate=?, freezing_rate=?, height=?, `length`=?, net_weight=?, product_code=?, recommended_freezing_temperature=?, width=?, product_type_id=?, seller_id=? WHERE id=?",
 	)
-	if err != nil {
-		return internal.Product{}, err
-	}
+
 	defer statement.Close()
 
 	_, err = statement.Exec(inputProduct.Description, inputProduct.ExpirationRate, inputProduct.FreezingRate, inputProduct.Height, inputProduct.Length, inputProduct.NetWeight, inputProduct.ProductCode, inputProduct.RecommendedFreezingTemperature, inputProduct.Width, inputProduct.ProductType, inputProduct.SellerID, inputProduct.ID)

@@ -105,14 +105,14 @@ func (r *MySQLCarryRepository) GetByID(id int) (internal.Carry, error) {
 	if err != nil {
 		return internal.Carry{}, err
 	}
+	defer stmt.Close()
 
 	row := stmt.QueryRow(id)
 
 	var carry internal.Carry
 
 	err = row.Scan(&carry.ID, &carry.CID, &carry.CompanyName, &carry.Address, &carry.Telephone, &carry.LocalityID)
-	if err !=
-		nil {
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return internal.Carry{}, utils.ENotFound("Carry")
 		}
