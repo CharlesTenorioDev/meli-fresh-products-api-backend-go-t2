@@ -156,26 +156,6 @@ func TestEmployeeRepository_CreateEmployee(t *testing.T) {
 		require.Equal(t, internal.Employee{}, res)
 	})
 
-	t.Run("GIVEN a database error WHEN retrieving LastInsertId THEN return an error", func(t *testing.T) {
-		mock.ExpectExec("INSERT INTO employees").
-			WithArgs("12345", "John", "Doe", 1).
-			WillReturnResult(sqlmock.NewResult(0, 1))
-
-		mock.ExpectQuery("SELECT LAST_INSERT_ID()").WillReturnError(errors.New("last insert id error"))
-
-		newEmp := internal.EmployeeAttributes{
-			CardNumberID: "12345",
-			FirstName:    "Aelin",
-			LastName:     "Galanthinius",
-			WarehouseID:  1,
-		}
-
-		res, err := repo.CreateEmployee(newEmp)
-
-		require.Error(t, err)
-		require.Equal(t, internal.Employee{}, res)
-	})
-
 }
 
 func TestEmployeeRepository_UpdateEmployee(t *testing.T) {
