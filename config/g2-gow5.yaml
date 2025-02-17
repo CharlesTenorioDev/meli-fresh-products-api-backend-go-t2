@@ -1,3 +1,4 @@
+goenv: local
 db:
   user: root
   password: example

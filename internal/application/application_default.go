@@ -101,7 +101,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition"
 	))
 
-	handler.RegisterHealhcheck(router)
+	handler.RegisterHealthCheck(router)
 
 	localityRepo := locality.NewMysqlLocalityRepository(a.db)
 	provinceRepo := province.NewMysqlProvinceRepository(a.db)
