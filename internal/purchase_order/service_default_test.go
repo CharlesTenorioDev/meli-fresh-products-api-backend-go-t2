@@ -28,6 +28,16 @@ func (m *mockPurchaseOrderRepository) CreatePurchaseOrder(newPurchaseOrder inter
 	return args.Get(0).(internal.PurchaseOrder), args.Error(1)
 }
 
+func (m *mockPurchaseOrderRepository) BuyerExistsByID(id int) (err error) {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
+func (m *mockPurchaseOrderRepository) ProductRecordExistsByID(id int) (err error) {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
 type mockPurchaseOrderBuyerValidation struct {
 	mock.Mock
 }
@@ -99,7 +109,6 @@ var (
 			LastName:     "Blackbeak",
 		},
 	}
-
 	mockProductRecord = internal.ProductRecords{
 		ID:             1,
 		LastUpdateDate: "2025-01-01",
@@ -107,14 +116,37 @@ var (
 		SalePrice:      15.00,
 		ProductID:      1,
 	}
+	mockProductRecord0 = internal.ProductRecords{
+		ID:             1,
+		LastUpdateDate: "2025-01-01",
+		PurchasePrice:  10.50,
+		SalePrice:      15.00,
+		ProductID:      0,
+	}
+	mockPurchaseOrder3 = internal.PurchaseOrder{
+		ID: 1,
+		Attributes: internal.PurchaseOrderAttributes{
+			OrderNumber:     "order#101",
+			OrderDate:       "2021-04-04",
+			TrackingCode:    "abscf1234",
+			BuyerID:         99,
+			ProductRecordID: 99,
+		}}
+	mockNewPurchaseOrder2 = internal.PurchaseOrderAttributes{
+		OrderNumber:     "order#1010",
+		OrderDate:       "2021-04-04",
+		TrackingCode:    "abscf1234",
+		BuyerID:         99,
+		ProductRecordID: 1,
+	}
 )
 
 func TestPurchaseOrdersService_FindAll(t *testing.T) {
-	mockRepo := new(mockPurchaseOrderRepository)
-	mockBV := new(mockPurchaseOrderBuyerValidation)
-	mockPRV := new(mockPurchaseOrderProductRecordValidation)
-	service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
 	t.Run("FindAllByBuyerID - Valid ID", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
 		mockRepo.On("FindAllByBuyerID", 1).Return([]internal.PurchaseOrderSummary{mockPurchaseOrderSummary}, nil)
 		result, err := service.FindAllByBuyerID(1)
 
@@ -123,6 +155,10 @@ func TestPurchaseOrdersService_FindAll(t *testing.T) {
 	})
 
 	t.Run("FindAllByBuyerID - Invalid ID", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
 		mockRepo.On("FindAllByBuyerID", 99).Return([]internal.PurchaseOrderSummary{}, utils.ErrNotFound)
 		result, err := service.FindAllByBuyerID(99)
 
@@ -131,6 +167,10 @@ func TestPurchaseOrdersService_FindAll(t *testing.T) {
 	})
 
 	t.Run("FindAll - Success", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
 		mockRepo.On("FindAllByBuyerID", 0).Return([]internal.PurchaseOrderSummary{mockPurchaseOrderSummary}, nil)
 		result, err := service.FindAllByBuyerID(0)
 
@@ -206,5 +246,58 @@ func TestPurchaseOrdersService_Create(t *testing.T) {
 
 		assert.Equal(t, internal.PurchaseOrder{}, result)
 		assert.Equal(t, utils.EDependencyNotFound("product", "id: "+"99"), err)
+	})
+
+	t.Run("Create - Error on Validate Duplicates", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 1).Return(&mockBuyer, nil)
+		mockPRV.On("FindByID", 1).Return(mockProductRecord, nil)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder}, nil)
+		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder).Return(internal.PurchaseOrder{}, assert.AnError)
+
+		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder)
+
+		assert.Equal(t, internal.PurchaseOrder{}, result)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Create - Error on ProductRecord", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 99).Return(&mockBuyer, nil)
+		mockPRV.On("FindByID", 1).Return(internal.ProductRecords{}, assert.AnError)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder3}, nil)
+		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder2).Return(internal.PurchaseOrder{}, nil)
+		mockRepo.On("BuyerExistsByID", 1).Return(nil, assert.AnError)
+
+		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder2)
+
+		assert.Equal(t, internal.PurchaseOrder{}, result)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Create - Error on Buyer", func(t *testing.T) {
+		mockRepo := new(mockPurchaseOrderRepository)
+		mockBV := new(mockPurchaseOrderBuyerValidation)
+		mockPRV := new(mockPurchaseOrderProductRecordValidation)
+		service := NewPurchaseOrderService(mockRepo, mockBV, mockPRV)
+
+		mockBV.On("GetOne", 99).Return(&internal.Buyer{}, assert.AnError)
+		mockPRV.On("FindByID", 1).Return(mockProductRecord, nil)
+		mockRepo.On("FindAll").Return([]internal.PurchaseOrder{mockPurchaseOrder3}, nil)
+		mockRepo.On("CreatePurchaseOrder", mockNewPurchaseOrder2).Return(internal.PurchaseOrder{}, nil)
+		mockRepo.On("BuyerExistsByID", 1).Return(nil, assert.AnError)
+
+		result, err := service.CreatePurchaseOrder(mockNewPurchaseOrder2)
+
+		assert.Equal(t, internal.PurchaseOrder{}, result)
+		assert.NotNil(t, err)
 	})
 }
