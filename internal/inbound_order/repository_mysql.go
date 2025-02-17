@@ -26,8 +26,7 @@ func (r *MysqlInboundOrderRepository) CreateInboundOrder(newOrder internal.Inbou
 	return r.FindByID(int(id))
 }
 
-func (r *MysqlInboundOrderRepository) GenerateInboundOrdersReport() ([]internal.EmployeeInboundOrdersReport, error) {
-	report := []internal.EmployeeInboundOrdersReport{}
+func (r *MysqlInboundOrderRepository) GenerateInboundOrdersReport() (report []internal.EmployeeInboundOrdersReport, err error) {
 	rows, err := r.db.Query(`
 		SELECT e.id, e.id_card_number, e.first_name, e.last_name, e.warehouse_id, COUNT(o.id) as inbound_orders_count
 		FROM employees e
@@ -61,12 +60,8 @@ func (r *MysqlInboundOrderRepository) GenerateByIDInboundOrdersReport(employeeID
 		GROUP BY e.id
 	`, employeeID).Scan(&report.ID, &report.CardNumberID, &report.FirstName, &report.LastName, &report.WarehouseID, &report.InboundOrdersCount)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return report, utils.ErrNotFound
-	}
-
-	if err != nil {
-		return report, err
 	}
 
 	return report, nil

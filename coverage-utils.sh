@@ -77,5 +77,7 @@ if [[ $1 == "Pedro" ]]; then
     sed '/inbound_orders_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/buyer\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/inbound_order\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/inbound_order\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/buyer\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
     go tool cover -html=coverage_filter.out
 fi
