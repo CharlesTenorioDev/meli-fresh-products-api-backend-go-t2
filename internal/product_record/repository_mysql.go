@@ -115,20 +115,11 @@ func (p *ProductRecordDB) Create(newProductRecord internal.ProductRecords) (inte
 func (p *ProductRecordDB) FindByID(productRecordID int) (internal.ProductRecords, error) {
 	var row *sql.Row
 
-	var err error
-
-	query := "select `id` from product_records where id = ?"
-
+	query := "SELECT `id` FROM product_records WHERE id = ?"
 	row = p.db.QueryRow(query, productRecordID)
 
 	var pr internal.ProductRecords
-
-	err = row.Scan(&pr.ID)
-	if err != nil {
-		return internal.ProductRecords{}, err
-	}
-
-	err = row.Err()
+	err := row.Scan(&pr.ID)
 	if err != nil {
 		return internal.ProductRecords{}, err
 	}
