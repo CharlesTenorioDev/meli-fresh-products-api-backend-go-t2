@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
@@ -28,6 +27,8 @@ func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var section internal.Section
 		err = rows.Scan(&section.ID, &section.SectionNumber, &section.CurrentTemperature,
@@ -39,11 +40,6 @@ func (r SectionMysqlRepository) GetAll() ([]internal.Section, error) {
 		}
 
 		sections = append(sections, section)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, err
 	}
 
 	return sections, nil
@@ -60,11 +56,9 @@ func (r *SectionMysqlRepository) GetByID(id int) (internal.Section, error) {
 		&section.MaximumCapacity, &section.WarehouseID, &section.ProductTypeID)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = utils.ErrNotFound
-			return internal.Section{}, err
 		}
-
 		return internal.Section{}, err
 	}
 
@@ -84,7 +78,7 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 		&section.MaximumCapacity, &section.WarehouseID, &section.ProductTypeID)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = utils.ErrNotFound
 		}
 
@@ -95,22 +89,12 @@ func (r *SectionMysqlRepository) GetBySectionNumber(sectionNumber int) (internal
 }
 
 // Save Generate a new ID and save the entity
-// All validatinos should be made on service layer
+// All validations should be made on service layer
 func (r *SectionMysqlRepository) Save(newSection *internal.Section) error {
 	result, err := r.db.Exec("INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 		(*newSection).SectionNumber, (*newSection).CurrentTemperature, (*newSection).MinimumTemperature, (*newSection).CurrentCapacity, (*newSection).MinimumCapacity, (*newSection).MaximumCapacity, (*newSection).WarehouseID, (*newSection).ProductTypeID)
 
 	if err != nil {
-		var mysqlErr *mysql.MySQLError
-		if errors.As(err, &mysqlErr) {
-			switch mysqlErr.Number {
-			case 1062:
-				err = utils.ErrConflict
-			}
-
-			return err
-		}
-
 		return err
 	}
 
@@ -133,16 +117,6 @@ func (r *SectionMysqlRepository) Update(newSection *internal.Section) error {
 	)
 
 	if err != nil {
-		var mysqlErr *mysql.MySQLError
-		if errors.As(err, &mysqlErr) {
-			switch mysqlErr.Number {
-			case 1062:
-				err = utils.ErrConflict
-			}
-
-			return err
-		}
-
 		return err
 	}
 
@@ -181,11 +155,6 @@ func (r *SectionMysqlRepository) GetSectionProductsReport() ([]internal.SectionP
 		reports = append(reports, report)
 	}
 
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
 	return reports, nil
 }
 func (r *SectionMysqlRepository) GetSectionProductsReportByID(id int) ([]internal.SectionProductsReport, error) {
@@ -193,19 +162,17 @@ func (r *SectionMysqlRepository) GetSectionProductsReportByID(id int) ([]interna
 
 	var reports []internal.SectionProductsReport
 
-	row := r.db.QueryRow("SELECT "+
-		"s.id, "+
-		"s.section_number, "+
-		"sum(p.current_quantity) as products_count "+
-		"FROM sections s "+
-		"left join product_batches p "+
+	row := r.db.QueryRow("SELECT s.id, s.section_number, sum(p.current_quantity) as products_count "+
+		"FROM sections s left join product_batches p "+
 		"on s.id = p.section_id "+
 		"where s.id=? group by s.id", id)
 
 	err := row.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
-	if err != nil && err == sql.ErrNoRows {
-		err = utils.ErrNotFound
-		return nil, err
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = utils.ErrNotFound
+		}
+		return []internal.SectionProductsReport{}, err
 	}
 
 	reports = append(reports, report)

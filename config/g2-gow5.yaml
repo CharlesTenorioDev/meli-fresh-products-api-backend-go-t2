@@ -1,0 +1,6 @@
+db:
+  user: root
+  password: example
+  endpoint: localhost:3306
+  name: fresh_products
+  

@@ -153,17 +153,6 @@ CREATE TABLE order_status(
 );
 
 
--- Ex4 Logs
-CREATE TABLE logs(
-    id SERIAL PRIMARY KEY,
-    session_id VARCHAR(128),
-    event_name VARCHAR(32),
-    message VARCHAR(1024),
-    details TEXT,
-    date BIGINT,
-    is_error BOOLEAN
-);
-
 -- Sprint 1 constraints
 -- R1
 ALTER TABLE sellers ADD FOREIGN KEY (locality_id) REFERENCES localities(id);

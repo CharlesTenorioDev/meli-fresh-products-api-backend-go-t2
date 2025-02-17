@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
@@ -20,6 +21,7 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/section"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/seller"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/warehouse"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-sql-driver/mysql"
@@ -84,6 +86,7 @@ func (a *ApplicationDefault) TearDown() {
 func (a *ApplicationDefault) SetUp() (err error) {
 	// connect to db
 	a.db, err = sql.Open("mysql", a.cfgDB.FormatDSN())
+	logger.SetLogger(logger.NewDBLogger(a.db))
 
 	if err != nil {
 		log.Fatalf("error opening db: %s", err.Error())
@@ -98,10 +101,13 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition"
 	))
 
+	handler.RegisterHealhcheck(router)
+
 	localityRepo := locality.NewMysqlLocalityRepository(a.db)
 	provinceRepo := province.NewMysqlProvinceRepository(a.db)
 	countryRepo := country.NewMysqlCountryRepository(a.db)
 	localityService := locality.NewBasicLocalityService(localityRepo, provinceRepo, countryRepo)
+	// err = locality.NewLocalityRoutes(localityService)
 	err = locality.NewLocalityRoutes(router, localityService)
 
 	if err != nil {

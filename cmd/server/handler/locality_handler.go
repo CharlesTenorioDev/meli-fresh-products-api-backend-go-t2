@@ -8,6 +8,7 @@ import (
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 type LocalityHandler struct {
@@ -36,10 +37,14 @@ type reqPostLocality struct {
 // If the provided arguments are invalid, it returns a 422 Unprocessable Entity status.
 func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CREATE_LOCALITY")
+
 		var body reqPostLocality
 
+		logger.Info(r.Context(), "request received", body)
+
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleError(w, utils.EBadRequest("body"))
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
@@ -56,11 +61,13 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 
 		err := h.service.Save(&newLocality, &province, &country)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, newLocality)
+		logger.Info(r.Context(), "request finished, status code: 201", newLocality)
+
+		utils.JSONContext(r.Context(), w, http.StatusCreated, newLocality)
 	}
 }
 
@@ -72,6 +79,8 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 // On success, it responds with a 200 OK status and the sellers data in JSON format.
 func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "GET_SELLERS_BY_LOCALITY_ID")
+
 		id := 0
 
 		var err error
@@ -79,7 +88,7 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 		if strings.TrimSpace(r.URL.Query().Get("id")) != "" {
 			id, err = strconv.Atoi(r.URL.Query().Get("id"))
 			if err != nil {
-				utils.HandleError(w, utils.EBadRequest("id"))
+				utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 				return
 			}
 		}
@@ -87,9 +96,10 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 		locality, err := h.service.GetSellersByLocalityID(id)
 
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
+		logger.Info(r.Context(), "request finished, status code: 200", locality)
 
 		utils.JSON(w, http.StatusOK, locality)
 	}
@@ -104,6 +114,8 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 // The response is returned as a JSON-encoded list of carriers with a status code of 200 OK.
 func (handler *LocalityHandler) GetCarriesByLocalityID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "GET_CARRIES_BY_LOCALITYID")
+
 		id := 0
 
 		var err error
@@ -111,16 +123,17 @@ func (handler *LocalityHandler) GetCarriesByLocalityID() http.HandlerFunc {
 		if strings.TrimSpace(r.URL.Query().Get("id")) != "" {
 			id, err = strconv.Atoi(r.URL.Query().Get("id"))
 			if err != nil {
-				utils.HandleError(w, utils.EBadRequest("id"))
+				utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 				return
 			}
 		}
 
 		buyers, err := handler.service.GetCarriesByLocalityID(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
+		logger.Info(r.Context(), "request finished, status code: 200", buyers)
 
 		utils.JSON(w, http.StatusOK, buyers)
 	}
