@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/assert"
@@ -84,7 +84,7 @@ func TestUnitBuyer_GetAllBuyers(t *testing.T) {
 			mockBuyers:      nil,
 			mockError:       errors.New("some service error"),
 			expectedStatus:  http.StatusInternalServerError,
-			expectedContent: "500 Erro Internal server error",
+			expectedContent: "500 Erro Internal api error",
 		},
 	}
 

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
@@ -238,7 +238,7 @@ func TestUnitProductHandler_CreateProduct(t *testing.T) {
 			TestName:           "CreateProduct_InternalServerError",
 			Body:               "",
 			ExpectedStatusCode: http.StatusInternalServerError,
-			ExpectedBody:       `{"status":"Internal Server Error","message":"internal server error"}`,
+			ExpectedBody:       `{"status":"Internal Server Error","message":"internal api error"}`,
 			ErrorToReturn:      utils.EBadRequest("Invalid Message Format"),
 		},
 	}
@@ -314,7 +314,7 @@ func TestUnitProductHandler_UpdateProduct(t *testing.T) {
 		{
 			TestName:           "UpdateProduct_InternalServerError",
 			Body:               "",
-			ExpectedBody:       `{"status":"Internal Server Error","message":"internal server error"}`,
+			ExpectedBody:       `{"status":"Internal Server Error","message":"internal api error"}`,
 			ExpectedStatusCode: http.StatusInternalServerError,
 			ErrorToReturn:      utils.EBadRequest("Invalid Message Format"),
 		},

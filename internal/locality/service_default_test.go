@@ -61,7 +61,7 @@ func (m *MockCountryRepository) GetByName(name string) (internal.Country, error)
 }
 
 func TestUnitLocality_Save(t *testing.T) {
-	var internalServerError = errors.New("internal server error")
+	var internalServerError = errors.New("internal api error")
 	cases := []struct {
 		TestName      string
 		Mock          func(*MockLocalityRepository, *MockProvinceRepository, *MockCountryRepository)
@@ -137,7 +137,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given an existing locality ID, return internal server error",
+			TestName: "given an existing locality ID, return internal api error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, internalServerError)
 			},
@@ -154,7 +154,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given a valid locality, countryRepo.GetByName, return internal server error",
+			TestName: "given a valid locality, countryRepo.GetByName, return internal api error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, internalServerError)
@@ -172,7 +172,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given a valid locality, when countryRepo.Save, return internal server error",
+			TestName: "given a valid locality, when countryRepo.Save, return internal api error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 				mcr.On("GetByName", mock.Anything).Return(internal.Country{}, utils.ErrNotFound)
@@ -191,7 +191,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given a valid locality, when provinceRepo.GetByName, return internal server error",
+			TestName: "given a valid locality, when provinceRepo.GetByName, return internal api error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 				mcr.On("GetByName", mock.Anything).Return(internal.Country{
@@ -214,7 +214,7 @@ func TestUnitLocality_Save(t *testing.T) {
 			},
 		},
 		{
-			TestName: "given a valid locality, when provinceRepo.Save, return internal server error",
+			TestName: "given a valid locality, when provinceRepo.Save, return internal api error",
 			Mock: func(mlr *MockLocalityRepository, mpr *MockProvinceRepository, mcr *MockCountryRepository) {
 				mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
 				mcr.On("GetByName", mock.Anything).Return(internal.Country{

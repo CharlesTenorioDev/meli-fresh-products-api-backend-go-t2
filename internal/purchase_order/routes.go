@@ -2,7 +2,7 @@ package purchase_order
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 )
 

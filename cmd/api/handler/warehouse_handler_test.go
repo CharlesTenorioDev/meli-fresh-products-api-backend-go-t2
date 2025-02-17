@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 	"github.com/stretchr/testify/mock"
@@ -175,7 +175,7 @@ func TestWarehouseHandler_Post(t *testing.T) {
 			TestName:           "Post_InvalidJson",
 			RequestBody:        `{JSON_INVALID}`,
 			ErrorToReturn:      errors.New("invalid Json"),
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 	}
@@ -246,7 +246,7 @@ func TestWarehouseHandler_Update(t *testing.T) {
 			ID:                 "1",
 			RequestBody:        `{INVALID_JSON}`,
 			ErrorToReturn:      errors.New("invalid Json"),
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 	}

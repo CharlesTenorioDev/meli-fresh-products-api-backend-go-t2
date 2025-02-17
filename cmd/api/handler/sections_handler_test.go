@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 
 	"github.com/go-chi/chi/v5"
@@ -133,7 +133,7 @@ func TestUnitSection_GetById(t *testing.T) {
 		{
 			Name:               "READ-FIND_BY_ID-500",
 			ID:                 "1",
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: 500,
 			MockData:           mockSection,
 			MockError:          errors.New("internal error"),
@@ -195,7 +195,7 @@ func TestUnitSection_Delete(t *testing.T) {
 		{
 			Name:               "DELETE-DELETE_BY_ID-500",
 			ID:                 "9",
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: 500,
 			MockError:          errors.New("Internal error occurs"),
 		},
@@ -271,7 +271,7 @@ func TestUnitSection_Post(t *testing.T) {
 		{
 			Name:               "POST-CREATE-500",
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: 500,
 			MockData:           internal.Section{},
 			MockError:          errors.New("Internal error occurs"),
@@ -358,7 +358,7 @@ func TestUnitSection_Patch(t *testing.T) {
 			Name:               "PATCH-UPDATE-500",
 			ID:                 "1",
 			Body:               `{"section_number":1,"current_capacity":1,"maximum_capacity":1,"minimum_capacity":1,"current_temperature":1,"minimum_temperature":1,"warehouse_id":1,"product_type_id":1}`,
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: 500,
 			MockData:           internal.Section{},
 			MockError:          errors.New("Internal error occurs"),
@@ -425,7 +425,7 @@ func TestUnitSection_GetSectionProductsReport(t *testing.T) {
 		{
 			Name:               "GET-GET_SECTION_BY_PRODUCTS-500",
 			RawQuery:           "id=1",
-			ExpectedBody:       `{"message":"internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 			ExpectedStatusCode: 500,
 			MockError:          errors.New("Internal error occurs"),
 			MockData:           nil,

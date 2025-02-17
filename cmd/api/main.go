@@ -23,7 +23,7 @@ type properties struct {
 
 // @title			Meli Fresh Products API
 // @version		0.0.2.1
-// @description	This is a HTTP REST API server.
+// @description	This is a HTTP REST API api.
 // @termsOfService	http://swagger.io/terms/
 func main() {
 	// err := utils.LoadProperties("./.env")

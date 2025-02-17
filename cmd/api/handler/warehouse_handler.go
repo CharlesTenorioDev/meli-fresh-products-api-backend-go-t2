@@ -128,7 +128,7 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 //	@Failure		400			{object}	utils.ErrorResponse	"Invalid request format"
 //	@Failure		409			{object}	utils.ErrorResponse	"Warehouse code conflict"
 //	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
-//	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
+//	@Failure		500			{object}	utils.ErrorResponse	"Internal api error"
 //	@Router			/warehouses [post]
 func (h *WarehouseHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +171,7 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 //	@Failure		404			{object}	utils.ErrorResponse	"Warehouse not found"
 //	@Failure		409			{object}	utils.ErrorResponse	"Conflict error"
 //	@Failure		422			{object}	utils.ErrorResponse	"Invalid arguments"
-//	@Failure		500			{object}	utils.ErrorResponse	"Internal server error"
+//	@Failure		500			{object}	utils.ErrorResponse	"Internal api error"
 //	@Router			/warehouses/{id} [put]
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

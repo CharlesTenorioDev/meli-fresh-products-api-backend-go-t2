@@ -25,7 +25,7 @@ func (handler *BuyerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		buyers, err := handler.service.GetAll()
 		if err != nil {
-			http.Error(w, "500 Erro Internal server error", http.StatusInternalServerError)
+			http.Error(w, "500 Erro Internal api error", http.StatusInternalServerError)
 			return
 		}
 

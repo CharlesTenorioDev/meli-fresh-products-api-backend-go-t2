@@ -151,9 +151,9 @@ func TestProductRecordsHandler_CreateProductRecord(t *testing.T) {
 				SalePrice:      150.00,
 				ProductID:      1,
 			},
-			ServiceError:       errors2.New("Internal server error"),
+			ServiceError:       errors2.New("Internal api error"),
 			ExpectedStatusCode: http.StatusInternalServerError,
-			ExpectedBody:       `{"message":"Internal server error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"Internal api error", "status":"Internal Server Error"}`,
 		},
 		{
 			TestName:           "CreateProductRecord_InvalidFormat",

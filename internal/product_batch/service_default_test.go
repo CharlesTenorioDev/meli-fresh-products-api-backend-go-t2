@@ -561,7 +561,7 @@ func TestUnitProductBatch_InternalServerError(t *testing.T) {
 	productRepo := new(MockProductRepository)
 	sectionRepo := new(MockSectionRepository)
 
-	internalErr := errors.New("internal server error")
+	internalErr := errors.New("internal api error")
 
 	batchRepo.On("GetBatchNumber", mock.Anything).Return(0, nil)
 	sectionRepo.On("GetByID", newBatch.SectionID).Return(internal.Section{ID: 1}, nil)

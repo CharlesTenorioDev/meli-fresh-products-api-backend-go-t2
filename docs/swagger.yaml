@@ -186,7 +186,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is a HTTP REST API server.
+  description: This is a HTTP REST API api.
   termsOfService: http://swagger.io/terms/
   title: Meli Fresh Products API
   version: 0.0.2.1
@@ -204,7 +204,7 @@ paths:
               $ref: '#/definitions/internal.Section'
             type: array
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get all sections
@@ -241,7 +241,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create a new section
@@ -304,7 +304,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get section by ID
@@ -346,7 +346,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Update a section
@@ -378,7 +378,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get section products report
@@ -409,7 +409,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get seller by ID
@@ -428,7 +428,7 @@ paths:
               $ref: '#/definitions/internal.Seller'
             type: array
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get all sellers
@@ -465,7 +465,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create a new seller
@@ -494,7 +494,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Delete a seller
@@ -536,7 +536,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Update a seller
@@ -600,7 +600,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create a new warehouse
@@ -707,7 +707,7 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal api error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Update a warehouse

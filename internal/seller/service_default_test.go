@@ -379,7 +379,7 @@ func TestUnitSeller_Create_InternalServerError(t *testing.T) {
 	msr := new(MockSellerRepository)
 	mlr := new(MockLocalityRepository)
 
-	internalErr := errors.New("internal server error")
+	internalErr := errors.New("internal api error")
 
 	msr.On("GetByCid", mock.Anything).Return(internal.Seller{Cid: 0}, nil)
 	mlr.On("GetByID", mock.Anything).Return(internal.Locality{}, nil)
@@ -522,7 +522,7 @@ func TestUnitSeller_Update_InternalServerError(t *testing.T) {
 	msr := new(MockSellerRepository)
 	mlr := new(MockLocalityRepository)
 
-	internalErr := errors.New("internal server error")
+	internalErr := errors.New("internal api error")
 
 	msr.On("GetByID", mock.Anything).Return(internal.Seller{ID: 1, LocalityID: 1}, nil)
 	msr.On("GetByCid", mock.Anything).Return(internal.Seller{ID: 1, Cid: 55}, nil)
@@ -585,7 +585,7 @@ func TestUnitSeller_Delete_InternalServerError(t *testing.T) {
 	msr := new(MockSellerRepository)
 	mlr := new(MockLocalityRepository)
 
-	internalErr := errors.New("internal server error")
+	internalErr := errors.New("internal api error")
 
 	msr.On("GetByID", mock.Anything).Return(internal.Seller{ID: 1}, nil)
 	msr.On("Delete", mock.Anything).Return(internalErr)

@@ -544,7 +544,7 @@ func TestUnitWarehouse_Update(t *testing.T) {
 			expectedErr:       utils.EConflict("Warehouse", "Warehouse code"),
 		},
 		{
-			name: "SaveWarehouse internal server error",
+			name: "SaveWarehouse internal api error",
 			fields: fields{
 				repo: &mockWarehouseRepository{
 					mock.Mock{},
@@ -632,7 +632,7 @@ func TestUnitWarehouse_Delete(t *testing.T) {
 			expectedErr: utils.ENotFound("Warehouse"),
 		},
 		{
-			name: "DeleteWarehouseByID Warehouse internal server error",
+			name: "DeleteWarehouseByID Warehouse internal api error",
 			fields: fields{
 				repo: &mockWarehouseRepository{
 					mock.Mock{},

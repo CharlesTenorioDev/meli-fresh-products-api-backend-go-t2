@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"

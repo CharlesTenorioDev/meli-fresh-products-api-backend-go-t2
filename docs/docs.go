@@ -37,7 +37,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -93,7 +93,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -142,7 +142,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -192,7 +192,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -255,7 +255,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -347,7 +347,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -376,7 +376,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -432,7 +432,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -497,7 +497,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -539,7 +539,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -636,7 +636,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -752,7 +752,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal api error",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -1070,7 +1070,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Meli Fresh Products API",
-	Description:      "This is a HTTP REST API server.",
+	Description:      "This is a HTTP REST API api.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

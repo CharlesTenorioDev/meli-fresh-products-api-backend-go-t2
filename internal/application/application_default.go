@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/buyer"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/carry"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/country"
@@ -33,7 +33,7 @@ import (
 type ConfigApplicationDefault struct {
 	// DB is the database configuration.
 	DB *mysql.Config
-	// Addr is the server address.
+	// Addr is the api address.
 	Addr string
 }
 
@@ -65,7 +65,7 @@ func NewApplicationDefault(config *ConfigApplicationDefault) *ApplicationDefault
 type ApplicationDefault struct {
 	// cfgDB is the database configuration.
 	cfgDB *mysql.Config
-	// cfgAddr is the server address.
+	// cfgAddr is the api address.
 	cfgAddr string
 	// db is the database connection.
 	db *sql.DB
@@ -230,7 +230,7 @@ func (a *ApplicationDefault) SetUp() (err error) {
 // Run runs the application.
 func (a *ApplicationDefault) Run() (err error) {
 	defer a.db.Close()
-	log.Printf("starting server at %s\n", a.cfgAddr)
+	log.Printf("starting api at %s\n", a.cfgAddr)
 
 	err = http.ListenAndServe(a.cfgAddr, a.router)
 

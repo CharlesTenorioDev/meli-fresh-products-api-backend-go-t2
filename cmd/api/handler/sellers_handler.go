@@ -33,7 +33,7 @@ type SellerHandler struct {
 //	@Tags			sellers
 //	@Produce		json
 //	@Success		200	{array}		internal.Seller		"List of sellers"
-//	@Failure		500	{object}	utils.ErrorResponse	"Internal server error"
+//	@Failure		500	{object}	utils.ErrorResponse	"Internal api error"
 //	@Router			/sellers [get]
 func (h *SellerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 //	@Success		200	{object}	internal.Seller		"Seller details"
 //	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID"
 //	@Failure		404	{object}	utils.ErrorResponse	"Seller not found"
-//	@Failure		500	{object}	utils.ErrorResponse	"Internal server error"
+//	@Failure		500	{object}	utils.ErrorResponse	"Internal api error"
 //	@Router			/api/v1/sellers/{id} [get]
 func (h *SellerHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 //	@Failure		400		{object}	utils.ErrorResponse		"Invalid request format"
 //	@Failure		409		{object}	utils.ErrorResponse		"Seller already exists"
 //	@Failure		422		{object}	utils.ErrorResponse		"Invalid arguments"
-//	@Failure		500		{object}	utils.ErrorResponse		"Internal server error"
+//	@Failure		500		{object}	utils.ErrorResponse		"Internal api error"
 //	@Router			/sellers [post]
 func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -151,7 +151,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 //	@Failure		400		{object}	utils.ErrorResponse				"Invalid request format"
 //	@Failure		404		{object}	utils.ErrorResponse				"Seller not found"
 //	@Failure		409		{object}	utils.ErrorResponse				"Seller already exists"
-//	@Failure		500		{object}	utils.ErrorResponse				"Internal server error"
+//	@Failure		500		{object}	utils.ErrorResponse				"Internal api error"
 //	@Router			/sellers/{id} [put]
 func (h *SellerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -199,7 +199,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 //	@Success		204	"No content"
 //	@Failure		400	{object}	utils.ErrorResponse	"Invalid ID"
 //	@Failure		404	{object}	utils.ErrorResponse	"Seller not found"
-//	@Failure		500	{object}	utils.ErrorResponse	"Internal server error"
+//	@Failure		500	{object}	utils.ErrorResponse	"Internal api error"
 //	@Router			/sellers/{id} [delete]
 func (h *SellerHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

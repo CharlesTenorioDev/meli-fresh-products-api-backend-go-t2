@@ -132,7 +132,7 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 // It extracts the ID from the URL parameters, validates it, and calls the service layer to delete the carry item.
 // If the ID is invalid, it responds with a 400 Bad Request status.
 // If the carry item is not found, it responds with a 404 Not Found status.
-// If there is an internal server error during deletion, it responds with a 500 Internal Server Error status.
+// If there is an internal api error during deletion, it responds with a 500 Internal Server Error status.
 // On successful deletion, it responds with a 204 No Content status.
 func (handler *CarryHandler) DeleteCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

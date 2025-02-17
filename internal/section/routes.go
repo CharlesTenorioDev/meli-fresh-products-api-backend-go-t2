@@ -2,7 +2,7 @@ package section
 
 import (
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/cmd/server/handler"
+	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 

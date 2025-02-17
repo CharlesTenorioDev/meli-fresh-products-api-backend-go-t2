@@ -85,7 +85,7 @@ func (s *PurchaseOrderDefault) validateDuplicates(purchaseOrders []internal.Purc
 
 func (s *PurchaseOrderDefault) buyerExistsByID(id int) error {
 	possibleBuyer, err := s.buyerService.GetOne(id)
-	// When internal server error
+	// When internal api error
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

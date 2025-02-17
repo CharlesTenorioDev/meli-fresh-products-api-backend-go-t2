@@ -51,7 +51,7 @@ func (s DefaultSectionService) GetByID(id int) (internal.Section, error) {
 
 func (s *DefaultSectionService) warehouseExistsByID(id int) error {
 	possibleWarehouse, err := s.warehouseService.GetByID(id)
-	// When internal server error
+	// When internal api error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}
@@ -65,7 +65,7 @@ func (s *DefaultSectionService) warehouseExistsByID(id int) error {
 
 func (s *DefaultSectionService) productTypeExistsByID(id int) error {
 	possibleProductType, err := s.productTypeService.GetProductTypeByID(id)
-	// When internal server error
+	// When internal api error
 	if err != nil && !errors.Is(err, utils.ErrNotFound) {
 		return err
 	}

@@ -59,7 +59,7 @@ func HandleErrorContext(ctx context.Context, w http.ResponseWriter, err error) {
 
 	if err == nil {
 		status = http.StatusInternalServerError
-		message = "internal server error"
+		message = "internal api error"
 	}
 
 	if errors.Is(err, ErrInvalidFormat) {
@@ -79,7 +79,7 @@ func HandleErrorContext(ctx context.Context, w http.ResponseWriter, err error) {
 		message = err.Error()
 	} else {
 		status = http.StatusInternalServerError
-		message = "internal server error"
+		message = "internal api error"
 	}
 
 	message = strings.Replace(message, "\n", ": ", 1)
@@ -95,7 +95,7 @@ func HandleError(w http.ResponseWriter, err error) {
 
 	if err == nil {
 		status = http.StatusInternalServerError
-		message = "internal server error"
+		message = "internal api error"
 	}
 
 	if errors.Is(err, ErrInvalidFormat) {
@@ -115,7 +115,7 @@ func HandleError(w http.ResponseWriter, err error) {
 		message = err.Error()
 	} else {
 		status = http.StatusInternalServerError
-		message = "internal server error"
+		message = "internal api error"
 	}
 
 	message = strings.Replace(message, "\n", ": ", 1)

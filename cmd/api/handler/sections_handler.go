@@ -39,7 +39,7 @@ func NewSectionHandler(service internal.SectionService) *SectionHandler {
 // @Tags sections
 // @Produce json
 // @Success 200 {array} internal.Section "List of sections"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
+// @Failure 500 {object} utils.ErrorResponse "Internal api error"
 // @Router /api/v1/sections [get]
 func (h *SectionHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +63,7 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 // @Success 200 {object} internal.Section
 // @Failure 400 {object} utils.ErrorResponse "Invalid ID"
 // @Failure 404 {object} utils.ErrorResponse "Section not found"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
+// @Failure 500 {object} utils.ErrorResponse "Internal api error"
 // @Router /api/v1/sections/{id} [get]
 func (h *SectionHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 // @Failure 400 {object} utils.ErrorResponse "Invalid request format"
 // @Failure 409 {object} utils.ErrorResponse "Section conflict"
 // @Failure 422 {object} utils.ErrorResponse "Invalid arguments"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
+// @Failure 500 {object} utils.ErrorResponse "Internal api error"
 // @Router /api/v1/sections [post]
 func (h *SectionHandler) CreateSection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +140,7 @@ func (h *SectionHandler) CreateSection() http.HandlerFunc {
 // @Failure 400 {object} utils.ErrorResponse "Invalid ID or request body"
 // @Failure 409 {object} utils.ErrorResponse "Conflict error"
 // @Failure 422 {object} utils.ErrorResponse "Unprocessable entity"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
+// @Failure 500 {object} utils.ErrorResponse "Internal api error"
 // @Router /api/v1/sections/{id} [put]
 func (h *SectionHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -209,7 +209,7 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 // @Success 200 {object} internal.SectionProductsReport
 // @Failure 400 {object} utils.ErrorResponse "Invalid ID"
 // @Failure 404 {object} utils.ErrorResponse "Section not found"
-// @Failure 500 {object} utils.ErrorResponse "Internal server error"
+// @Failure 500 {object} utils.ErrorResponse "Internal api error"
 // @Router /api/v1/sections/products/report [get]
 func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -160,7 +160,7 @@ func mergeEmployeeFields(inputEmployee, internalEmployee internal.Employee) (upd
 
 func (s *EmployeeDefault) warehouseExistsByID(id int) error {
 	possibleWarehouse, err := s.warehouseService.GetByID(id)
-	// When internal server error
+	// When internal api error
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
