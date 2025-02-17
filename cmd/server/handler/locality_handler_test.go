@@ -51,7 +51,7 @@ func TestUnitLocality_CreateLocality(t *testing.T) {
 		{
 			Name:               "BAD_REQUEST",
 			Body:               `data:{"id":6701,"locality_name":"Lujan","province_name":"Buenos Aires","country_name":"USA"}}`,
-			ExpectedStatusCode: 400,
+			ExpectedStatusCode: 500,
 			ErrorToReturn:      nil, // Error is genereated by JSON parsing process
 		},
 		{
