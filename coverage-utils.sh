@@ -37,7 +37,9 @@ if [[ $1 == "João" ]]; then
     sed '/warehouse_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/product_records_handler/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/warehouse\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/warehouse\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
     sed '/internal\/product_record\/service_default.go/!d' ./coverage.out >> ./coverage_filter.out
+    sed '/internal\/product_record\/repository_mysql.go/!d' ./coverage.out >> ./coverage_filter.out
     go tool cover -html=coverage_filter.out
 fi
 
