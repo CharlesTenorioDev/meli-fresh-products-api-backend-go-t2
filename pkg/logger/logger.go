@@ -58,7 +58,6 @@ func NewDBLogger(db *sql.DB) Logger {
 	return &DBLogger{db}
 }
 func (l DBLogger) Start(r *http.Request) {
-	log.Start(r)
 	message := fmt.Sprintf("START: %s %s?%s", r.Method, r.URL.Path, r.URL.RawQuery)
 	log.Info(r.Context(), message, nil)
 }
