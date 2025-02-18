@@ -19,7 +19,7 @@ func NewProductDB(db *sql.DB) *MySQLProductRepository {
 
 // GetAll returns all products
 func (p *MySQLProductRepository) GetAll() (listProducts []internal.Product, err error) {
-	rows, err := p.db.Query("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM fresh_products.products")
+	rows, err := p.db.Query("SELECT id, description, expiration_rate, freezing_rate, height, length, net_weight, product_code, recommended_freezing_temperature, width, product_type_id, seller_id FROM products")
 	if err != nil {
 		return nil, err
 	}
