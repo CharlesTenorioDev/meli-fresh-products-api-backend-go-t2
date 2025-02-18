@@ -2,9 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
-	"net/http"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 type ProductBatchHandler struct {
@@ -17,18 +19,22 @@ func NewProductBatchHandler(service internal.ProductBatchService) *ProductBatchH
 
 func (h *ProductBatchHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "PRODUCT_BATCH:CREATE")
+		logger.Start(r)
+
 		var body internal.ProductBatchRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+		logger.Info(r.Context(), "processing", body)
 
 		newBatch, err := h.service.Save(&body)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, newBatch)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, newBatch)
 	}
 }

@@ -118,8 +118,8 @@ func TestWarehouseHandler_GetByID(t *testing.T) {
 		{
 			TestName:           "GetByID_BadRequest",
 			ID:                 "abc",
-			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
-			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: Invalid ID with invalid format"}`,
+			ErrorToReturn:      utils.EBadRequest("ID"),
+			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: ID with invalid format"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -238,7 +238,7 @@ func TestWarehouseHandler_Update(t *testing.T) {
 			ID:                 "abc",
 			RequestBody:        `{"address":"Updated Address"}`,
 			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
-			ExpectedBody:       `{"message":"invalid format: Invalid ID with invalid format", "status":"Bad Request"}`,
+			ExpectedBody:       `{"message":"invalid format: ID with invalid format", "status":"Bad Request"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -246,8 +246,8 @@ func TestWarehouseHandler_Update(t *testing.T) {
 			ID:                 "1",
 			RequestBody:        `{INVALID_JSON}`,
 			ErrorToReturn:      errors.New("invalid Json"),
-			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
-			ExpectedStatusCode: http.StatusInternalServerError,
+			ExpectedBody:       `{"message":"invalid format: body with invalid format", "status":"Bad Request"}`,
+			ExpectedStatusCode: http.StatusBadRequest,
 		},
 	}
 

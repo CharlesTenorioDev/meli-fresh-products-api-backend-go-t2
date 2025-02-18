@@ -296,7 +296,7 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 		res := httptest.NewRecorder()
 		handler.DeleteEmployees()(res, req)
 
-		assert.Equal(t, http.StatusUnprocessableEntity, res.Result().StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, res.Result().StatusCode)
 		assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	})
 }

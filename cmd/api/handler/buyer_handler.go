@@ -2,12 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -23,76 +22,82 @@ func NewBuyerHandler(service internal.BuyerService) *BuyerHandler {
 
 func (handler *BuyerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "BUYER:GET_ALL")
+		logger.Start(r)
+
 		buyers, err := handler.service.GetAll()
 		if err != nil {
-			http.Error(w, "500 Erro Internal api error", http.StatusInternalServerError)
+			utils.HandleErrorContext(r.Context(), w, err)
+			// http.Error(w, "500 Erro Internal api error", http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if err := json.NewEncoder(w).Encode(buyers); err != nil {
-			http.Error(w, "Failed to encode buyers: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
+		utils.JSONContext(r.Context(), w, http.StatusOK, buyers)
 	}
 }
 
 func (handler *BuyerHandler) GetOne() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "BUYER:GET_BY_ID")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			log.Println("Error in parse param to int")
-			utils.Error(w, http.StatusBadRequest, err.Error())
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 		}
 
 		buyer, err := handler.service.GetOne(id)
 
 		if err != nil {
-			log.Println("Error to get an user - ", err)
-			utils.Error(w, http.StatusInternalServerError, err.Error())
+			utils.HandleErrorContext(r.Context(), w, err)
 		}
 
-		utils.JSON(w, http.StatusOK, buyer)
+		utils.JSONContext(r.Context(), w, http.StatusOK, buyer)
 	}
 }
 
 func (handler *BuyerHandler) CreateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "BUYER:CREATE")
+		logger.Start(r)
+
 		var newBuyer internal.BuyerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
-			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
+			return
 		}
+		logger.Info(r.Context(), "processing", newBuyer)
 
 		buyer, err := handler.service.CreateBuyer(newBuyer)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "500")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, buyer)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, buyer)
 	}
 }
 
 func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "BUYER:UPDATE")
+		logger.Start(r)
+
 		var newBuyer internal.BuyerAttributes
 
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
+			return
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&newBuyer); err != nil {
-			utils.JSON(w, http.StatusInternalServerError, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
+			return
 		}
+
+		logger.Info(r.Context(), "processing", newBuyer)
 
 		updatedBuyer := internal.Buyer{
 			ID: int64(id),
@@ -106,35 +111,33 @@ func (handler *BuyerHandler) UpdateBuyer() http.HandlerFunc {
 		buyer, err := handler.service.UpdateBuyer(&updatedBuyer)
 
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "500")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, buyer)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, buyer)
 	}
 }
 
 func (handler *BuyerHandler) DeleteBuyer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "BUYER:DELETE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			log.Println("Error in parse param to int")
-			utils.Error(w, http.StatusBadRequest, err.Error())
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
+			return
 		}
 
 		err = handler.service.DeleteBuyer(id)
 
 		if err != nil {
-			log.Println("Error to  an user - ", err)
-			utils.Error(w, http.StatusInternalServerError, err.Error())
+			utils.HandleErrorContext(r.Context(), w, err)
+			return
 		}
 
-		utils.JSON(w, http.StatusNoContent, nil)
+		utils.JSONContext(r.Context(), w, http.StatusNoContent, nil)
 	}
 }

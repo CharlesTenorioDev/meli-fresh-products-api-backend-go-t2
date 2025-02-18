@@ -12,7 +12,6 @@ import (
 	"github.com/meli-fresh-products-api-backend-go-t2/cmd/api/handler"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -61,7 +60,7 @@ func TestUnitBuyer_GetAllBuyers(t *testing.T) {
 			mockBuyers:      []internal.Buyer{},
 			mockError:       nil,
 			expectedStatus:  http.StatusOK,
-			expectedContent: "[]",
+			expectedContent: `{"data": []}`,
 		},
 		{
 			name: "OK - one buyer",
@@ -84,7 +83,7 @@ func TestUnitBuyer_GetAllBuyers(t *testing.T) {
 			mockBuyers:      nil,
 			mockError:       errors.New("some service error"),
 			expectedStatus:  http.StatusInternalServerError,
-			expectedContent: "500 Erro Internal api error",
+			expectedContent: "Internal Server Error",
 		},
 	}
 
@@ -102,16 +101,16 @@ func TestUnitBuyer_GetAllBuyers(t *testing.T) {
 
 			h.GetAll()(rr, req)
 
-			assert.Equal(t, tc.expectedStatus, rr.Code)
+			require.Equal(t, tc.expectedStatus, rr.Code)
 
 			if tc.expectedStatus == http.StatusOK {
 				if len(tc.mockBuyers) == 0 {
-					assert.JSONEq(t, tc.expectedContent, rr.Body.String())
+					require.JSONEq(t, tc.expectedContent, rr.Body.String())
 				} else {
-					assert.Contains(t, rr.Body.String(), tc.expectedContent)
+					require.Contains(t, rr.Body.String(), tc.expectedContent)
 				}
 			} else {
-				assert.Contains(t, rr.Body.String(), tc.expectedContent)
+				require.Contains(t, rr.Body.String(), tc.expectedContent)
 			}
 			service.AssertExpectations(t)
 		})
@@ -153,7 +152,7 @@ func TestUnitBuyer_GetOne(t *testing.T) {
 			mockBuyer:      nil,
 			mockError:      errors.New("some user error"),
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "invalid syntax",
+			expectedBody:   "invalid format: id with invalid format",
 		},
 		{
 			name:           "INTERNAL_SERVER_ERROR",
@@ -162,7 +161,7 @@ func TestUnitBuyer_GetOne(t *testing.T) {
 			mockBuyer:      nil,
 			mockError:      errors.New("some service error"),
 			expectedStatus: http.StatusInternalServerError,
-			expectedBody:   "some service error",
+			expectedBody:   "Internal Server Error",
 		},
 	}
 
@@ -183,10 +182,10 @@ func TestUnitBuyer_GetOne(t *testing.T) {
 
 			h.GetOne()(rr, req)
 
-			assert.Equal(t, tc.expectedStatus, rr.Code)
+			require.Equal(t, tc.expectedStatus, rr.Code)
 
 			if tc.expectedBody != "" {
-				assert.Contains(t, rr.Body.String(), tc.expectedBody)
+				require.Contains(t, rr.Body.String(), tc.expectedBody)
 			}
 
 			service.AssertExpectations(t)
@@ -324,8 +323,8 @@ func TestUnitBuyerHandler_DeleteBuyer(t *testing.T) {
 		{
 			TestName:           "DeleteBuyer - Error",
 			ErrorToReturn:      utils.ErrNotFound,
-			ExpectedBody:       `{"message":"entity not found", "status": "Internal Server Error"}`,
-			ExpectedStatusCode: 500,
+			ExpectedBody:       `{"message":"entity not found", "status": "Not Found"}`,
+			ExpectedStatusCode: 404,
 		},
 	}
 	for _, tc := range cases {

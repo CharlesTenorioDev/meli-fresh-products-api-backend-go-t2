@@ -37,16 +37,17 @@ type reqPostLocality struct {
 // If the provided arguments are invalid, it returns a 422 Unprocessable Entity status.
 func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r = logger.GetContext(r, "CREATE_LOCALITY")
+		r = logger.GetContext(r, "LOCALITY:CREATE")
+		logger.Start(r)
 
 		var body reqPostLocality
 
-		logger.Info(r.Context(), "request received", body)
-
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleErrorContext(r.Context(), w, err)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+
+		logger.Info(r.Context(), "processing", body)
 
 		newLocality := internal.Locality{
 			ID:           body.Data.ID,
@@ -65,8 +66,6 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 			return
 		}
 
-		logger.Info(r.Context(), "request finished, status code: 201", newLocality)
-
 		utils.JSONContext(r.Context(), w, http.StatusCreated, newLocality)
 	}
 }
@@ -79,7 +78,8 @@ func (h *LocalityHandler) CreateLocality() http.HandlerFunc {
 // On success, it responds with a 200 OK status and the sellers data in JSON format.
 func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r = logger.GetContext(r, "GET_SELLERS_BY_LOCALITY_ID")
+		r = logger.GetContext(r, "LOCALITY:GET_SELLERS_BY_LOCALITY_ID")
+		logger.Start(r)
 
 		id := 0
 
@@ -99,9 +99,8 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
-		logger.Info(r.Context(), "request finished, status code: 200", locality)
 
-		utils.JSON(w, http.StatusOK, locality)
+		utils.JSONContext(r.Context(), w, http.StatusOK, locality)
 	}
 }
 
@@ -114,7 +113,8 @@ func (h *LocalityHandler) GetSellersByLocalityID() http.HandlerFunc {
 // The response is returned as a JSON-encoded list of carriers with a status code of 200 OK.
 func (handler *LocalityHandler) GetCarriesByLocalityID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r = logger.GetContext(r, "GET_CARRIES_BY_LOCALITYID")
+		r = logger.GetContext(r, "LOCALITY:GET_CARRIES_BY_LOCALITY_ID")
+		logger.Start(r)
 
 		id := 0
 
@@ -133,8 +133,7 @@ func (handler *LocalityHandler) GetCarriesByLocalityID() http.HandlerFunc {
 			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
-		logger.Info(r.Context(), "request finished, status code: 200", buyers)
 
-		utils.JSON(w, http.StatusOK, buyers)
+		utils.JSONContext(r.Context(), w, http.StatusOK, buyers)
 	}
 }

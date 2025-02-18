@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -15,12 +14,12 @@ import (
 const SessionIDLabel = "API-FRESH-PRODUCTS-SESSION"
 const EventName = "API-FRESH-PRODUCTS-EVENT-NAME"
 
-var DB *sql.DB
 var log Logger = NoLogger{}
 
 type Logger interface {
 	Info(ctx context.Context, message string, details any)
 	Error(ctx context.Context, message string, details any)
+	Start(r *http.Request)
 }
 
 func SetLogger(l Logger) {
@@ -35,6 +34,9 @@ func GetContext(r *http.Request, eventName string) *http.Request {
 func Info(ctx context.Context, message string, details any) {
 	log.Info(ctx, message, details)
 }
+func Start(r *http.Request) {
+	log.Start(r)
+}
 func Error(ctx context.Context, message string, details any) {
 	log.Error(ctx, message, details)
 }
@@ -45,6 +47,8 @@ func (l NoLogger) Info(ctx context.Context, message string, details any) {
 }
 func (l NoLogger) Error(ctx context.Context, message string, details any) {
 }
+func (l NoLogger) Start(r *http.Request) {
+}
 
 type DBLogger struct {
 	db *sql.DB
@@ -53,7 +57,11 @@ type DBLogger struct {
 func NewDBLogger(db *sql.DB) Logger {
 	return &DBLogger{db}
 }
-
+func (l DBLogger) Start(r *http.Request) {
+	log.Start(r)
+	message := fmt.Sprintf("START: %s %s?%s", r.Method, r.URL.Path, r.URL.RawQuery)
+	log.Info(r.Context(), message, nil)
+}
 func (l DBLogger) Info(ctx context.Context, message string, details any) {
 	sessionID := ctx.Value(SessionIDLabel).(string)
 	eventName := ctx.Value(EventName).(string)
@@ -68,7 +76,6 @@ func (l DBLogger) Info(ctx context.Context, message string, details any) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	slog.Info(sessionID)
 }
 
 func (l DBLogger) Error(ctx context.Context, message string, details any) {
@@ -85,5 +92,4 @@ func (l DBLogger) Error(ctx context.Context, message string, details any) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	slog.Info(sessionID)
 }

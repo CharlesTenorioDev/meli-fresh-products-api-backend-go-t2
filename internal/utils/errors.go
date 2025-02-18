@@ -84,7 +84,7 @@ func HandleErrorContext(ctx context.Context, w http.ResponseWriter, err error) {
 
 	message = strings.Replace(message, "\n", ": ", 1)
 	response.Error(w, status, message)
-	logger.Error(ctx, message+", status code: "+fmt.Sprintf("%d", status), nil)
+	logger.Error(ctx, fmt.Sprintf("END: %d, %s", status, message), nil)
 }
 
 // HandleError centralizes error handling and response formatting

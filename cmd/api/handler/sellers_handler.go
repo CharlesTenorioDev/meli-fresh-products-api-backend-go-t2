@@ -2,12 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -37,15 +36,17 @@ type SellerHandler struct {
 //	@Router			/sellers [get]
 func (h *SellerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SELLER:GET_ALL")
+		logger.Start(r)
+
 		sellers, err := h.service.GetAll()
 		if err != nil {
-			fmt.Println(err.Error())
-			utils.JSON(w, http.StatusInternalServerError, nil)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, sellers)
+		utils.JSONContext(r.Context(), w, http.StatusOK, sellers)
 	}
 }
 
@@ -63,6 +64,9 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 //	@Router			/api/v1/sellers/{id} [get]
 func (h *SellerHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SELLER:GET_BY_ID")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			utils.Error(w, http.StatusBadRequest, "invalid id")
@@ -71,17 +75,12 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 
 		seller, err := h.service.GetByID(id)
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, fmt.Sprintln("id:", id, "not found"))
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Internal error")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, seller)
+		utils.JSONContext(r.Context(), w, http.StatusOK, seller)
 	}
 }
 
@@ -101,11 +100,16 @@ func (h *SellerHandler) GetById() http.HandlerFunc {
 //	@Router			/sellers [post]
 func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SELLER:CREATE")
+		logger.Start(r)
+
 		var reqBody internal.SellerRequest
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+
+		logger.Info(r.Context(), "processing", reqBody)
 
 		newSeller := internal.Seller{
 			Cid:         reqBody.Cid,
@@ -117,24 +121,12 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 
 		err := h.service.Create(&newSeller)
 		if err != nil {
-			fmt.Println(err.Error())
-
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Internal error")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, newSeller)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, newSeller)
 	}
 }
 
@@ -155,37 +147,30 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 //	@Router			/sellers/{id} [put]
 func (h *SellerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SELLER:UPDATE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "invalid id")
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 			return
 		}
 
 		var reqBody internal.Seller
 
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			utils.JSON(w, http.StatusBadRequest, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+		logger.Info(r.Context(), "processing", reqBody)
 
 		seller, err := h.service.Update(id, &reqBody)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Internal error")
-
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, seller)
+		utils.JSONContext(r.Context(), w, http.StatusOK, seller)
 	}
 }
 
@@ -203,24 +188,22 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 //	@Router			/sellers/{id} [delete]
 func (h *SellerHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SELLER:DELETE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Error(w, http.StatusBadRequest, "invalid id")
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 			return
 		}
 
 		err = h.service.Delete(id)
 		if err != nil {
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Internal error")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusNoContent, nil)
+		utils.JSONContext(r.Context(), w, http.StatusNoContent, nil)
 	}
 }

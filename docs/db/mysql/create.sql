@@ -157,7 +157,7 @@ CREATE TABLE order_status(
 CREATE TABLE logs(
     id SERIAL PRIMARY KEY,
     session_id VARCHAR(128),
-    event_name VARCHAR(32),
+    event_name VARCHAR(64),
     message VARCHAR(1024),
     details TEXT,
     date BIGINT,

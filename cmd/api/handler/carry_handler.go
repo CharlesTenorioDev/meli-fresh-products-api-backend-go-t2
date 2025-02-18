@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 type CarryHandler struct {
@@ -37,20 +38,25 @@ func NewCarryHandler(service internal.CarryService) *CarryHandler {
 // On success, it responds with a 201 Created status and the saved carry object.
 func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CARRY:CREATE")
+		logger.Start(r)
+
 		var carry *internal.Carry
 
 		err := json.NewDecoder(r.Body).Decode(&carry)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+
+		logger.Info(r.Context(), "processing", carry)
 
 		if err := handler.service.Save(carry); err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, carry)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, carry)
 	}
 }
 
@@ -59,13 +65,16 @@ func (handler *CarryHandler) SaveCarry() http.HandlerFunc {
 // If an error occurs while retrieving the carries, it responds with a 404 status code and an error message.
 func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CARRY:GET_ALL")
+		logger.Start(r)
+
 		carries, err := handler.service.GetAll()
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, carries)
+		utils.JSONContext(r.Context(), w, http.StatusOK, carries)
 	}
 }
 
@@ -79,19 +88,22 @@ func (handler *CarryHandler) GetAllCarries() http.HandlerFunc {
 // Returns an http.HandlerFunc that can be used to handle the request.
 func (handler *CarryHandler) GetCarryByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CARRY:GET_BY_ID")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("ID"))
 			return
 		}
 
 		carry, err := handler.service.GetByID(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, carry)
+		utils.JSONContext(r.Context(), w, http.StatusOK, carry)
 	}
 }
 
@@ -103,9 +115,12 @@ func (handler *CarryHandler) GetCarryByID() http.HandlerFunc {
 // On success, it responds with the updated carry item and a 200 OK status.
 func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CARRY:UPDATE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
+			utils.HandleError(w, utils.EBadRequest("ID"))
 			return
 		}
 
@@ -113,18 +128,20 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 
 		err = json.NewDecoder(r.Body).Decode(carry)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+
+		logger.Info(r.Context(), "processing", carry)
 
 		carry.ID = id
 
 		if err := handler.service.Update(carry); err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, carry)
+		utils.JSONContext(r.Context(), w, http.StatusOK, carry)
 	}
 }
 
@@ -136,17 +153,20 @@ func (handler *CarryHandler) UpdateCarry() http.HandlerFunc {
 // On successful deletion, it responds with a 204 No Content status.
 func (handler *CarryHandler) DeleteCarry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "CARRY:DELETE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("Invalid ID"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("ID"))
 			return
 		}
 
 		if err := handler.service.Delete(id); err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusNoContent, "Carry deleted successfully")
+		utils.JSONContext(r.Context(), w, http.StatusNoContent, nil)
 	}
 }

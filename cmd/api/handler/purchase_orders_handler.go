@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
-	"github.com/bootcamp-go/web/response"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -24,6 +24,9 @@ func NewPurchaseOrdersHandler(sv internal.PurchaseOrderService) *PurchaseOrderDe
 
 func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "PURCHASE_ORDER:GET_ALL")
+		logger.Start(r)
+
 		queryParams := r.URL.Query()
 		buyerIDParam := queryParams.Get("id")
 
@@ -34,14 +37,14 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 
 			buyerID, err = strconv.Atoi(buyerIDParam)
 			if err != nil {
-				utils.HandleError(w, utils.ErrInvalidFormat)
+				utils.HandleErrorContext(r.Context(), w, utils.ErrInvalidFormat)
 				return
 			}
 		}
 
 		PurchaseOrdersSummary, err := h.sv.FindAllByBuyerID(buyerID)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
@@ -54,37 +57,34 @@ func (h *PurchaseOrderDefault) GetAllPurchaseOrders() http.HandlerFunc {
 			}
 		}
 
-		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
-		})
+		utils.JSONContext(r.Context(), w, http.StatusOK, data)
 	}
 }
 
 // PostPurchaseOrders handles the POST /PurchaseOrders route
 func (h *PurchaseOrderDefault) PostPurchaseOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "PURCHASE_ORDER:CREATE")
+		logger.Start(r)
+
 		var newPurchaseOrder internal.PurchaseOrderAttributes
 
 		// decode the json request body
 		err := json.NewDecoder(r.Body).Decode(&newPurchaseOrder)
 		if err != nil {
-			utils.HandleError(w, utils.ErrInvalidFormat)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
 
 		// create the PurchaseOrder
 		PurchaseOrder, err := h.sv.CreatePurchaseOrder(newPurchaseOrder)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
 		// returns status 201 and the data if all ok
-		response.JSON(w, http.StatusCreated, map[string]any{
-			"message": "success",
-			"data":    PurchaseOrder,
-		})
+		utils.JSONContext(r.Context(), w, http.StatusCreated, PurchaseOrder)
 	}
 }

@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -145,7 +146,7 @@ func TestUnitProductHandler_GetProductByID(t *testing.T) {
 			TestName: "GetProductByID_ErrorBadRequest",
 			Body: `{
 				"status": "Bad Request",
-				"message": "invalid format: Invalid ID with invalid format"
+				"message": "invalid format: ID with invalid format"
 			}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
@@ -293,9 +294,9 @@ func TestUnitProductHandler_UpdateProduct(t *testing.T) {
 		{
 			TestName:           "UpdateProduct_ErrorBadRequest",
 			Body:               `{"id":1,"product_code":"123","description":"product1","width":1000,"height":10,"length":10,"net_weight":10,"expiration_rate":10,"recommended_freezing_temperature":10,"product_type":1,"seller_id":1}`,
-			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: Invalid ID with invalid format"}`,
+			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: ID with invalid format"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
-			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
+			// ErrorToReturn:      utils.EBadRequest("ID"),
 		},
 		{
 			TestName:           "UpdateProduct_ErrorUnprocessableEntity",
@@ -312,11 +313,10 @@ func TestUnitProductHandler_UpdateProduct(t *testing.T) {
 			ErrorToReturn:      utils.EConflict("Product", "Product Code"),
 		},
 		{
-			TestName:           "UpdateProduct_InternalServerError",
-			Body:               "",
-			ExpectedBody:       `{"status":"Internal Server Error","message":"internal api error"}`,
+			TestName: "UpdateProduct_InternalServerError",
+			Body:     `{"id":1,"product_code":"123","description":"product1","width":1000,"height":10,"length":10,"net_weight":10,"expiration_rate":10,"recommended_freezing_temperature":10,"freezing_rate":10,"product_type":1,"seller_id":1}`, ExpectedBody: `{"status":"Internal Server Error","message":"internal api error"}`,
 			ExpectedStatusCode: http.StatusInternalServerError,
-			ErrorToReturn:      utils.EBadRequest("Invalid Message Format"),
+			ErrorToReturn:      errors.New("Invalid Message Format"),
 		},
 	}
 	for _, c := range cases {

@@ -2,13 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
-	"github.com/bootcamp-go/web/response"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
@@ -21,6 +20,9 @@ func NewProductRecordsHandler(service internal.ProductRecordsService) *ProductRe
 }
 
 func (p *ProductRecordsHandler) GetProductRecords(w http.ResponseWriter, r *http.Request) {
+	r = logger.GetContext(r, "PRODUCT_RECORD:GET_BY_ID")
+	logger.Start(r)
+
 	idStr := r.URL.Query().Get("id")
 
 	var id int
@@ -30,46 +32,38 @@ func (p *ProductRecordsHandler) GetProductRecords(w http.ResponseWriter, r *http
 
 		id, err = strconv.Atoi(idStr)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "Invalid 'id' format")
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 			return
 		}
 	}
 
 	products, err := p.service.GetProductRecords(id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, utils.ErrNotFound.Error())
+		utils.HandleErrorContext(r.Context(), w, err)
 		return
 	}
 
-	response.JSON(w, http.StatusOK, map[string]any{
-		"data": products,
-	})
+	utils.JSONContext(r.Context(), w, http.StatusOK, products)
 }
 
 func (p *ProductRecordsHandler) CreateProductRecord(w http.ResponseWriter, r *http.Request) {
+	r = logger.GetContext(r, "PRODUCT_RECORD:CREATE")
+	logger.Start(r)
+
 	var newProduct internal.ProductRecords
 
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+		utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 		return
 	}
+	logger.Info(r.Context(), "processing", newProduct)
 
 	product, err := p.service.CreateProductRecord(newProduct)
 	if err != nil {
-		if errors.Is(err, utils.ErrConflict) {
-			response.Error(w, http.StatusConflict, utils.ErrConflict.Error())
-			return
-		} else if errors.Is(err, utils.ErrInvalidArguments) {
-			response.Error(w, http.StatusUnprocessableEntity, utils.ErrInvalidArguments.Error())
-			return
-		} else {
-			response.Error(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+		utils.HandleErrorContext(r.Context(), w, err)
+		return
 	}
 
-	response.JSON(w, http.StatusCreated, map[string]any{
-		"data": product,
-	})
+	utils.JSONContext(r.Context(), w, http.StatusCreated, product)
 }

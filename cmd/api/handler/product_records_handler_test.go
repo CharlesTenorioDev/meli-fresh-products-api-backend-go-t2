@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	errors2 "errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type mockProductRecordsService struct {
@@ -53,7 +54,7 @@ func TestProductRecordsHandler_GetProductRecords(t *testing.T) {
 			ServiceResponse:    nil,
 			ServiceError:       nil,
 			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       `{"message":"Invalid 'id' format", "status":"Bad Request"}`,
+			ExpectedBody:       `{"message":"invalid format: id with invalid format", "status":"Bad Request"}`,
 		},
 		{
 			TestName:           "GetProductRecords_NotFound",
@@ -153,7 +154,7 @@ func TestProductRecordsHandler_CreateProductRecord(t *testing.T) {
 			},
 			ServiceError:       errors2.New("Internal api error"),
 			ExpectedStatusCode: http.StatusInternalServerError,
-			ExpectedBody:       `{"message":"Internal api error", "status":"Internal Server Error"}`,
+			ExpectedBody:       `{"message":"internal api error", "status":"Internal Server Error"}`,
 		},
 		{
 			TestName:           "CreateProductRecord_InvalidFormat",
@@ -161,7 +162,7 @@ func TestProductRecordsHandler_CreateProductRecord(t *testing.T) {
 			ServiceResponse:    internal.ProductRecords{},
 			ServiceError:       nil,
 			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       `{"message":"invalid format", "status":"Bad Request"}`,
+			ExpectedBody:       `{"message":"invalid format: body with invalid format", "status":"Bad Request"}`,
 		},
 	}
 

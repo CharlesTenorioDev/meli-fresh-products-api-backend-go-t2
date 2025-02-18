@@ -6,13 +6,14 @@ import (
 	"strconv"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
 )
 
 const (
-	INVALID = "Invalid ID"
+	INVALID = "ID"
 )
 
 // reqPostWarehouse represents the request payload for creating a new warehouse.
@@ -74,13 +75,16 @@ func NewWarehouseHandler(service internal.WarehouseService) *WarehouseHandler {
 //	@Router			/warehouses [get]
 func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "WAREHOUSE:GET_ALL")
+		logger.Start(r)
+
 		warehouses, err := h.service.GetAll()
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, warehouses)
+		utils.JSONContext(r.Context(), w, http.StatusOK, warehouses)
 	}
 }
 
@@ -98,20 +102,23 @@ func (h *WarehouseHandler) GetAll() http.HandlerFunc {
 //	@Router			/warehouses/{id} [get]
 func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "WAREHOUSE:GET_BY_ID")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest(INVALID))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		warehouse, err := h.service.GetByID(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, warehouse)
+		utils.JSONContext(r.Context(), w, http.StatusOK, warehouse)
 	}
 }
 
@@ -132,11 +139,15 @@ func (h *WarehouseHandler) GetByID() http.HandlerFunc {
 //	@Router			/warehouses [post]
 func (h *WarehouseHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "WAREHOUSE:CREATE")
+		logger.Start(r)
+
 		var body reqPostWarehouse
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
+		logger.Info(r.Context(), "processing", body)
 
 		newWarehouse := internal.Warehouse{
 			WarehouseCode:      body.Code,
@@ -149,11 +160,11 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 
 		newWarehouse, err := h.service.Save(newWarehouse)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, newWarehouse)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, newWarehouse)
 	}
 }
 
@@ -175,25 +186,29 @@ func (h *WarehouseHandler) Post() http.HandlerFunc {
 //	@Router			/warehouses/{id} [put]
 func (h *WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "WAREHOUSE:UPDATE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest(INVALID))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		var body internal.WarehousePointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+		logger.Info(r.Context(), "processing", body)
 
 		updatedWarehouse, err := h.service.Update(id, body)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, updatedWarehouse)
+		utils.JSONContext(r.Context(), w, http.StatusOK, updatedWarehouse)
 	}
 }
 
@@ -212,19 +227,22 @@ func (h *WarehouseHandler) Update() http.HandlerFunc {
 //	@Router			/warehouses/{id} [delete]
 func (h *WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "WAREHOUSE:DELETE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest(INVALID))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest(INVALID))
 			return
 		}
 
 		err = h.service.Delete(id)
 
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusNoContent, nil)
+		utils.JSONContext(r.Context(), w, http.StatusNoContent, nil)
 	}
 }

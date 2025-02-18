@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
@@ -43,13 +44,16 @@ func NewSectionHandler(service internal.SectionService) *SectionHandler {
 // @Router /api/v1/sections [get]
 func (h *SectionHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:GET_ALL")
+		logger.Start(r)
+
 		sections, err := h.service.GetAll()
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, sections)
+		utils.JSONContext(r.Context(), w, http.StatusOK, sections)
 	}
 }
 
@@ -67,21 +71,24 @@ func (h *SectionHandler) GetAll() http.HandlerFunc {
 // @Router /api/v1/sections/{id} [get]
 func (h *SectionHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:GET_BY_ID")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("id"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 
 			return
 		}
 
 		section, err := h.service.GetByID(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, section)
+		utils.JSONContext(r.Context(), w, http.StatusOK, section)
 	}
 }
 
@@ -101,11 +108,15 @@ func (h *SectionHandler) GetById() http.HandlerFunc {
 // @Router /api/v1/sections [post]
 func (h *SectionHandler) CreateSection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:CREATE")
+		logger.Start(r)
+
 		var body reqPostSection
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleError(w, utils.EBadRequest("body"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+		logger.Info(r.Context(), "processing", body)
 
 		newSection := internal.Section{
 			SectionNumber:      body.SectionNumber,
@@ -120,11 +131,11 @@ func (h *SectionHandler) CreateSection() http.HandlerFunc {
 
 		newSection, err := h.service.Save(newSection)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusCreated, newSection)
+		utils.JSONContext(r.Context(), w, http.StatusCreated, newSection)
 	}
 }
 
@@ -144,27 +155,31 @@ func (h *SectionHandler) CreateSection() http.HandlerFunc {
 // @Router /api/v1/sections/{id} [put]
 func (h *SectionHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:UPDATE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("id"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 			return
 		}
 
 		var body internal.SectionPointers
 		if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
-			utils.HandleError(w, utils.EBadRequest("body"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+		logger.Info(r.Context(), "processing", body)
 
 		updatedSection, err := h.service.Update(id, body)
 
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, updatedSection)
+		utils.JSONContext(r.Context(), w, http.StatusOK, updatedSection)
 	}
 }
 
@@ -183,19 +198,22 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 // @Router /api/v1/sections/{id} [delete]
 func (h *SectionHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:DELETE")
+		logger.Start(r)
+
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.HandleError(w, utils.EBadRequest("id"))
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 			return
 		}
 
 		err = h.service.Delete(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusNoContent, nil)
+		utils.JSONContext(r.Context(), w, http.StatusNoContent, nil)
 	}
 }
 
@@ -213,6 +231,9 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 // @Router /api/v1/sections/products/report [get]
 func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "SECTION:GET_SECTIONS_PRODUCTS_REPORT")
+		logger.Start(r)
+
 		idReq := strings.TrimSpace(r.URL.Query().Get("id"))
 		id := 0
 
@@ -221,17 +242,17 @@ func (h *SectionHandler) GetSectionProductsReport() http.HandlerFunc {
 		if idReq != "" {
 			id, err = strconv.Atoi(idReq)
 			if err != nil {
-				utils.HandleError(w, utils.EBadRequest("id"))
+				utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 				return
 			}
 		}
 
 		sectionProductReport, err := h.service.GetSectionProductsReport(id)
 		if err != nil {
-			utils.HandleError(w, err)
+			utils.HandleErrorContext(r.Context(), w, err)
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, sectionProductReport)
+		utils.JSONContext(r.Context(), w, http.StatusOK, sectionProductReport)
 	}
 }

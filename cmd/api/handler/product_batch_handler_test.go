@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal"
-	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/meli-fresh-products-api-backend-go-t2/internal"
+	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type MockProductBatchService struct {
@@ -75,7 +76,7 @@ func TestUnitProductBatch_Create_BadRequest(t *testing.T) {
 	require.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	responseBody, _ := io.ReadAll(response.Body)
-	expectedResponseBody := `{"status":"Bad Request","message":"invalid format"}`
+	expectedResponseBody := `{"status":"Bad Request","message":"invalid format: body with invalid format"}`
 	require.Equal(t, expectedResponseBody, string(responseBody))
 
 }

@@ -177,8 +177,8 @@ func TestUnitCarryHandler_GetCarryByID(t *testing.T) {
 		},
 		{
 			TestName:           "GetCarryByIDError_ErrorBadRequest",
-			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
-			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: Invalid ID with invalid format"}`,
+			ErrorToReturn:      utils.EBadRequest("ID"),
+			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: ID with invalid format"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -267,10 +267,10 @@ func TestUnitCarryHandler_UpdateCarry(t *testing.T) {
 		},
 		{
 			TestName:      "UpdateCarryError_ErrorBadRequest",
-			ErrorToReturn: utils.EBadRequest("Invalid ID"),
+			ErrorToReturn: utils.EBadRequest("ID"),
 			Body: `{"cid": 6,"company
 			_name": "New Alkemy","address": "Monroe 860","telephone": "47470000","locality_id": 2}`,
-			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: Invalid ID with invalid format"}`,
+			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: ID with invalid format"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -305,11 +305,9 @@ func TestUnitCarryHandler_DeleteCarry(t *testing.T) {
 		ExpectedStatusCode int
 	}{
 		{
-			TestName:      "DeleteCarry",
-			ErrorToReturn: nil,
-			ExpectedBody: `{
-							"data": "Carry deleted successfully"
-						}`,
+			TestName:           "DeleteCarry",
+			ErrorToReturn:      nil,
+			ExpectedBody:       ``,
 			ExpectedStatusCode: http.StatusNoContent,
 		},
 		{
@@ -320,8 +318,8 @@ func TestUnitCarryHandler_DeleteCarry(t *testing.T) {
 		},
 		{
 			TestName:           "DeleteCarryError_ErrorBadRequest",
-			ErrorToReturn:      utils.EBadRequest("Invalid ID"),
-			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: Invalid ID with invalid format"}`,
+			ErrorToReturn:      utils.EBadRequest("ID"),
+			ExpectedBody:       `{"status":"Bad Request","message":"invalid format: ID with invalid format"}`,
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -342,7 +340,11 @@ func TestUnitCarryHandler_DeleteCarry(t *testing.T) {
 			funcHandler(res, req)
 			require.Equal(t, c.ExpectedStatusCode, res.Result().StatusCode)
 			require.Equal(t, "application/json", res.Header().Get("Content-Type"))
-			require.JSONEq(t, c.ExpectedBody, res.Body.String())
+			if c.ExpectedBody == "" {
+				require.Empty(t, res.Body.String())
+			} else {
+				require.JSONEq(t, c.ExpectedBody, res.Body.String())
+			}
 
 		})
 	}

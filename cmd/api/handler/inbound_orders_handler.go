@@ -2,14 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/meli-fresh-products-api-backend-go-t2/internal"
 	"github.com/meli-fresh-products-api-backend-go-t2/internal/utils"
+	"github.com/meli-fresh-products-api-backend-go-t2/pkg/logger"
 )
 
 type InboundOrderHandler struct {
@@ -23,44 +22,33 @@ func NewInboundOrderHandler(service internal.InboundOrderService) *InboundOrderH
 // CreateInboundOrder Handle POST /api/v1/inboundOrders
 func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "INBOUND_ORDER:CREATE")
+		logger.Start(r)
+
 		var request struct {
 			Data internal.InboundOrderAttributes `json:"data"`
 		}
 
 		// Decodifica o JSON
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			utils.Error(w, http.StatusBadRequest, utils.ErrInvalidFormat.Error())
+			utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("body"))
 			return
 		}
+
+		logger.Info(r.Context(), "processing", request)
 
 		newOrder := request.Data
 
 		// Cria a ordem usando o serviço
 		order, err := h.service.CreateInboundOrder(newOrder)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				log.Println(newOrder)
-				utils.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Failed to create order")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
 		// Retorna o JSON com apenas os dados diretamente na resposta
-		utils.JSON(w, http.StatusCreated, map[string]any{
+		utils.JSONContext(r.Context(), w, http.StatusCreated, map[string]any{
 			"order_date":       order.Attributes.OrderDate,
 			"order_number":     order.Attributes.OrderNumber,
 			"employee_id":      order.Attributes.EmployeeID,
@@ -75,6 +63,9 @@ func (h *InboundOrderHandler) CreateInboundOrder() http.HandlerFunc {
 //	handles the generation of the report.
 func (h *InboundOrderHandler) GenerateInboundOrdersReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r = logger.GetContext(r, "INBOUND_ORDER:INBOUND_ORDERS_REPORT")
+		logger.Start(r)
+
 		idsParam := r.URL.Query().Get("id")
 
 		var ids []int
@@ -84,7 +75,7 @@ func (h *InboundOrderHandler) GenerateInboundOrdersReport() http.HandlerFunc {
 			for _, idStr := range idsStrings {
 				id, err := strconv.Atoi(strings.TrimSpace(idStr))
 				if err != nil {
-					utils.HandleError(w, utils.ErrInvalidFormat)
+					utils.HandleErrorContext(r.Context(), w, utils.EBadRequest("id"))
 					return
 				}
 
@@ -94,26 +85,11 @@ func (h *InboundOrderHandler) GenerateInboundOrdersReport() http.HandlerFunc {
 
 		report, err := h.service.GenerateInboundOrdersReport(ids)
 		if err != nil {
-			if errors.Is(err, utils.ErrConflict) {
-				utils.Error(w, http.StatusConflict, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrNotFound) {
-				utils.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			if errors.Is(err, utils.ErrInvalidArguments) {
-				utils.Error(w, http.StatusUnprocessableEntity, err.Error())
-				return
-			}
-
-			utils.Error(w, http.StatusInternalServerError, "Failed to create order")
+			utils.HandleErrorContext(r.Context(), w, err)
 
 			return
 		}
 
-		utils.JSON(w, http.StatusOK, report)
+		utils.JSONContext(r.Context(), w, http.StatusOK, report)
 	}
 }
